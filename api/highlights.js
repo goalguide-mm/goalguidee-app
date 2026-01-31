@@ -9,16 +9,13 @@ export default async function handler(req, res) {
     const highlights = matches.map(m => ({
       title: m.title,
       competition: m.competition,
-      video: `https://www.youtube.com/results?search_query=${encodeURIComponent(
+      video: `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(
         `${m.title} ${m.competition} official match highlights football`
       )}`
     }));
 
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.status(200).json({
-      status: "ok",
-      highlights
-    });
+    res.status(200).json({ status: "ok", highlights });
 
   } catch (e) {
     res.status(500).json({ status: "error" });

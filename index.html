@@ -192,40 +192,49 @@ async function loadLive(){
 
 /* HIGHLIGHTS — SERVER API */
 async function loadHighlights(){
-  const box=document.getElementById("highlightBox");
+  const box = document.getElementById("highlightBox");
   box.innerHTML="<div class='center'>Loading...</div>";
 
   try{
-    const j = await fetch("/api/highlights").then(r=>r.json());
+    const data = await fetch("/api/highlights").then(r=>r.json());
 
-    const list = j.highlights || [];
+    // 🔥 only finished football matches
+    const matches = (data.highlights || []).filter(m=>{
+      return (
+        m.status === "FT" ||
+        m.status === "Finished" ||
+        m.status === "Full Time"
+      );
+    });
 
-    box.innerHTML = list.length ? list.map(v=>`
-      <div class="card">
-        <span class="badge today">HIGHLIGHT</span>
-        <div class="league">${v.competition}</div>
-        <div style="font-size:13px;font-weight:bold;margin-bottom:8px">
-          ${v.title}
+    if(!matches.length){
+      box.innerHTML="<div class='center'>No finished matches yet</div>";
+      return;
+    }
+
+    box.innerHTML = matches.map(m=>{
+      const query = `${m.title} ${m.competition} football highlights`;
+
+      return `
+        <div class="card">
+          <span class="badge today">FINISHED</span>
+          <div class="league">${m.competition}</div>
+          <div style="font-weight:bold">${m.title}</div>
+
+          <div class="video">
+            <iframe
+              src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}"
+              allowfullscreen>
+            </iframe>
+          </div>
         </div>
-        <div class="video">
-          <iframe 
-            src="https://www.youtube.com/embed/${getYT(v.video)}"
-            allowfullscreen>
-          </iframe>
-        </div>
-      </div>
-    `).join("") : "<div class='center'>No highlights</div>";
+      `;
+    }).join("");
 
   }catch(e){
     console.error(e);
     box.innerHTML="<div class='center'>Highlight service unavailable</div>";
   }
-}
-
-/* helper: youtube id */
-function getYT(url){
-  const m = url.match(/v=([^&]+)/);
-  return m ? m[1] : "";
 }
 </script>
 

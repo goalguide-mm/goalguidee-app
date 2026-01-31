@@ -1,23 +1,20 @@
-export default async function handler(req, res) {
-  try {
-    const matches = [
-      { title: "Man City vs Arsenal", competition: "Premier League" },
-      { title: "Barcelona vs Real Madrid", competition: "La Liga" },
-      { title: "Bayern Munich vs Dortmund", competition: "Bundesliga" }
-    ];
+export default function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
-    const highlights = matches.map(m => ({
-      title: m.title,
-      competition: m.competition,
-      video: `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(
-        `${m.title} ${m.competition} official match highlights football`
-      )}`
-    }));
-
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.status(200).json({ status: "ok", highlights });
-
-  } catch (e) {
-    res.status(500).json({ status: "error" });
-  }
+  res.status(200).json({
+    highlights: [
+      {
+        title: "Man City vs Arsenal",
+        competition: "Premier League",
+        video:
+          "https://www.youtube.com/embed?listType=search&list=Man%20City%20vs%20Arsenal%20Premier%20League%20official%20match%20highlights%20football"
+      },
+      {
+        title: "Barcelona vs Real Madrid",
+        competition: "La Liga",
+        video:
+          "https://www.youtube.com/embed?listType=search&list=Barcelona%20vs%20Real%20Madrid%20La%20Liga%20official%20match%20highlights%20football"
+      }
+    ]
+  });
 }

@@ -85,7 +85,6 @@ section.active{display:block}
   border-radius:12px;font-weight:bold;margin-bottom:6px
 }
 .today{background:#f5c400;color:#000}
-.yesterday{background:#2d3748;color:#f5c400}
 
 .center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
 footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
@@ -165,9 +164,9 @@ async function loadFixtures(){
   <div class="card">
     <div class="league">${e.strLeague}</div>
     <div class="match">
-      <div class="team"><img src="${e.strHomeTeamBadge}">${e.strHomeTeam}</div>
+      <div class="team">${e.strHomeTeam}</div>
       <div class="vs">VS</div>
-      <div class="team right">${e.strAwayTeam}<img src="${e.strAwayTeamBadge}"></div>
+      <div class="team right">${e.strAwayTeam}</div>
     </div>
     <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
   </div>`).join(""):"<div class='center'>No data</div>";
@@ -182,50 +181,42 @@ async function loadLive(){
   <div class="card">
     <div class="league">${e.strLeague}</div>
     <div class="match">
-      <div class="team"><img src="${e.strHomeTeamBadge}">${e.strHomeTeam}</div>
+      <div class="team">${e.strHomeTeam}</div>
       <div class="vs">VS</div>
-      <div class="team right">${e.strAwayTeam}<img src="${e.strAwayTeamBadge}"></div>
+      <div class="team right">${e.strAwayTeam}</div>
     </div>
     <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
   </div>`).join(""):"<div class='center'>No matches</div>";
 }
 
-/* HIGHLIGHTS — SERVER API (FIXED FOR DEMO JSON) */
+/* HIGHLIGHTS */
 async function loadHighlights(){
-  const box = document.getElementById("highlightBox");
-  box.innerHTML = "<div class='center'>Loading...</div>";
+  const box=document.getElementById("highlightBox");
+  box.innerHTML="<div class='center'>Loading...</div>";
 
   try{
-    const r = await fetch("/api/highlights");
-    const j = await r.json();
+    const r=await fetch("/api/highlights");
+    const j=await r.json();
 
-    if(!j.highlights || !j.highlights.length){
-      box.innerHTML = "<div class='center'>No highlights</div>";
-      return;
-    }
-
-    box.innerHTML = j.highlights.map(h=>{
-      // convert watch?v= to embed/
-      const embed = h.video.replace("watch?v=","embed/");
-
+    box.innerHTML=j.highlights.map(h=>{
+      const embed=h.video.replace("watch?v=","embed/");
       return `
       <div class="card">
         <span class="badge today">HIGHLIGHT</span>
         <div class="league">${h.competition}</div>
         <div style="font-size:13px;font-weight:bold">${h.title}</div>
-
         <div class="video">
           <iframe src="${embed}" allowfullscreen></iframe>
         </div>
       </div>`;
     }).join("");
-
-  }catch(err){
-    console.error(err);
-    box.innerHTML = "<div class='center'>Highlight service unavailable</div>";
+  }catch(e){
+    box.innerHTML="<div class='center'>Highlight service unavailable</div>";
   }
 }
-<script>
-  
+
+loadLive();
+</script>
+
 </body>
 </html>

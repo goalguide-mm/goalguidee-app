@@ -192,43 +192,35 @@ async function loadLive(){
 
 /* HIGHLIGHTS — SERVER API */
 async function loadHighlights(){
-  const box = document.getElementById("highlightBox");
+  const box=document.getElementById("highlightBox");
   box.innerHTML="<div class='center'>Loading...</div>";
 
   try{
-    const data = await fetch("/api/highlights").then(r=>r.json());
+    const r = await fetch("/api/highlights");
+    const j = await r.json();
 
-    // 🔥 only finished football matches
-    const matches = (data.highlights || []).filter(m=>{
-      return (
-        m.status === "FT" ||
-        m.status === "Finished" ||
-        m.status === "Full Time"
-      );
-    });
-
-    if(!matches.length){
+    if(!j.highlights || !j.highlights.length){
       box.innerHTML="<div class='center'>No finished matches yet</div>";
       return;
     }
 
-    box.innerHTML = matches.map(m=>{
-      const query = `${m.title} ${m.competition} football highlights`;
+    box.innerHTML = j.highlights.map(m=>{
+      // football highlight only (avoid music)
+      const q = `${m.title} ${m.competition} football match highlights`;
 
       return `
-        <div class="card">
-          <span class="badge today">FINISHED</span>
-          <div class="league">${m.competition}</div>
-          <div style="font-weight:bold">${m.title}</div>
+      <div class="card">
+        <span class="badge today">HIGHLIGHT</span>
+        <div class="league">${m.competition}</div>
+        <div style="font-size:13px;font-weight:bold">${m.title}</div>
 
-          <div class="video">
-            <iframe
-              src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}"
-              allowfullscreen>
-            </iframe>
-          </div>
+        <div class="video">
+          <iframe
+            src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}"
+            allowfullscreen>
+          </iframe>
         </div>
-      `;
+      </div>`;
     }).join("");
 
   }catch(e){

@@ -198,33 +198,23 @@ async function loadHighlights(){
   try{
     const j = await fetch("/api/highlights").then(r=>r.json());
 
-    const now=new Date(Date.now()+6.5*60*60*1000);
-    const today=now.toISOString().slice(0,10);
-    const y=new Date(now);y.setDate(y.getDate()-1);
-    const yesterday=y.toISOString().slice(0,10);
+    const list = j.highlights || [];
 
-    const list=j.response.filter(v=>{
-      if(!v.videos||!v.videos.length) return false;
-      const d=v.date.slice(0,10);
-      return d===today||d===yesterday;
-    });
-
-    box.innerHTML=list.length?list.map(v=>{
-      const d=v.date.slice(0,10);
-      const badge=d===today
-        ?"<span class='badge today'>TODAY</span>"
-        :"<span class='badge yesterday'>YESTERDAY</span>";
-
-      return`
+    box.innerHTML = list.length ? list.map(v=>`
       <div class="card">
-        ${badge}
+        <span class="badge today">HIGHLIGHT</span>
         <div class="league">${v.competition}</div>
-        <div style="font-size:13px;font-weight:bold">${v.title}</div>
-        <div class="video">
-          ${v.videos[0].embed.replace("autoplay=1","autoplay=0")}
+        <div style="font-size:13px;font-weight:bold;margin-bottom:8px">
+          ${v.title}
         </div>
-      </div>`;
-    }).join(""):"<div class='center'>No highlights</div>";
+        <div class="video">
+          <iframe 
+            src="https://www.youtube.com/embed/${getYT(v.video)}"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    `).join("") : "<div class='center'>No highlights</div>";
 
   }catch(e){
     console.error(e);
@@ -232,7 +222,11 @@ async function loadHighlights(){
   }
 }
 
-loadLive();
+/* helper: youtube id */
+function getYT(url){
+  const m = url.match(/v=([^&]+)/);
+  return m ? m[1] : "";
+}
 </script>
 
 </body>

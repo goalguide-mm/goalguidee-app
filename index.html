@@ -195,7 +195,9 @@ async function loadHighlights(){
   box.innerHTML="<div class='center'>Loading...</div>";
 
   try{
-    const r = await fetch("highlights.json");
+    const r = await fetch(
+  "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
+);
     const j = await r.json();
 
     if(!j.highlights || j.highlights.length===0) throw "no data";

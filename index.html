@@ -192,42 +192,39 @@ async function loadLive(){
 
 /* HIGHLIGHTS — SERVER API (FIXED FOR DEMO JSON) */
 async function loadHighlights(){
-  const box=document.getElementById("highlightBox");
-  box.innerHTML="<div class='center'>Loading...</div>";
+  const box = document.getElementById("highlightBox");
+  box.innerHTML = "<div class='center'>Loading...</div>";
 
   try{
-    const j = await fetch("/api/highlights").then(r=>r.json());
+    const r = await fetch("/api/highlights");
+    const j = await r.json();
 
-    const list = j.highlights || [];
+    if(!j.highlights || !j.highlights.length){
+      box.innerHTML = "<div class='center'>No highlights</div>";
+      return;
+    }
 
-    box.innerHTML = list.length ? list.map(v=>`
+    box.innerHTML = j.highlights.map(h=>{
+      // convert watch?v= to embed/
+      const embed = h.video.replace("watch?v=","embed/");
+
+      return `
       <div class="card">
         <span class="badge today">HIGHLIGHT</span>
-        <div class="league">${v.competition}</div>
-        <div style="font-size:13px;font-weight:bold;margin-bottom:8px">
-          ${v.title}
-        </div>
-        <div class="video">
-          <iframe 
-            src="https://www.youtube.com/embed/${getYT(v.video)}"
-            allowfullscreen>
-          </iframe>
-        </div>
-      </div>
-    `).join("") : "<div class='center'>No highlights</div>";
+        <div class="league">${h.competition}</div>
+        <div style="font-size:13px;font-weight:bold">${h.title}</div>
 
-  }catch(e){
-    console.error(e);
-    box.innerHTML="<div class='center'>Highlight service unavailable</div>";
+        <div class="video">
+          <iframe src="${embed}" allowfullscreen></iframe>
+        </div>
+      </div>`;
+    }).join("");
+
+  }catch(err){
+    console.error(err);
+    box.innerHTML = "<div class='center'>Highlight service unavailable</div>";
   }
 }
-
-/* helper: youtube id */
-function getYT(url){
-  const m = url.match(/v=([^&]+)/);
-  return m ? m[1] : "";
-}
-</script>
 
 </body>
 </html>

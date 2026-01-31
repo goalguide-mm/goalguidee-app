@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
   try {
-    // demo matches (later → API-FOOTBALL finished matches)
     const matches = [
       { title: "Man City vs Arsenal", competition: "Premier League" },
       { title: "Barcelona vs Real Madrid", competition: "La Liga" },
@@ -10,9 +9,8 @@ export default async function handler(req, res) {
     const highlights = matches.map(m => ({
       title: m.title,
       competition: m.competition,
-      // football-only YouTube search (no music)
-      video: `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(
-        m.title + " " + m.competition + " official highlights football"
+      video: `https://www.youtube.com/results?search_query=${encodeURIComponent(
+        `${m.title} ${m.competition} official match highlights football`
       )}`
     }));
 

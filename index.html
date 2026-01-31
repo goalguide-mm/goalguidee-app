@@ -190,43 +190,42 @@ async function loadLive(){
   </div>`).join(""):"<div class='center'>No matches</div>";
 }
 
-/* HIGHLIGHTS — SERVER API */
+/* HIGHLIGHTS — SERVER API (FIXED FOR DEMO JSON) */
 async function loadHighlights(){
   const box=document.getElementById("highlightBox");
   box.innerHTML="<div class='center'>Loading...</div>";
 
   try{
-    const r = await fetch("/api/highlights");
-    const j = await r.json();
+    const j = await fetch("/api/highlights").then(r=>r.json());
 
-    if(!j.highlights || !j.highlights.length){
-      box.innerHTML="<div class='center'>No finished matches yet</div>";
-      return;
-    }
+    const list = j.highlights || [];
 
-    box.innerHTML = j.highlights.map(m=>{
-      // football highlight only (avoid music)
-      const q = `${m.title} ${m.competition} football match highlights`;
-
-      return `
+    box.innerHTML = list.length ? list.map(v=>`
       <div class="card">
         <span class="badge today">HIGHLIGHT</span>
-        <div class="league">${m.competition}</div>
-        <div style="font-size:13px;font-weight:bold">${m.title}</div>
-
+        <div class="league">${v.competition}</div>
+        <div style="font-size:13px;font-weight:bold;margin-bottom:8px">
+          ${v.title}
+        </div>
         <div class="video">
-          <iframe
-            src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}"
+          <iframe 
+            src="https://www.youtube.com/embed/${getYT(v.video)}"
             allowfullscreen>
           </iframe>
         </div>
-      </div>`;
-    }).join("");
+      </div>
+    `).join("") : "<div class='center'>No highlights</div>";
 
   }catch(e){
     console.error(e);
     box.innerHTML="<div class='center'>Highlight service unavailable</div>";
   }
+}
+
+/* helper: youtube id */
+function getYT(url){
+  const m = url.match(/v=([^&]+)/);
+  return m ? m[1] : "";
 }
 </script>
 

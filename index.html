@@ -195,37 +195,23 @@ async function loadHighlights(){
   box.innerHTML="<div class='center'>Loading...</div>";
 
   try{
-    const r = await fetch("/api/highlights");
+    const r=await fetch("/api/highlights");
+    const j=await r.json();
 
-    if(!r.ok){
-      throw new Error("API not reachable");
-    }
+    if(!j.highlights) throw "no data";
 
-    const j = await r.json();
-
-    if(!j.highlights || j.highlights.length===0){
-      box.innerHTML="<div class='center'>No highlights available</div>";
-      return;
-    }
-
-    box.innerHTML = j.highlights.map(h=>{
-      const embed = h.video.includes("watch?v=")
-        ? h.video.replace("watch?v=","embed/")
-        : h.video;
-
-      return `
+    box.innerHTML=j.highlights.map(h=>`
       <div class="card">
         <span class="badge today">HIGHLIGHT</span>
         <div class="league">${h.competition}</div>
         <div style="font-size:13px;font-weight:bold">${h.title}</div>
         <div class="video">
-          <iframe src="${embed}" allowfullscreen></iframe>
+          <iframe src="${h.video}" allowfullscreen></iframe>
         </div>
-      </div>`;
-    }).join("");
+      </div>
+    `).join("");
 
-  }catch(err){
-    console.error(err);
+  }catch(e){
     box.innerHTML="<div class='center'>Highlight service unavailable</div>";
   }
 }

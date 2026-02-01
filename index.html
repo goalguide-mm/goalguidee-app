@@ -37,8 +37,10 @@ nav button{
   opacity:.6;
   font-weight:600;
 }
-nav button.active{opacity:1;border-bottom:2px solid #f5c400}
-
+nav button.active{
+  opacity:1;
+  border-bottom:2px solid #f5c400;
+}
 .controls{
   padding:16px 24px;
 }
@@ -50,14 +52,12 @@ select{
   border-radius:6px;
   font-weight:600;
 }
-
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
   gap:18px;
   padding:24px;
 }
-
 .card{
   background:linear-gradient(145deg,#121a26,#0b0f14);
   border:1px solid #1f2a3a;
@@ -81,21 +81,25 @@ select{
   gap:8px;
   font-size:14px;
 }
-.team img{width:26px;height:26px}
+.team img{
+  width:26px;
+  height:26px;
+}
 .date{
   margin-top:10px;
   font-size:13px;
   color:#ccc;
 }
-.card button{
-  margin-top:10px;
-  width:100%;
+.card a{
+  display:block;
+  margin-top:12px;
+  text-align:center;
   padding:10px;
-  background:#f5c400;
-  border:none;
+  background:#000;
+  color:#f5c400;
   border-radius:8px;
+  text-decoration:none;
   font-weight:600;
-  cursor:pointer;
 }
 footer{
   text-align:center;
@@ -124,9 +128,7 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
+/* ================= CONFIG ================= */
 const API_KEY = "123";
 
 const LEAGUES = {
@@ -135,46 +137,39 @@ const LEAGUES = {
   "Serie A": 4332,
   "Bundesliga": 4331,
   "Ligue 1": 4334,
-
   "Champions League": 4480,
-  "Europa League": 4481,
-
-  "FA Cup": 4485,
-  "EFL Cup": 4486
+  "Europa League": 4481
 };
 
 const grid = document.getElementById("grid");
 const leagueSelect = document.getElementById("leagueSelect");
 
-/* =========================
-   UI
-========================= */
-Object.keys(LEAGUES).forEach(name=>{
+/* ================= UI ================= */
+Object.entries(LEAGUES).forEach(([name,id])=>{
   const o=document.createElement("option");
-  o.value=LEAGUES[name];
+  o.value=id;
   o.textContent=name;
   leagueSelect.appendChild(o);
 });
 
 leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
 
-/* =========================
-   DATA
-========================= */
+/* ================= FIXTURES ================= */
 async function loadFixtures(id){
-  grid.innerHTML="Loading...";
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsseason.php?id=${id}&s=2025-2026`;
+  grid.innerHTML="Loading fixtures...";
+  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`;
   const r=await fetch(url);
   const d=await r.json();
 
   grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No matches";return;}
+  if(!d.events){grid.innerHTML="No fixtures";return;}
 
-  d.events.forEach(e=>grid.appendChild(card(e,false)));
+  d.events.forEach(e=>grid.appendChild(matchCard(e,false)));
 }
 
+/* ================= HIGHLIGHTS ================= */
 async function loadHighlights(id){
-  grid.innerHTML="Loading...";
+  grid.innerHTML="Loading highlights...";
   const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
   const r=await fetch(url);
   const d=await r.json();
@@ -182,30 +177,35 @@ async function loadHighlights(id){
   grid.innerHTML="";
   if(!d.events){grid.innerHTML="No highlights";return;}
 
-  d.events.forEach(e=>{
-    if(e.strVideo) grid.appendChild(card(e,true));
-  });
+  d.events
+    .filter(e=>e.strVideo)
+    .forEach(e=>grid.appendChild(matchCard(e,true)));
 }
 
-function card(e,video){
+/* ================= CARD ================= */
+function matchCard(e,video){
   const c=document.createElement("div");
   c.className="card";
   c.innerHTML=`
-    <div class="league">${e.strLeague}</div>
+    <div class="league">${e.strLeague||""}</div>
     <div class="match">
-      <div class="team"><img src="${e.strHomeTeamBadge||""}">${e.strHomeTeam}</div>
+      <div class="team">
+        <img src="${e.strHomeTeamBadge||""}">
+        ${e.strHomeTeam||""}
+      </div>
       <b>VS</b>
-      <div class="team"><img src="${e.strAwayTeamBadge||""}">${e.strAwayTeam}</div>
+      <div class="team">
+        <img src="${e.strAwayTeamBadge||""}">
+        ${e.strAwayTeam||""}
+      </div>
     </div>
     <div class="date">${e.dateEvent||""}</div>
-    ${video?`<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>`:""}
+    ${video?`<a href="${e.strVideo}" target="_blank">▶ Watch Highlights</a>`:""}
   `;
   return c;
 }
 
-/* =========================
-   MENU
-========================= */
+/* ================= MENU ================= */
 function showFixtures(){
   setActive(0);
   loadFixtures(leagueSelect.value);
@@ -215,7 +215,8 @@ function showHighlights(){
   loadHighlights(leagueSelect.value);
 }
 function setActive(i){
-  document.querySelectorAll("nav button").forEach((b,x)=>b.classList.toggle("active",x===i));
+  document.querySelectorAll("nav button")
+    .forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
 /* DEFAULT */

@@ -48,7 +48,7 @@ nav button.active{
   display:flex;gap:10px;
   background:#111823
 }
-select,button{
+select{
   background:#1a222f;color:#f5c400;
   border:1px solid #f5c400;
   padding:8px 15px;border-radius:8px;font-weight:bold
@@ -98,15 +98,7 @@ section.active{display:block}
 .video{position:relative;padding-bottom:56.25%;height:0;margin-top:10px}
 .video iframe{position:absolute;width:100%;height:100%;border:0}
 
-/* BADGE */
-.badge{
-  display:inline-block;font-size:10px;
-  padding:3px 8px;border-radius:12px;
-  font-weight:bold;margin-bottom:6px
-}
-.today{background:#f5c400;color:#000}
-.yesterday{background:#2d3748;color:#f5c400}
-
+/* MISC */
 .center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
 footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </style>
@@ -127,7 +119,7 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </header>
 
 <div class="controls" id="controls">
-  <select id="league">
+  <select id="league" onchange="loadFixtures()">
     <option value="4328">Premier League</option>
     <option value="4335">La Liga</option>
     <option value="4331">Bundesliga</option>
@@ -158,6 +150,12 @@ function showPage(id,btn){
   if(id==="highlights") loadHighlights();
 }
 
+/* MYANMAR TIME FORMAT */
+function mmt(date,time){
+  if(!date) return "TBD";
+  return `${date} ${time ? time.slice(0,5) : ""} (MMT)`;
+}
+
 /* LIVE */
 async function loadLive(){
   const box=document.getElementById("liveBox");
@@ -176,46 +174,34 @@ async function loadLive(){
 
 /* FIXTURES */
 async function loadFixtures(){
-  const league = document.getElementById("league").value;
-  const box = document.getElementById("fixtureBox");
+  const league=document.getElementById("league").value;
+  const box=document.getElementById("fixtureBox");
+  box.innerHTML="<div class='center'>Loading...</div>";
 
-  box.innerHTML = "<div class='center'>Loading...</div>";
-
-  const j = await fetch(`${DB}/eventsnextleague.php?id=${league}`)
-    .then(r => r.json());
-
-  box.innerHTML = j.events
-    ? j.events.map(e => `
-      <div class="card">
-        <div class="league">${e.strLeague}</div>
-        <div class="match">
-          <div class="team">
-            <img src="${e.strHomeTeamBadge}">
-            ${e.strHomeTeam}
-          </div>
-          <div class="vs">VS</div>
-          <div class="team right">
-            ${e.strAwayTeam}
-            <img src="${e.strAwayTeamBadge}">
-          </div>
-        </div>
-        <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
+  const j=await fetch(`${DB}/eventsnextleague.php?id=${league}`).then(r=>r.json());
+  box.innerHTML=j.events?j.events.map(e=>`
+    <div class="card">
+      <div class="league">${e.strLeague}</div>
+      <div class="match">
+        <div class="team">${e.strHomeTeam}</div>
+        <div class="vs">VS</div>
+        <div class="team right">${e.strAwayTeam}</div>
       </div>
-    `).join("")
-    : "<div class='center'>No data</div>";
+      <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
+    </div>
+  `).join(""):"<div class='center'>No fixtures</div>";
 }
 
-/* HIGHLIGHTS — GitHub RAW JSON */
+/* HIGHLIGHTS */
 async function loadHighlights(){
   const box=document.getElementById("highlightBox");
   box.innerHTML="<div class='center'>Loading...</div>";
   try{
-    const r = await fetch(
+    const j=await fetch(
       "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
-    );
-    const j = await r.json();
+    ).then(r=>r.json());
 
-    box.innerHTML = j.highlights.map(v=>`
+    box.innerHTML=j.highlights.map(v=>`
       <div class="card">
         <div class="league">${v.competition}</div>
         <div style="font-size:14px;font-weight:bold">${v.title}</div>
@@ -224,7 +210,7 @@ async function loadHighlights(){
         </div>
       </div>
     `).join("");
-  }catch(e){
+  }catch{
     box.innerHTML="<div class='center'>Highlights unavailable</div>";
   }
 }

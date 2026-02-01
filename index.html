@@ -128,7 +128,7 @@ footer{
    CONFIG
 ========================= */
 const API_KEY = "123";
-const TODAY = "2026-02-01"; // 👉 ဒီနေ့
+const TODAY = new Date().toISOString().slice(0,10); // 👉 AUTO TODAY
 
 const LEAGUES = {
   "Premier League": 4328,
@@ -158,7 +158,7 @@ Object.keys(LEAGUES).forEach(name=>{
 leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
 
 /* =========================
-   DATA (TODAY FIXTURES)
+   FIXTURES (TODAY)
 ========================= */
 async function loadFixtures(id){
   grid.innerHTML="Loading...";
@@ -168,21 +168,25 @@ async function loadFixtures(id){
 
   grid.innerHTML="";
   if(!d.events){
-    grid.innerHTML="No matches";
-    return;
-  }
-
-  // 👉 ဒီနေ့ (2026-02-01) ပွဲတွေကိုပဲ filter
-  const todayMatches = d.events.filter(e => e.dateEvent === TODAY);
-
-  if(todayMatches.length === 0){
     grid.innerHTML="No matches today";
     return;
   }
 
-  todayMatches.forEach(e=>grid.appendChild(card(e,false)));
+  const todayFixtures = d.events.filter(e =>
+    e.dateEvent === TODAY && e.strStatus !== "Match Finished"
+  );
+
+  if(todayFixtures.length === 0){
+    grid.innerHTML="No matches today";
+    return;
+  }
+
+  todayFixtures.forEach(e=>grid.appendChild(card(e,false)));
 }
 
+/* =========================
+   HIGHLIGHTS (TODAY)
+========================= */
 async function loadHighlights(id){
   grid.innerHTML="Loading...";
   const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
@@ -190,13 +194,26 @@ async function loadHighlights(id){
   const d=await r.json();
 
   grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No highlights";return;}
+  if(!d.events){
+    grid.innerHTML="No highlights today";
+    return;
+  }
 
-  d.events.forEach(e=>{
-    if(e.strVideo) grid.appendChild(card(e,true));
-  });
+  const todayHighlights = d.events.filter(e =>
+    e.dateEvent === TODAY && e.strVideo
+  );
+
+  if(todayHighlights.length === 0){
+    grid.innerHTML="No highlights today";
+    return;
+  }
+
+  todayHighlights.forEach(e=>grid.appendChild(card(e,true)));
 }
 
+/* =========================
+   CARD
+========================= */
 function card(e,video){
   const c=document.createElement("div");
   c.className="card";
@@ -214,7 +231,7 @@ function card(e,video){
       </div>
     </div>
     <div class="date">${e.dateEvent}</div>
-    ${video?`<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>`:""}
+    ${video ? `<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>` : ""}
   `;
   return c;
 }
@@ -236,7 +253,7 @@ function setActive(i){
 }
 
 /* DEFAULT */
-leagueSelect.value=4328;
+leagueSelect.value = 4328;
 loadFixtures(4328);
 </script>
 

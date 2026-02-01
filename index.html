@@ -75,21 +75,37 @@ section.active{display:block}
   font-weight:bold;margin-bottom:8px
 }
 
-/* VIDEO */
-.video{
-  position:relative;
-  padding-bottom:56.25%;
-  height:0;
-  margin-top:10px;
-  border-radius:12px;
-  overflow:hidden;
+/* MATCH */
+.match{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  min-height:60px
 }
-.video iframe{
-  position:absolute;
-  width:100%;
-  height:100%;
-  border:0;
+.team{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:40%;
+  font-size:14px
 }
+.team.right{justify-content:flex-end;text-align:right}
+.team img{
+  width:26px;
+  height:26px;
+  object-fit:contain;
+}
+.vs{color:#f5c400;font-weight:900}
+
+/* TIME */
+.time{
+  margin-top:auto;font-size:12px;color:#f5c400;
+  background:rgba(245,196,0,.1);
+  padding:8px;border-radius:8px;
+  text-align:center;font-weight:bold
+}
+
+.center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
+footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 
 /* WATCH BUTTON */
 a.watch-btn{
@@ -108,9 +124,6 @@ a.watch-btn:hover{
   transform:scale(1.03);
   background:#000;
 }
-
-.center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
-footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </style>
 </head>
 
@@ -155,19 +168,76 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 <script>
 const DB = "https://www.thesportsdb.com/api/v1/json/3";
 
+/* TEAM LOGO */
+async function getLogo(name){
+  try{
+    const r = await fetch(`${DB}/searchteams.php?t=${encodeURIComponent(name)}`);
+    const j = await r.json();
+    return j.teams ? j.teams[0].strTeamBadge : "";
+  }catch{
+    return "";
+  }
+}
+
 /* NAV */
 function showPage(id,btn){
   document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   btn.classList.add("active");
+
   document.getElementById("controls").style.display =
     id==="highlights" ? "none" : "flex";
 
+  if(id==="live") loadLive();
+  if(id==="fixtures") loadFixtures();
   if(id==="highlights") loadHighlights();
 }
 
-/* ✅ HIGHLIGHTS (SMART) */
+/* FIXTURES (with logos) */
+async function loadFixtures(){
+  const league=document.getElementById("league").value;
+  const box=document.getElementById("fixtureBox");
+  box.innerHTML="<div class='center'>Loading...</div>";
+
+  try{
+    const r=await fetch(`${DB}/eventsnextleague.php?id=${league}`);
+    const j=await r.json();
+
+    if(!j.events){
+      box.innerHTML="<div class='center'>No fixtures</div>";
+      return;
+    }
+
+    const cards = await Promise.all(j.events.map(async e=>{
+      const hLogo = await getLogo(e.strHomeTeam);
+      const aLogo = await getLogo(e.strAwayTeam);
+
+      return `
+      <div class="card">
+        <div class="league">${e.strLeague}</div>
+        <div class="match">
+          <div class="team">
+            ${hLogo?`<img src="${hLogo}">`:""}
+            ${e.strHomeTeam}
+          </div>
+          <div class="vs">VS</div>
+          <div class="team right">
+            ${e.strAwayTeam}
+            ${aLogo?`<img src="${aLogo}">`:""}
+          </div>
+        </div>
+        <div class="time">${e.dateEvent} ${e.strTime?.slice(0,5)||""}</div>
+      </div>`;
+    }));
+
+    box.innerHTML = cards.join("");
+  }catch{
+    box.innerHTML="<div class='center'>Fixtures unavailable</div>";
+  }
+}
+
+/* HIGHLIGHTS (logo + watch) */
 async function loadHighlights(){
   const box = document.getElementById("highlightBox");
   box.innerHTML = "<div class='center'>Loading...</div>";
@@ -177,36 +247,40 @@ async function loadHighlights(){
       "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
     ).then(r => r.json());
 
-    box.innerHTML = j.highlights.map(v => {
-
-      const canEmbed = v.video.includes("embed/");
+    const cards = await Promise.all(j.highlights.map(async v=>{
+      const hLogo = await getLogo(v.home);
+      const aLogo = await getLogo(v.away);
 
       return `
-        <div class="card">
-          <div class="league">${v.competition}</div>
-          <div style="font-weight:bold;margin-bottom:8px">${v.title}</div>
-
-          ${
-            canEmbed
-            ? `
-              <div class="video">
-                <iframe src="${v.video}" allowfullscreen></iframe>
-              </div>
-            `
-            : `
-              <a class="watch-btn" href="${v.video}" target="_blank">
-                ▶ Watch on YouTube
-              </a>
-            `
-          }
+      <div class="card">
+        <div class="league">${v.competition}</div>
+        <div class="match">
+          <div class="team">
+            ${hLogo?`<img src="${hLogo}">`:""}
+            ${v.home}
+          </div>
+          <div class="vs">VS</div>
+          <div class="team right">
+            ${v.away}
+            ${aLogo?`<img src="${aLogo}">`:""}
+          </div>
         </div>
-      `;
-    }).join("");
+        <a class="watch-btn"
+           href="${v.video.replace("embed/","watch?v=")}"
+           target="_blank">
+          ▶ Watch on YouTube
+        </a>
+      </div>`;
+    }));
 
+    box.innerHTML = cards.join("");
   }catch{
     box.innerHTML="<div class='center'>Highlights unavailable</div>";
   }
 }
+
+/* DEFAULT */
+loadFixtures();
 </script>
 
 </body>

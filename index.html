@@ -4,31 +4,115 @@
 <meta charset="UTF-8">
 <title>GOAL GUIDE</title>
 
-<link rel="icon" type="image/png" href="IMG_20260123_104505_958.jpg">
+<link rel="icon" href="IMG_20260123_104505_958.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@600&display=swap" rel="stylesheet">
 
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:'Poppins',sans-serif;background:#0b0f14;color:#fff}
-header{padding:14px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #f5c400;background:#0d121a}
+
+/* HEADER */
+header{
+  padding:14px 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:3px solid #f5c400;
+  background:#0d121a;
+}
 .logo-area{display:flex;align-items:center;gap:15px}
-.logo-area img{width:50px;height:50px;border-radius:50%;border:2px solid #f5c400;padding:2px;background:#000}
-header h1{margin:0;color:#f5c400;font-family:'Montserrat',sans-serif;font-size:26px}
-nav button{background:none;border:none;color:#fff;font-weight:600;cursor:pointer;margin-left:12px;opacity:.6}
-nav button.active{opacity:1;color:#f5c400;border-bottom:2px solid #f5c400;padding-bottom:4px}
-.controls{padding:14px 22px;display:flex;gap:10px;background:#111823}
-select{background:#1a222f;color:#f5c400;border:1px solid #f5c400;padding:8px 15px;border-radius:8px;font-weight:bold}
+.logo-area img{
+  width:50px;height:50px;border-radius:50%;
+  border:2px solid #f5c400;padding:2px;background:#000
+}
+header h1{
+  margin:0;color:#f5c400;
+  font-family:'Montserrat',sans-serif;
+  font-size:26px;font-weight:800
+}
+
+/* NAV */
+nav button{
+  background:none;border:none;color:#fff;
+  font-weight:600;cursor:pointer;
+  margin-left:12px;opacity:.6
+}
+nav button.active{
+  opacity:1;color:#f5c400;
+  border-bottom:2px solid #f5c400;padding-bottom:4px
+}
+
+/* CONTROLS */
+.controls{
+  padding:14px 22px;
+  display:flex;gap:10px;
+  background:#111823
+}
+select{
+  background:#1a222f;color:#f5c400;
+  border:1px solid #f5c400;
+  padding:8px 15px;border-radius:8px;font-weight:bold
+}
+
+/* SECTIONS */
 section{display:none;padding:22px}
 section.active{display:block}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-.card{background:linear-gradient(145deg,#151c26,#0d121a);padding:18px;border-radius:15px;border:1px solid #2d3748}
-.league{font-size:11px;color:#f5c400;font-weight:bold;margin-bottom:6px}
-.match{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.team{display:flex;align-items:center;gap:8px;font-size:14px}
-.team img{width:28px;height:28px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:18px
+}
+
+/* CARD */
+.card{
+  background:linear-gradient(145deg,#151c26,#0d121a);
+  padding:18px;border-radius:15px;
+  border:1px solid #2d3748;
+  display:flex;flex-direction:column
+}
+.league{
+  font-size:11px;color:#f5c400;
+  font-weight:bold;margin-bottom:8px
+}
+
+/* MATCH */
+.match{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.team{
+  display:flex;align-items:center;gap:8px;
+  width:40%;font-size:14px
+}
+.team img{width:22px;height:22px}
+.team.right{justify-content:flex-end;text-align:right}
 .vs{color:#f5c400;font-weight:900}
-.watch-btn{display:block;background:#000;border-radius:12px;padding:26px;text-align:center;color:#f5c400;font-weight:900;text-decoration:none}
-.center{text-align:center;opacity:.6;padding:40px}
+
+/* TIME */
+.time{
+  margin-top:12px;font-size:12px;color:#f5c400;
+  background:rgba(245,196,0,.1);
+  padding:8px;border-radius:8px;
+  text-align:center;font-weight:bold
+}
+
+/* WATCH BTN */
+a.watch-btn{
+  display:block;
+  background:linear-gradient(145deg,#000,#111);
+  border-radius:12px;
+  padding:28px;
+  text-align:center;
+  color:#f5c400;
+  font-weight:900;
+  letter-spacing:.5px;
+  text-decoration:none;
+  transition:.2s;
+}
+a.watch-btn:hover{transform:scale(1.03)}
+
+.center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
 footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </style>
 </head>
@@ -54,12 +138,22 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
     <option value="4331">Bundesliga</option>
     <option value="4332">Serie A</option>
     <option value="4334">Ligue 1</option>
+    <option value="4480">Champions League</option>
+    <option value="4481">Europa League</option>
   </select>
 </div>
 
-<section id="live" class="active"><div id="liveBox" class="grid"></div></section>
-<section id="fixtures"><div id="fixtureBox" class="grid"></div></section>
-<section id="highlights"><div id="highlightBox" class="grid"></div></section>
+<section id="live" class="active">
+  <div id="liveBox" class="grid"></div>
+</section>
+
+<section id="fixtures">
+  <div id="fixtureBox" class="grid"></div>
+</section>
+
+<section id="highlights">
+  <div id="highlightBox" class="grid"></div>
+</section>
 
 <footer>GOAL GUIDE © 2026</footer>
 
@@ -67,40 +161,73 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 const DB="https://www.thesportsdb.com/api/v1/json/3";
 
 function showPage(id,btn){
- document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
- document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
- document.getElementById(id).classList.add("active"); btn.classList.add("active");
- document.getElementById("controls").style.display=id==="highlights"?"none":"flex";
- if(id==="live")loadLive(); if(id==="fixtures")loadFixtures(); if(id==="highlights")loadHighlights();
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+  document.getElementById("controls").style.display=id==="highlights"?"none":"flex";
+  if(id==="live")loadLive();
+  if(id==="fixtures")loadFixtures();
+  if(id==="highlights")loadHighlights();
+}
+
+async function loadLive(){
+  const box=liveBox;
+  box.innerHTML="<div class='center'>Loading...</div>";
+  const d=new Date().toISOString().slice(0,10);
+  const j=await fetch(`${DB}/eventsday.php?s=Soccer&d=${d}`).then(r=>r.json());
+  if(!j.events){box.innerHTML="<div class='center'>No live matches</div>";return;}
+  box.innerHTML=j.events.map(e=>`
+    <div class="card">
+      <div class="league">${e.strLeague||""}</div>
+      <div class="match">
+        <div class="team">
+          <img src="${e.strHomeTeamBadge||''}">
+          ${e.strHomeTeam}
+        </div>
+        <div class="vs">VS</div>
+        <div class="team right">
+          ${e.strAwayTeam}
+          <img src="${e.strAwayTeamBadge||''}">
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+async function loadFixtures(){
+  const id=league.value;
+  fixtureBox.innerHTML="<div class='center'>Loading...</div>";
+  const j=await fetch(`${DB}/eventsnextleague.php?id=${id}`).then(r=>r.json());
+  if(!j.events){fixtureBox.innerHTML="<div class='center'>No fixtures</div>";return;}
+  fixtureBox.innerHTML=j.events.map(e=>`
+    <div class="card">
+      <div class="league">${e.strLeague}</div>
+      <div class="match">
+        <div class="team">
+          <img src="${e.strHomeTeamBadge||''}">
+          ${e.strHomeTeam}
+        </div>
+        <div class="vs">VS</div>
+        <div class="team right">
+          ${e.strAwayTeam}
+          <img src="${e.strAwayTeamBadge||''}">
+        </div>
+      </div>
+      <div class="time">${e.dateEvent}</div>
+    </div>`).join("");
 }
 
 async function loadHighlights(){
- const box=document.getElementById("highlightBox");
- box.innerHTML="<div class='center'>Loading...</div>";
- const today=new Date().toISOString().slice(0,10);
- const r=await fetch(`${DB}/eventsday.php?s=Soccer&d=${today}`);
- const j=await r.json();
- if(!j.events){box.innerHTML="<div class='center'>No highlights</div>";return;}
- box.innerHTML=j.events.map(e=>{
-  const q=`${e.strHomeTeam} vs ${e.strAwayTeam} highlights`;
-  return `
-  <div class="card">
-    <div class="league">${e.strLeague}</div>
-    <div class="match">
-      <div class="team"><img src="${e.strHomeTeamBadge}">${e.strHomeTeam}</div>
-      <div class="vs">VS</div>
-      <div class="team"><img src="${e.strAwayTeamBadge}">${e.strAwayTeam}</div>
-    </div>
-    <a class="watch-btn" target="_blank"
-      href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}">
-      ▶ Watch Highlights
-    </a>
-  </div>`;
- }).join("");
+  const j=await fetch("https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json").then(r=>r.json());
+  highlightBox.innerHTML=j.highlights.map(v=>`
+    <div class="card">
+      <div class="league">${v.competition}</div>
+      <div style="font-weight:bold;margin-bottom:10px">${v.title}</div>
+      <a class="watch-btn" href="${v.video}" target="_blank">▶ Watch Highlights</a>
+    </div>`).join("");
 }
 
-async function loadLive(){document.getElementById("liveBox").innerHTML="<div class='center'>Today matches</div>";}
-async function loadFixtures(){document.getElementById("fixtureBox").innerHTML="<div class='center'>Fixtures loading</div>";}
+loadLive();
 </script>
 
 </body>

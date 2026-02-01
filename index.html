@@ -128,8 +128,18 @@ footer{
    CONFIG
 ========================= */
 const API_KEY = "123";
-const TODAY = new Date().toISOString().slice(0,10); // 👉 AUTO TODAY
 
+/* LOCAL TODAY (NO UTC BUG) */
+function getLocalDate(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+const TODAY = getLocalDate();
+
+/* LEAGUES */
 const LEAGUES = {
   "Premier League": 4328,
   "La Liga": 4335,
@@ -142,6 +152,9 @@ const LEAGUES = {
   "EFL Cup": 4486
 };
 
+/* CUP IDS */
+const CUP_LEAGUES = [4480, 4481, 4485, 4486];
+
 const grid = document.getElementById("grid");
 const leagueSelect = document.getElementById("leagueSelect");
 
@@ -149,88 +162,108 @@ const leagueSelect = document.getElementById("leagueSelect");
    UI
 ========================= */
 Object.keys(LEAGUES).forEach(name=>{
-  const o=document.createElement("option");
-  o.value=LEAGUES[name];
-  o.textContent=name;
+  const o = document.createElement("option");
+  o.value = LEAGUES[name];
+  o.textContent = name;
   leagueSelect.appendChild(o);
 });
 
-leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
+leagueSelect.onchange = () => loadFixtures(leagueSelect.value);
 
 /* =========================
-   FIXTURES (TODAY)
+   FIXTURES
 ========================= */
 async function loadFixtures(id){
-  grid.innerHTML="Loading...";
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsseason.php?id=${id}&s=2025-2026`;
-  const r=await fetch(url);
-  const d=await r.json();
+  grid.innerHTML = "Loading...";
 
-  grid.innerHTML="";
-  if(!d.events){
-    grid.innerHTML="No matches today";
-    return;
+  const isCup = CUP_LEAGUES.includes(Number(id));
+  const url = isCup
+    ? `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`
+    : `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsseason.php?id=${id}&s=2025-2026`;
+
+  try{
+    const r = await fetch(url);
+    const d = await r.json();
+    const events = d.events || d.event;
+
+    grid.innerHTML = "";
+
+    if(!events || events.length === 0){
+      grid.innerHTML = "No matches";
+      return;
+    }
+
+    const todayFixtures = events.filter(e => e.dateEvent === TODAY);
+
+    if(todayFixtures.length === 0){
+      grid.innerHTML = "No matches today";
+      return;
+    }
+
+    todayFixtures.forEach(e => grid.appendChild(card(e,false)));
+
+  }catch(err){
+    grid.innerHTML = "Error loading data";
+    console.error(err);
   }
-
-  const todayFixtures = d.events.filter(e =>
-    e.dateEvent === TODAY && e.strStatus !== "Match Finished"
-  );
-
-  if(todayFixtures.length === 0){
-    grid.innerHTML="No matches today";
-    return;
-  }
-
-  todayFixtures.forEach(e=>grid.appendChild(card(e,false)));
 }
 
 /* =========================
-   HIGHLIGHTS (TODAY)
+   HIGHLIGHTS
 ========================= */
 async function loadHighlights(id){
-  grid.innerHTML="Loading...";
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
-  const r=await fetch(url);
-  const d=await r.json();
+  grid.innerHTML = "Loading...";
 
-  grid.innerHTML="";
-  if(!d.events){
-    grid.innerHTML="No highlights today";
-    return;
+  try{
+    const url = `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const events = d.events || d.event;
+
+    grid.innerHTML = "";
+
+    if(!events || events.length === 0){
+      grid.innerHTML = "No highlights";
+      return;
+    }
+
+    const todayHighlights = events.filter(e =>
+      e.dateEvent === TODAY && e.strVideo
+    );
+
+    if(todayHighlights.length === 0){
+      grid.innerHTML = "No highlights today";
+      return;
+    }
+
+    todayHighlights.forEach(e => grid.appendChild(card(e,true)));
+
+  }catch(err){
+    grid.innerHTML = "Error loading data";
+    console.error(err);
   }
-
-  const todayHighlights = d.events.filter(e =>
-    e.dateEvent === TODAY && e.strVideo
-  );
-
-  if(todayHighlights.length === 0){
-    grid.innerHTML="No highlights today";
-    return;
-  }
-
-  todayHighlights.forEach(e=>grid.appendChild(card(e,true)));
 }
 
 /* =========================
    CARD
 ========================= */
-function card(e,video){
-  const c=document.createElement("div");
-  c.className="card";
-  c.innerHTML=`
-    <div class="league">${e.strLeague}</div>
+function card(e, video){
+  const c = document.createElement("div");
+  c.className = "card";
+  c.innerHTML = `
+    <div class="league">${e.strLeague || ""}</div>
     <div class="match">
       <div class="team">
-        <img src="${e.strHomeTeamBadge||""}">
-        ${e.strHomeTeam}
+        <img src="${e.strHomeTeamBadge || ""}">
+        ${e.strHomeTeam || ""}
       </div>
       <b>VS</b>
       <div class="team">
-        <img src="${e.strAwayTeamBadge||""}">
-        ${e.strAwayTeam}
+        <img src="${e.strAwayTeamBadge || ""}">
+        ${e.strAwayTeam || ""}
       </div>
     </div>
-    <div class="date">${e.dateEvent}</div>
+    <div class="date">${e.dateEvent || ""}</div>
     ${video ? `<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>` : ""}
   `;
   return c;
@@ -243,16 +276,20 @@ function showFixtures(){
   setActive(0);
   loadFixtures(leagueSelect.value);
 }
+
 function showHighlights(){
   setActive(1);
   loadHighlights(leagueSelect.value);
 }
+
 function setActive(i){
   document.querySelectorAll("nav button")
     .forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
-/* DEFAULT */
+/* =========================
+   DEFAULT LOAD
+========================= */
 leagueSelect.value = 4328;
 loadFixtures(4328);
 </script>

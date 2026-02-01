@@ -160,6 +160,19 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 <script>
 const DB = "https://www.thesportsdb.com/api/v1/json/3";
 
+/* TEAM NAME FIX */
+const TEAM_ALIAS = {
+  "Man City": "Manchester City",
+  "Man Utd": "Manchester United",
+  "Spurs": "Tottenham",
+  "Newcastle": "Newcastle United",
+  "PSG": "Paris Saint-Germain"
+};
+
+function fixName(name){
+  return TEAM_ALIAS[name] || name;
+}
+
 /* NAV */
 function showPage(id,btn){
   document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
@@ -174,7 +187,8 @@ function showPage(id,btn){
 
 /* TEAM SEARCH */
 async function getTeam(name){
-  const r = await fetch(`${DB}/searchteams.php?t=${encodeURIComponent(name)}`);
+  const fixed = fixName(name);
+  const r = await fetch(`${DB}/searchteams.php?t=${encodeURIComponent(fixed)}`);
   const j = await r.json();
   return j.teams ? j.teams[0] : null;
 }
@@ -197,28 +211,33 @@ async function loadHighlights(){
       const h = await getTeam(home);
       const a = await getTeam(away);
 
-      box.innerHTML += `
-        <div class="card h-card">
-          <div class="h-league">${v.competition}</div>
+      const hLogo = h?.strTeamBadge || "https://www.thesportsdb.com/images/media/team/badge/default.png";
+      const aLogo = a?.strTeamBadge || "https://www.thesportsdb.com/images/media/team/badge/default.png";
 
-          <div class="h-teams">
-            <div class="team-box">
-              <img src="${h?.strTeamBadge||""}">
-              <span>${home}</span>
+      box.innerHTML += `
+        <div class="card">
+          <div style="color:#f5c400;font-size:12px;font-weight:700;margin-bottom:10px">
+            ${v.competition}
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <img src="${hLogo}" width="34">
+              <strong>${home}</strong>
             </div>
 
-            <div class="vs">VS</div>
+            <div style="color:#f5c400;font-weight:900">VS</div>
 
-            <div class="team-box right">
-              <span>${away}</span>
-              <img src="${a?.strTeamBadge||""}">
+            <div style="display:flex;align-items:center;gap:8px">
+              <strong>${away}</strong>
+              <img src="${aLogo}" width="34">
             </div>
           </div>
 
           <a class="watch-btn"
              href="${v.video.replace("embed/","watch?v=")}"
              target="_blank">
-            ▶ Watch on YouTube
+             ▶ Watch on YouTube
           </a>
         </div>
       `;

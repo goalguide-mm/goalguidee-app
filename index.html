@@ -128,7 +128,9 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-/* ================= CONFIG ================= */
+/* =========================
+   CONFIG
+========================= */
 const API_KEY = "123";
 
 const LEAGUES = {
@@ -144,75 +146,104 @@ const LEAGUES = {
 const grid = document.getElementById("grid");
 const leagueSelect = document.getElementById("leagueSelect");
 
-/* ================= UI ================= */
-Object.entries(LEAGUES).forEach(([name,id])=>{
+/* =========================
+   UI
+========================= */
+Object.keys(LEAGUES).forEach(name=>{
   const o=document.createElement("option");
-  o.value=id;
+  o.value=LEAGUES[name];
   o.textContent=name;
   leagueSelect.appendChild(o);
 });
 
-leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
+leagueSelect.onchange = () => loadTodayFixtures();
 
-/* ================= FIXTURES ================= */
-async function loadFixtures(id){
-  grid.innerHTML="Loading fixtures...";
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`;
-  const r=await fetch(url);
-  const d=await r.json();
-
-  grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No fixtures";return;}
-
-  d.events.forEach(e=>grid.appendChild(matchCard(e,false)));
+/* =========================
+   HELPERS
+========================= */
+function today(){
+  const d=new Date();
+  return d.toISOString().split("T")[0];
 }
 
-/* ================= HIGHLIGHTS ================= */
-async function loadHighlights(id){
+/* =========================
+   FIXTURES (TODAY)
+========================= */
+async function loadTodayFixtures(){
+  grid.innerHTML="Loading today fixtures...";
+  const date = today();
+  const leagueId = leagueSelect.value;
+
+  const url = `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsday.php?d=${date}&l=${leagueId}`;
+  const r = await fetch(url);
+  const d = await r.json();
+
+  grid.innerHTML="";
+  if(!d.events){ grid.innerHTML="No matches today"; return; }
+
+  d.events.forEach(e=>grid.appendChild(card(e,false)));
+}
+
+/* =========================
+   HIGHLIGHTS (ALL LEAGUES)
+========================= */
+async function loadAllHighlights(){
   grid.innerHTML="Loading highlights...";
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
-  const r=await fetch(url);
-  const d=await r.json();
-
   grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No highlights";return;}
 
-  d.events
-    .filter(e=>e.strVideo)
-    .forEach(e=>grid.appendChild(matchCard(e,true)));
+  for(const id of Object.values(LEAGUES)){
+    const url = `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if(!d.events) continue;
+
+    d.events.forEach(e=>{
+      if(e.strVideo){
+        grid.appendChild(card(e,true));
+      }
+    });
+  }
+
+  if(!grid.innerHTML){
+    grid.innerHTML="No highlights found";
+  }
 }
 
-/* ================= CARD ================= */
-function matchCard(e,video){
+/* =========================
+   CARD
+========================= */
+function card(e,video){
   const c=document.createElement("div");
   c.className="card";
   c.innerHTML=`
-    <div class="league">${e.strLeague||""}</div>
+    <div class="league">${e.strLeague}</div>
     <div class="match">
       <div class="team">
         <img src="${e.strHomeTeamBadge||""}">
-        ${e.strHomeTeam||""}
+        ${e.strHomeTeam}
       </div>
       <b>VS</b>
       <div class="team">
         <img src="${e.strAwayTeamBadge||""}">
-        ${e.strAwayTeam||""}
+        ${e.strAwayTeam}
       </div>
     </div>
     <div class="date">${e.dateEvent||""}</div>
-    ${video?`<a href="${e.strVideo}" target="_blank">▶ Watch Highlights</a>`:""}
+    ${video ? `<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>` : ""}
   `;
   return c;
 }
 
-/* ================= MENU ================= */
+/* =========================
+   MENU
+========================= */
 function showFixtures(){
   setActive(0);
-  loadFixtures(leagueSelect.value);
+  loadTodayFixtures();
 }
 function showHighlights(){
   setActive(1);
-  loadHighlights(leagueSelect.value);
+  loadAllHighlights();
 }
 function setActive(i){
   document.querySelectorAll("nav button")
@@ -220,8 +251,8 @@ function setActive(i){
 }
 
 /* DEFAULT */
-leagueSelect.value=4328;
-loadFixtures(4328);
+leagueSelect.value = 4328;
+loadTodayFixtures();
 </script>
 
 </body>

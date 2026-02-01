@@ -135,8 +135,12 @@ const LEAGUES = {
   "Serie A": 4332,
   "Bundesliga": 4331,
   "Ligue 1": 4334,
+
   "Champions League": 4480,
-  "Europa League": 4481
+  "Europa League": 4481,
+
+  "FA Cup": 4485,
+  "EFL Cup": 4486
 };
 
 const grid = document.getElementById("grid");
@@ -155,89 +159,45 @@ Object.keys(LEAGUES).forEach(name=>{
 leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
 
 /* =========================
-   FIXTURES + LIVE
+   DATA
 ========================= */
 async function loadFixtures(id){
   grid.innerHTML="Loading...";
-
-  /* 🔴 LIVE MATCHES */
-  const liveRes = await fetch(
-    `https://www.thesportsdb.com/api/v1/json/${API_KEY}/livescore.php?l=${id}`
-  );
-  const liveData = await liveRes.json();
+  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsseason.php?id=${id}&s=2025-2026`;
+  const r=await fetch(url);
+  const d=await r.json();
 
   grid.innerHTML="";
+  if(!d.events){grid.innerHTML="No matches";return;}
 
-  if(liveData.events){
-    liveData.events.forEach(e=>{
-      grid.appendChild(card(e,false,true));
-    });
-  }
-
-  /* 📅 NEXT FIXTURES */
-  const fixRes = await fetch(
-    `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`
-  );
-  const fixData = await fixRes.json();
-
-  if(fixData.events){
-    fixData.events.forEach(e=>{
-      grid.appendChild(card(e,false,false));
-    });
-  }
-
-  if(!liveData.events && !fixData.events){
-    grid.innerHTML="No matches";
-  }
+  d.events.forEach(e=>grid.appendChild(card(e,false)));
 }
 
-/* =========================
-   HIGHLIGHTS (ALL MIXED)
-========================= */
-async function loadHighlights(){
+async function loadHighlights(id){
   grid.innerHTML="Loading...";
+  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
+  const r=await fetch(url);
+  const d=await r.json();
+
   grid.innerHTML="";
+  if(!d.events){grid.innerHTML="No highlights";return;}
 
-  for(const id of Object.values(LEAGUES)){
-    const r = await fetch(
-      `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`
-    );
-    const d = await r.json();
-
-    if(d.events){
-      d.events.forEach(e=>{
-        if(e.strVideo){
-          grid.appendChild(card(e,true,false));
-        }
-      });
-    }
-  }
+  d.events.forEach(e=>{
+    if(e.strVideo) grid.appendChild(card(e,true));
+  });
 }
 
-/* =========================
-   CARD
-========================= */
-function card(e,video,isLive){
+function card(e,video){
   const c=document.createElement("div");
   c.className="card";
   c.innerHTML=`
-    <div class="league">
-      ${isLive ? "🔴 LIVE — " : ""}${e.strLeague}
-    </div>
+    <div class="league">${e.strLeague}</div>
     <div class="match">
-      <div class="team">
-        <img src="${e.strHomeTeamBadge||""}">
-        ${e.strHomeTeam}
-      </div>
-      <b>${isLive ? e.intHomeScore+" : "+e.intAwayScore : "VS"}</b>
-      <div class="team">
-        <img src="${e.strAwayTeamBadge||""}">
-        ${e.strAwayTeam}
-      </div>
+      <div class="team"><img src="${e.strHomeTeamBadge||""}">${e.strHomeTeam}</div>
+      <b>VS</b>
+      <div class="team"><img src="${e.strAwayTeamBadge||""}">${e.strAwayTeam}</div>
     </div>
-    <div class="date">
-      ${isLive ? "Playing Now" : (e.dateEvent||"")}
-    </div>
+    <div class="date">${e.dateEvent||""}</div>
     ${video?`<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>`:""}
   `;
   return c;
@@ -252,11 +212,10 @@ function showFixtures(){
 }
 function showHighlights(){
   setActive(1);
-  loadHighlights();
+  loadHighlights(leagueSelect.value);
 }
 function setActive(i){
-  document.querySelectorAll("nav button")
-    .forEach((b,x)=>b.classList.toggle("active",x===i));
+  document.querySelectorAll("nav button").forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
 /* DEFAULT */

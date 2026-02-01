@@ -128,6 +128,7 @@ footer{
    CONFIG
 ========================= */
 const API_KEY = "123";
+const TODAY = "2026-02-01"; // 👉 ဒီနေ့
 
 const LEAGUES = {
   "Premier League": 4328,
@@ -135,10 +136,8 @@ const LEAGUES = {
   "Serie A": 4332,
   "Bundesliga": 4331,
   "Ligue 1": 4334,
-
   "Champions League": 4480,
   "Europa League": 4481,
-
   "FA Cup": 4485,
   "EFL Cup": 4486
 };
@@ -159,7 +158,7 @@ Object.keys(LEAGUES).forEach(name=>{
 leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
 
 /* =========================
-   DATA
+   DATA (TODAY FIXTURES)
 ========================= */
 async function loadFixtures(id){
   grid.innerHTML="Loading...";
@@ -168,9 +167,20 @@ async function loadFixtures(id){
   const d=await r.json();
 
   grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No matches";return;}
+  if(!d.events){
+    grid.innerHTML="No matches";
+    return;
+  }
 
-  d.events.forEach(e=>grid.appendChild(card(e,false)));
+  // 👉 ဒီနေ့ (2026-02-01) ပွဲတွေကိုပဲ filter
+  const todayMatches = d.events.filter(e => e.dateEvent === TODAY);
+
+  if(todayMatches.length === 0){
+    grid.innerHTML="No matches today";
+    return;
+  }
+
+  todayMatches.forEach(e=>grid.appendChild(card(e,false)));
 }
 
 async function loadHighlights(id){
@@ -193,11 +203,17 @@ function card(e,video){
   c.innerHTML=`
     <div class="league">${e.strLeague}</div>
     <div class="match">
-      <div class="team"><img src="${e.strHomeTeamBadge||""}">${e.strHomeTeam}</div>
+      <div class="team">
+        <img src="${e.strHomeTeamBadge||""}">
+        ${e.strHomeTeam}
+      </div>
       <b>VS</b>
-      <div class="team"><img src="${e.strAwayTeamBadge||""}">${e.strAwayTeam}</div>
+      <div class="team">
+        <img src="${e.strAwayTeamBadge||""}">
+        ${e.strAwayTeam}
+      </div>
     </div>
-    <div class="date">${e.dateEvent||""}</div>
+    <div class="date">${e.dateEvent}</div>
     ${video?`<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>`:""}
   `;
   return c;
@@ -215,7 +231,8 @@ function showHighlights(){
   loadHighlights(leagueSelect.value);
 }
 function setActive(i){
-  document.querySelectorAll("nav button").forEach((b,x)=>b.classList.toggle("active",x===i));
+  document.querySelectorAll("nav button")
+    .forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
 /* DEFAULT */

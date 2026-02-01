@@ -218,15 +218,23 @@ async function loadFixtures(){
   }
 }
 
-/* ✅ HIGHLIGHTS — VERCEL API */
+/* ✅ HIGHLIGHTS — GITHUB RAW JSON (GITHUB PAGES OK) */
 async function loadHighlights(){
-  const box=document.getElementById("highlightBox");
-  box.innerHTML="<div class='center'>Loading...</div>";
-  try{
-    const r=await fetch("/api/highlights");
-    const j=await r.json();
+  const box = document.getElementById("highlightBox");
+  box.innerHTML = "<div class='center'>Loading...</div>";
 
-    box.innerHTML=j.highlights.map(v=>`
+  try{
+    const r = await fetch(
+      "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
+    );
+    const j = await r.json();
+
+    if(!j.highlights){
+      box.innerHTML = "<div class='center'>No highlights</div>";
+      return;
+    }
+
+    box.innerHTML = j.highlights.map(v=>`
       <div class="card">
         <div class="league">${v.competition}</div>
         <div style="font-weight:bold">${v.title}</div>
@@ -235,12 +243,11 @@ async function loadHighlights(){
         </div>
       </div>
     `).join("");
-  }catch{
-    box.innerHTML="<div class='center'>Highlights unavailable</div>";
+  }catch(err){
+    console.error(err);
+    box.innerHTML = "<div class='center'>Highlights unavailable</div>";
   }
 }
-
-document.addEventListener("DOMContentLoaded",loadLive);
 </script>
 
 </body>

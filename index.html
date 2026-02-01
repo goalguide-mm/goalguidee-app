@@ -190,31 +190,54 @@ async function loadLive(){
 }
 
 /* HIGHLIGHTS */
-async function loadHighlights(){
-  const box=document.getElementById("highlightBox");
-  box.innerHTML="<div class='center'>Loading...</div>";
+async function loadHighlights() {
+  const box = document.getElementById("highlightBox");
+  box.innerHTML = "<div class='center'>Loading highlights...</div>";
 
-  try{
-    const r = await fetch(
-  "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
-);
-    const j = await r.json();
+  // URL ထဲမှာ timestamp ထည့်ပြီး Cache error ကို ဖြေရှင်းမယ်
+  const url = `https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json?t=${new Date().getTime()}`;
 
-    if(!j.highlights || j.highlights.length===0) throw "no data";
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`လက်ရှိ file ကို ရှာမတွေ့ပါ (Error: ${response.status})`);
+    }
 
-    box.innerHTML=j.highlights.map(h=>`
+    const data = await response.json();
+
+    if (!data.highlights || data.highlights.length === 0) {
+      box.innerHTML = "<div class='center'>ပြသစရာ Highlight မရှိသေးပါ။</div>";
+      return;
+    }
+
+    box.innerHTML = data.highlights.map(h => {
+      // YouTube Embed Link ကို ပိုစိတ်ချရအောင် format ပြန်လုပ်ပေးခြင်း
+      const searchUrl = h.video;
+      
+      return `
       <div class="card">
         <span class="badge today">HIGHLIGHT</span>
         <div class="league">${h.competition}</div>
-        <div style="font-size:13px;font-weight:bold">${h.title}</div>
+        <div style="font-size:14px; font-weight:bold; margin-bottom:10px;">${h.title}</div>
         <div class="video">
-          <iframe src="${h.video}" allowfullscreen></iframe>
+          <iframe 
+            src="${searchUrl}" 
+            allowfullscreen 
+            loading="lazy">
+          </iframe>
         </div>
       </div>
-    `).join("");
+      `;
+    }).join("");
 
-  }catch(e){
-    box.innerHTML="<div class='center'>Highlight service unavailable</div>";
+  } catch (error) {
+    console.error("Error details:", error);
+    box.innerHTML = `
+      <div class='center'>
+        <p>Highlight ခေါ်ယူ၍ မရနိုင်ပါ</p>
+        <small style="color: #f5c400;">အကြောင်းရင်း: ${error.message}</small>
+      </div>`;
   }
 }
 </script>

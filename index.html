@@ -143,7 +143,7 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 <script>
 const DB = "https://www.thesportsdb.com/api/v1/json/3";
 
-/* SAFE TIME FORMAT */
+/* SAFE TIME */
 function mmt(date,time){
   if(!date) return "TBD";
   if(!time) return date+" (MMT)";
@@ -156,14 +156,15 @@ function showPage(id,btn){
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   btn.classList.add("active");
-  document.getElementById("controls").style.display = id==="highlights"?"none":"flex";
+  document.getElementById("controls").style.display =
+    id==="highlights" ? "none" : "flex";
 
   if(id==="live") loadLive();
   if(id==="fixtures") loadFixtures();
   if(id==="highlights") loadHighlights();
 }
 
-/* LIVE (WHITE SCREEN SAFE) */
+/* LIVE */
 async function loadLive(){
   const box=document.getElementById("liveBox");
   box.innerHTML="<div class='center'>Loading...</div>";
@@ -172,23 +173,22 @@ async function loadLive(){
     const r=await fetch(`${DB}/eventsday.php?s=Soccer&d=${today}`);
     const j=await r.json();
 
-    if(!j.events || !j.events.length){
-      box.innerHTML="<div class='center'>No live matches today</div>";
+    if(!j.events){
+      box.innerHTML="<div class='center'>No live matches</div>";
       return;
     }
 
     box.innerHTML=j.events.map(e=>`
       <div class="card">
-        <div class="league">${e.strLeague ?? ""}</div>
+        <div class="league">${e.strLeague||""}</div>
         <div class="match">
-          <div class="team">${e.strHomeTeam ?? ""}</div>
+          <div class="team">${e.strHomeTeam||""}</div>
           <div class="vs">VS</div>
-          <div class="team right">${e.strAwayTeam ?? ""}</div>
+          <div class="team right">${e.strAwayTeam||""}</div>
         </div>
       </div>
     `).join("");
-  }catch(err){
-    console.error(err);
+  }catch{
     box.innerHTML="<div class='center'>Live unavailable</div>";
   }
 }
@@ -199,7 +199,9 @@ async function loadFixtures(){
   const box=document.getElementById("fixtureBox");
   box.innerHTML="<div class='center'>Loading...</div>";
   try{
-    const j=await fetch(`${DB}/eventsnextleague.php?id=${league}`).then(r=>r.json());
+    const r=await fetch(`${DB}/eventsnextleague.php?id=${league}`);
+    const j=await r.json();
+
     box.innerHTML=j.events?j.events.map(e=>`
       <div class="card">
         <div class="league">${e.strLeague}</div>
@@ -216,14 +218,13 @@ async function loadFixtures(){
   }
 }
 
-/* HIGHLIGHTS */
+/* ✅ HIGHLIGHTS — VERCEL API */
 async function loadHighlights(){
   const box=document.getElementById("highlightBox");
   box.innerHTML="<div class='center'>Loading...</div>";
   try{
-    const j=await fetch(
-      "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
-    ).then(r=>r.json());
+    const r=await fetch("/api/highlights");
+    const j=await r.json();
 
     box.innerHTML=j.highlights.map(v=>`
       <div class="card">
@@ -239,8 +240,7 @@ async function loadHighlights(){
   }
 }
 
-/* SAFE LOAD */
-document.addEventListener("DOMContentLoaded", loadLive);
+document.addEventListener("DOMContentLoaded",loadLive);
 </script>
 
 </body>

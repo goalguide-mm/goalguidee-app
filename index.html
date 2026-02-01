@@ -99,6 +99,24 @@ section.active{display:block}
 
 .center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
 footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
+
+/* ✅ WATCH BUTTON (အသစ်ထည့်တာ) */
+a.watch-btn{
+  display:block;
+  background:linear-gradient(145deg,#000,#111);
+  border-radius:12px;
+  padding:28px;
+  text-align:center;
+  color:#f5c400;
+  font-weight:900;
+  letter-spacing:.5px;
+  transition:.2s;
+  text-decoration:none;
+}
+a.watch-btn:hover{
+  transform:scale(1.03);
+  background:#000;
+}
 </style>
 </head>
 
@@ -143,7 +161,7 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 <script>
 const DB = "https://www.thesportsdb.com/api/v1/json/3";
 
-/* SAFE TIME */
+/* TIME */
 function mmt(date,time){
   if(!date) return "TBD";
   if(!time) return date+" (MMT)";
@@ -218,7 +236,7 @@ async function loadFixtures(){
   }
 }
 
-/* ✅ HIGHLIGHTS — GITHUB RAW JSON (GITHUB PAGES OK) */
+/* ✅ HIGHLIGHTS (မပျက်) */
 async function loadHighlights(){
   const box = document.getElementById("highlightBox");
   box.innerHTML = "<div class='center'>Loading...</div>";
@@ -233,21 +251,14 @@ async function loadHighlights(){
         <div class="league">${v.competition}</div>
         <div style="font-weight:bold;margin-bottom:8px">${v.title}</div>
 
-        <a href="${v.video.replace("embed/","watch?v=")}"
-           target="_blank"
-           style="display:block;
-                  background:#000;
-                  border-radius:10px;
-                  padding:30px;
-                  text-align:center;
-                  color:#f5c400;
-                  font-weight:bold;
-                  text-decoration:none">
+        <a class="watch-btn"
+           href="${v.video.replace("embed/","watch?v=")}"
+           target="_blank">
           ▶ Watch on YouTube
         </a>
       </div>
     `).join("");
-  }catch(e){
+  }catch{
     box.innerHTML="<div class='center'>Highlights unavailable</div>";
   }
 }

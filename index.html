@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GOAL GUIDE - TODAY</title>
+<title>GOAL GUIDE</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
@@ -20,7 +20,6 @@ header{
   align-items:center;
   padding:14px 24px;
   border-bottom:3px solid #f5c400;
-  background:#0d121a;
 }
 .logo{
   display:flex;
@@ -28,7 +27,6 @@ header{
   gap:10px;
   font-weight:600;
   color:#f5c400;
-  font-size: 20px;
 }
 nav button{
   background:none;
@@ -41,9 +39,21 @@ nav button{
 }
 nav button.active{opacity:1;border-bottom:2px solid #f5c400}
 
+.controls{
+  padding:16px 24px;
+}
+select{
+  background:#111823;
+  color:#f5c400;
+  border:1px solid #f5c400;
+  padding:8px 14px;
+  border-radius:6px;
+  font-weight:600;
+}
+
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
   gap:18px;
   padding:24px;
 }
@@ -56,10 +66,8 @@ nav button.active{opacity:1;border-bottom:2px solid #f5c400}
 }
 .league{
   color:#f5c400;
-  font-size: 11px;
   font-weight:600;
-  margin-bottom:12px;
-  text-transform: uppercase;
+  margin-bottom:8px;
 }
 .match{
   display:flex;
@@ -69,44 +77,18 @@ nav button.active{opacity:1;border-bottom:2px solid #f5c400}
 }
 .team{
   display:flex;
-  flex-direction: column;
   align-items:center;
   gap:8px;
+  font-size:14px;
+}
+.team img{width:26px;height:26px}
+.date{
+  margin-top:10px;
   font-size:13px;
-  width: 40%;
-  text-align: center;
+  color:#ccc;
 }
-/* Logo ပြန်ပေါ်အောင် ပြင်ဆင်ထားသောအပိုင်း */
-.team img{
-  width:45px;
-  height:45px;
-  object-fit: contain;
-  background: rgba(255,255,255,0.05);
-  border-radius: 50%;
-  padding: 5px;
-}
-.vs-box{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.vs{
-  font-weight: 900;
-  color: #f5c400;
-  font-size: 18px;
-}
-.date-time{
-  margin-top:15px;
-  font-size:12px;
-  color:#f5c400;
-  font-weight: bold;
-  text-align: center;
-  background: rgba(245, 196, 0, 0.1);
-  padding: 6px;
-  border-radius: 6px;
-}
-.btn-hl{
-  margin-top:12px;
+.card button{
+  margin-top:10px;
   width:100%;
   padding:10px;
   background:#f5c400;
@@ -114,13 +96,11 @@ nav button.active{opacity:1;border-bottom:2px solid #f5c400}
   border-radius:8px;
   font-weight:600;
   cursor:pointer;
-  color: #000;
 }
 footer{
   text-align:center;
-  padding:30px;
+  padding:20px;
   color:#666;
-  font-size: 12px;
 }
 </style>
 </head>
@@ -130,127 +110,158 @@ footer{
 <header>
   <div class="logo">⚽ GOAL GUIDE</div>
   <nav>
-    <button class="active" onclick="loadTodayMatches()">TODAY</button>
-    <button onclick="loadHighlights()">HIGHLIGHTS</button>
+    <button class="active" onclick="showFixtures()">FIXTURES</button>
+    <button onclick="showHighlights()">HIGHLIGHTS</button>
   </nav>
 </header>
 
-<div id="grid" class="grid">Loading matches...</div>
+<div class="controls">
+  <select id="leagueSelect"></select>
+</div>
 
-<footer>GOAL GUIDE © 2026 · MYANMAR TIME</footer>
+<div id="grid" class="grid">Loading...</div>
+
+<footer>GOAL GUIDE © 2026</footer>
 
 <script>
-const API_KEY = "3"; // TheSportsDB Free Key
+/* =========================
+   CONFIG
+========================= */
+const API_KEY = "123";
+
+const LEAGUES = {
+  "Premier League": 4328,
+  "La Liga": 4335,
+  "Serie A": 4332,
+  "Bundesliga": 4331,
+  "Ligue 1": 4334,
+  "Champions League": 4480,
+  "Europa League": 4481
+};
+
+const grid = document.getElementById("grid");
+const leagueSelect = document.getElementById("leagueSelect");
 
 /* =========================
-   TIME CONVERTER (Myanmar Time)
+   UI
 ========================= */
-function toMMT(dateStr, timeStr) {
-  if (!dateStr) return "TBA";
-  // API ကလာတဲ့ UTC Time ကို Myanmar Time ပြောင်းခြင်း
-  const time = timeStr ? timeStr : "00:00:00";
-  const utcDate = new Date(`${dateStr}T${time}Z`);
-  return utcDate.toLocaleString('en-GB', { 
-    day: '2-digit', month: 'short',
-    hour: '2-digit', minute: '2-digit', hour12: true 
-  }) + " MMT";
+Object.keys(LEAGUES).forEach(name=>{
+  const o=document.createElement("option");
+  o.value=LEAGUES[name];
+  o.textContent=name;
+  leagueSelect.appendChild(o);
+});
+
+leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
+
+/* =========================
+   FIXTURES + LIVE
+========================= */
+async function loadFixtures(id){
+  grid.innerHTML="Loading...";
+
+  /* 🔴 LIVE MATCHES */
+  const liveRes = await fetch(
+    `https://www.thesportsdb.com/api/v1/json/${API_KEY}/livescore.php?l=${id}`
+  );
+  const liveData = await liveRes.json();
+
+  grid.innerHTML="";
+
+  if(liveData.events){
+    liveData.events.forEach(e=>{
+      grid.appendChild(card(e,false,true));
+    });
+  }
+
+  /* 📅 NEXT FIXTURES */
+  const fixRes = await fetch(
+    `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`
+  );
+  const fixData = await fixRes.json();
+
+  if(fixData.events){
+    fixData.events.forEach(e=>{
+      grid.appendChild(card(e,false,false));
+    });
+  }
+
+  if(!liveData.events && !fixData.events){
+    grid.innerHTML="No matches";
+  }
 }
 
 /* =========================
-   TEAM LOGO FETCH
+   HIGHLIGHTS (ALL MIXED)
 ========================= */
-// API က Badge မပေးတဲ့အခါ သုံးဖို့ ပုံသေ Logo Link
-const getLogo = (id) => `https://www.thesportsdb.com/images/media/team/badge/small/${id}.png`;
+async function loadHighlights(){
+  grid.innerHTML="Loading...";
+  grid.innerHTML="";
 
-/* =========================
-   DATA LOADERS
-========================= */
-async function loadTodayMatches() {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "<div style='grid-column:1/-1; text-align:center'>Loading Today's Matches...</div>";
-  setActive(0);
-
-  try {
-    // ဒီနေ့ကန်မယ့်ပွဲစဉ်အားလုံး (Soccer) ကိုဆွဲယူခြင်း
-    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsday.php?s=Soccer`);
+  for(const id of Object.values(LEAGUES)){
+    const r = await fetch(
+      `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`
+    );
     const d = await r.json();
 
-    grid.innerHTML = "";
-    if (!d.events) {
-      grid.innerHTML = "<div style='grid-column:1/-1; text-align:center; opacity:0.5'>ယနေ့ပွဲစဉ်များ မရှိသေးပါ။</div>";
-      return;
+    if(d.events){
+      d.events.forEach(e=>{
+        if(e.strVideo){
+          grid.appendChild(card(e,true,false));
+        }
+      });
     }
-
-    d.events.forEach(e => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="league">${e.strLeague}</div>
-        <div class="match">
-          <div class="team">
-            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idHomeTeam}.png" onerror="this.src='https://www.thesportsdb.com/static/images/icons/no-logo.png'">
-            <span>${e.strHomeTeam}</span>
-          </div>
-          <div class="vs-box">
-            <div class="vs">${e.intHomeScore !== null ? e.intHomeScore : 'VS'}</div>
-            ${e.intAwayScore !== null ? `<div class="vs">${e.intAwayScore}</div>` : ''}
-          </div>
-          <div class="team">
-            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idAwayTeam}.png" onerror="this.src='https://www.thesportsdb.com/static/images/icons/no-logo.png'">
-            <span>${e.strAwayTeam}</span>
-          </div>
-        </div>
-        <div class="date-time">⏰ ${toMMT(e.dateEvent, e.strTime)}</div>
-      `;
-      grid.appendChild(card);
-    });
-  } catch (err) {
-    grid.innerHTML = "Error loading data.";
   }
 }
 
-async function loadHighlights() {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "<div style='grid-column:1/-1; text-align:center'>Loading Recent Highlights...</div>";
+/* =========================
+   CARD
+========================= */
+function card(e,video,isLive){
+  const c=document.createElement("div");
+  c.className="card";
+  c.innerHTML=`
+    <div class="league">
+      ${isLive ? "🔴 LIVE — " : ""}${e.strLeague}
+    </div>
+    <div class="match">
+      <div class="team">
+        <img src="${e.strHomeTeamBadge||""}">
+        ${e.strHomeTeam}
+      </div>
+      <b>${isLive ? e.intHomeScore+" : "+e.intAwayScore : "VS"}</b>
+      <div class="team">
+        <img src="${e.strAwayTeamBadge||""}">
+        ${e.strAwayTeam}
+      </div>
+    </div>
+    <div class="date">
+      ${isLive ? "Playing Now" : (e.dateEvent||"")}
+    </div>
+    ${video?`<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>`:""}
+  `;
+  return c;
+}
+
+/* =========================
+   MENU
+========================= */
+function showFixtures(){
+  setActive(0);
+  loadFixtures(leagueSelect.value);
+}
+function showHighlights(){
   setActive(1);
-
-  try {
-    // ပြီးခဲ့တဲ့ပွဲစဉ်တွေထဲက Highlight ရှိတာတွေကိုပြခြင်း
-    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=4328`);
-    const d = await r.json();
-
-    grid.innerHTML = "";
-    d.events.forEach(e => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="league">${e.strLeague}</div>
-        <div class="match">
-          <div class="team">
-            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idHomeTeam}.png">
-            <span>${e.strHomeTeam}</span>
-          </div>
-          <div class="vs-box"><div class="vs">${e.intHomeScore} : ${e.intAwayScore}</div></div>
-          <div class="team">
-            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idAwayTeam}.png">
-            <span>${e.strAwayTeam}</span>
-          </div>
-        </div>
-        ${e.strVideo ? `<button class="btn-hl" onclick="window.open('${e.strVideo}')">▶ Watch Highlight</button>` : ""}
-      `;
-      grid.appendChild(card);
-    });
-  } catch (err) {
-    grid.innerHTML = "Error loading highlights.";
-  }
+  loadHighlights();
 }
-
 function setActive(i){
-  document.querySelectorAll("nav button").forEach((b,x)=>b.classList.toggle("active",x===i));
+  document.querySelectorAll("nav button")
+    .forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
-// Initial Load
-loadTodayMatches();
+/* DEFAULT */
+leagueSelect.value=4328;
+loadFixtures(4328);
 </script>
 
 </body>

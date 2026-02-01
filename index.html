@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GOAL GUIDE</title>
+<title>GOAL GUIDE - TODAY</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
@@ -20,6 +20,7 @@ header{
   align-items:center;
   padding:14px 24px;
   border-bottom:3px solid #f5c400;
+  background:#0d121a;
 }
 .logo{
   display:flex;
@@ -27,6 +28,7 @@ header{
   gap:10px;
   font-weight:600;
   color:#f5c400;
+  font-size: 20px;
 }
 nav button{
   background:none;
@@ -39,21 +41,9 @@ nav button{
 }
 nav button.active{opacity:1;border-bottom:2px solid #f5c400}
 
-.controls{
-  padding:16px 24px;
-}
-select{
-  background:#111823;
-  color:#f5c400;
-  border:1px solid #f5c400;
-  padding:8px 14px;
-  border-radius:6px;
-  font-weight:600;
-}
-
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
   gap:18px;
   padding:24px;
 }
@@ -66,8 +56,10 @@ select{
 }
 .league{
   color:#f5c400;
+  font-size: 11px;
   font-weight:600;
-  margin-bottom:8px;
+  margin-bottom:12px;
+  text-transform: uppercase;
 }
 .match{
   display:flex;
@@ -77,20 +69,44 @@ select{
 }
 .team{
   display:flex;
+  flex-direction: column;
   align-items:center;
   gap:8px;
-  font-size:14px;
-  width: 40%;
-}
-.team img{width:26px;height:26px}
-.date-time{
-  margin-top:10px;
   font-size:13px;
-  color:#f5c400; /* အချိန်ကို အရောင်လေးနဲ့ ပေါ်လွင်အောင်ထားပါတယ် */
-  font-weight: bold;
+  width: 40%;
+  text-align: center;
 }
-.card button{
-  margin-top:10px;
+/* Logo ပြန်ပေါ်အောင် ပြင်ဆင်ထားသောအပိုင်း */
+.team img{
+  width:45px;
+  height:45px;
+  object-fit: contain;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  padding: 5px;
+}
+.vs-box{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.vs{
+  font-weight: 900;
+  color: #f5c400;
+  font-size: 18px;
+}
+.date-time{
+  margin-top:15px;
+  font-size:12px;
+  color:#f5c400;
+  font-weight: bold;
+  text-align: center;
+  background: rgba(245, 196, 0, 0.1);
+  padding: 6px;
+  border-radius: 6px;
+}
+.btn-hl{
+  margin-top:12px;
   width:100%;
   padding:10px;
   background:#f5c400;
@@ -98,11 +114,13 @@ select{
   border-radius:8px;
   font-weight:600;
   cursor:pointer;
+  color: #000;
 }
 footer{
   text-align:center;
-  padding:20px;
+  padding:30px;
   color:#666;
+  font-size: 12px;
 }
 </style>
 </head>
@@ -112,141 +130,127 @@ footer{
 <header>
   <div class="logo">⚽ GOAL GUIDE</div>
   <nav>
-    <button class="active" onclick="showFixtures()">FIXTURES</button>
-    <button onclick="showHighlights()">HIGHLIGHTS</button>
+    <button class="active" onclick="loadTodayMatches()">TODAY</button>
+    <button onclick="loadHighlights()">HIGHLIGHTS</button>
   </nav>
 </header>
 
-<div class="controls">
-  <select id="leagueSelect"></select>
-</div>
+<div id="grid" class="grid">Loading matches...</div>
 
-<div id="grid" class="grid">Loading...</div>
-
-<footer>GOAL GUIDE © 2026</footer>
+<footer>GOAL GUIDE © 2026 · MYANMAR TIME</footer>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
-const API_KEY = "3"; // Free Key '3' ကို အသုံးပြုထားပါတယ်
-
-const LEAGUES = {
-  "Premier League": 4328,
-  "La Liga": 4335,
-  "Serie A": 4332,
-  "Bundesliga": 4331,
-  "Ligue 1": 4334,
-  "Champions League": 4480,
-  "Europa League": 4481,
-  "FA Cup": 4485,
-  "EFL Cup": 4486
-};
-
-const grid = document.getElementById("grid");
-const leagueSelect = document.getElementById("leagueSelect");
+const API_KEY = "3"; // TheSportsDB Free Key
 
 /* =========================
    TIME CONVERTER (Myanmar Time)
 ========================= */
-function formatMyanmarTime(dateStr, timeStr) {
-  if (!dateStr || !timeStr) return dateStr || "TBA";
+function toMMT(dateStr, timeStr) {
+  if (!dateStr) return "TBA";
+  // API ကလာတဲ့ UTC Time ကို Myanmar Time ပြောင်းခြင်း
+  const time = timeStr ? timeStr : "00:00:00";
+  const utcDate = new Date(`${dateStr}T${time}Z`);
+  return utcDate.toLocaleString('en-GB', { 
+    day: '2-digit', month: 'short',
+    hour: '2-digit', minute: '2-digit', hour12: true 
+  }) + " MMT";
+}
+
+/* =========================
+   TEAM LOGO FETCH
+========================= */
+// API က Badge မပေးတဲ့အခါ သုံးဖို့ ပုံသေ Logo Link
+const getLogo = (id) => `https://www.thesportsdb.com/images/media/team/badge/small/${id}.png`;
+
+/* =========================
+   DATA LOADERS
+========================= */
+async function loadTodayMatches() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "<div style='grid-column:1/-1; text-align:center'>Loading Today's Matches...</div>";
+  setActive(0);
+
   try {
-    // UTC to Myanmar Time (+6:30)
-    const date = new Date(`${dateStr}T${timeStr}`);
-    return date.toLocaleString('en-GB', { 
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true 
-    }) + " (MMT)";
-  } catch(e) {
-    return dateStr;
+    // ဒီနေ့ကန်မယ့်ပွဲစဉ်အားလုံး (Soccer) ကိုဆွဲယူခြင်း
+    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsday.php?s=Soccer`);
+    const d = await r.json();
+
+    grid.innerHTML = "";
+    if (!d.events) {
+      grid.innerHTML = "<div style='grid-column:1/-1; text-align:center; opacity:0.5'>ယနေ့ပွဲစဉ်များ မရှိသေးပါ။</div>";
+      return;
+    }
+
+    d.events.forEach(e => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="league">${e.strLeague}</div>
+        <div class="match">
+          <div class="team">
+            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idHomeTeam}.png" onerror="this.src='https://www.thesportsdb.com/static/images/icons/no-logo.png'">
+            <span>${e.strHomeTeam}</span>
+          </div>
+          <div class="vs-box">
+            <div class="vs">${e.intHomeScore !== null ? e.intHomeScore : 'VS'}</div>
+            ${e.intAwayScore !== null ? `<div class="vs">${e.intAwayScore}</div>` : ''}
+          </div>
+          <div class="team">
+            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idAwayTeam}.png" onerror="this.src='https://www.thesportsdb.com/static/images/icons/no-logo.png'">
+            <span>${e.strAwayTeam}</span>
+          </div>
+        </div>
+        <div class="date-time">⏰ ${toMMT(e.dateEvent, e.strTime)}</div>
+      `;
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    grid.innerHTML = "Error loading data.";
   }
 }
 
-/* =========================
-   UI
-========================= */
-Object.keys(LEAGUES).forEach(name=>{
-  const o=document.createElement("option");
-  o.value=LEAGUES[name];
-  o.textContent=name;
-  leagueSelect.appendChild(o);
-});
-
-leagueSelect.onchange=()=> {
-  const activeBtn = document.querySelector("nav button.active").textContent;
-  if(activeBtn === "FIXTURES") loadFixtures(leagueSelect.value);
-  else loadHighlights(leagueSelect.value);
-};
-
-/* =========================
-   DATA
-========================= */
-async function loadFixtures(id){
-  grid.innerHTML="Loading Fixtures...";
-  // 2026 အတွက် Season ပြင်ဆင်ထားပါတယ်
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`;
-  const r=await fetch(url);
-  const d=await r.json();
-
-  grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No upcoming matches found";return;}
-
-  d.events.forEach(e=>grid.appendChild(card(e,false)));
-}
-
-async function loadHighlights(id){
-  grid.innerHTML="Loading Highlights...";
-  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
-  const r=await fetch(url);
-  const d=await r.json();
-
-  grid.innerHTML="";
-  if(!d.events){grid.innerHTML="No highlights available";return;}
-
-  d.events.forEach(e=>{
-    grid.appendChild(card(e, !!e.strVideo));
-  });
-}
-
-function card(e,video){
-  const c=document.createElement("div");
-  c.className="card";
-  
-  // အချိန်နဲ့ ရက်စွဲကို ပေါင်းစည်းပေးခြင်း
-  const displayTime = formatMyanmarTime(e.dateEvent, e.strTime);
-
-  c.innerHTML=`
-    <div class="league">${e.strLeague}</div>
-    <div class="match">
-      <div class="team">${e.strHomeTeam}</div>
-      <b>${e.intHomeScore !== null ? e.intHomeScore + " : " + e.intAwayScore : "VS"}</b>
-      <div class="team" style="justify-content: flex-end; text-align: right;">${e.strAwayTeam}</div>
-    </div>
-    <div class="date-time">📅 ${displayTime}</div>
-    ${video ? `<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>` : ""}
-  `;
-  return c;
-}
-
-/* =========================
-   MENU
-========================= */
-function showFixtures(){
-  setActive(0);
-  loadFixtures(leagueSelect.value);
-}
-function showHighlights(){
+async function loadHighlights() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "<div style='grid-column:1/-1; text-align:center'>Loading Recent Highlights...</div>";
   setActive(1);
-  loadHighlights(leagueSelect.value);
+
+  try {
+    // ပြီးခဲ့တဲ့ပွဲစဉ်တွေထဲက Highlight ရှိတာတွေကိုပြခြင်း
+    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=4328`);
+    const d = await r.json();
+
+    grid.innerHTML = "";
+    d.events.forEach(e => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="league">${e.strLeague}</div>
+        <div class="match">
+          <div class="team">
+            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idHomeTeam}.png">
+            <span>${e.strHomeTeam}</span>
+          </div>
+          <div class="vs-box"><div class="vs">${e.intHomeScore} : ${e.intAwayScore}</div></div>
+          <div class="team">
+            <img src="https://www.thesportsdb.com/images/media/team/badge/small/${e.idAwayTeam}.png">
+            <span>${e.strAwayTeam}</span>
+          </div>
+        </div>
+        ${e.strVideo ? `<button class="btn-hl" onclick="window.open('${e.strVideo}')">▶ Watch Highlight</button>` : ""}
+      `;
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    grid.innerHTML = "Error loading highlights.";
+  }
 }
+
 function setActive(i){
   document.querySelectorAll("nav button").forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
-/* DEFAULT - Premier League 2026 */
-leagueSelect.value=4328;
-loadFixtures(4328);
+// Initial Load
+loadTodayMatches();
 </script>
 
 </body>

@@ -10,115 +10,25 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:'Poppins',sans-serif;background:#0b0f14;color:#fff}
-
-/* HEADER */
-header{
-  padding:14px 22px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:3px solid #f5c400;
-  background:#0d121a;
-}
+header{padding:14px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #f5c400;background:#0d121a}
 .logo-area{display:flex;align-items:center;gap:15px}
-.logo-area img{
-  width:50px;height:50px;border-radius:50%;
-  border:2px solid #f5c400;padding:2px;background:#000
-}
-header h1{
-  margin:0;color:#f5c400;
-  font-family:'Montserrat',sans-serif;
-  font-size:26px;font-weight:800
-}
-
-/* NAV */
-nav button{
-  background:none;border:none;color:#fff;
-  font-weight:600;cursor:pointer;
-  margin-left:12px;opacity:.6
-}
-nav button.active{
-  opacity:1;color:#f5c400;
-  border-bottom:2px solid #f5c400;padding-bottom:4px
-}
-
-/* CONTROLS */
-.controls{
-  padding:14px 22px;
-  display:flex;gap:10px;
-  background:#111823
-}
-select{
-  background:#1a222f;color:#f5c400;
-  border:1px solid #f5c400;
-  padding:8px 15px;border-radius:8px;font-weight:bold
-}
-
-/* SECTIONS */
+.logo-area img{width:50px;height:50px;border-radius:50%;border:2px solid #f5c400;padding:2px;background:#000}
+header h1{margin:0;color:#f5c400;font-family:'Montserrat',sans-serif;font-size:26px}
+nav button{background:none;border:none;color:#fff;font-weight:600;cursor:pointer;margin-left:12px;opacity:.6}
+nav button.active{opacity:1;color:#f5c400;border-bottom:2px solid #f5c400;padding-bottom:4px}
+.controls{padding:14px 22px;display:flex;gap:10px;background:#111823}
+select{background:#1a222f;color:#f5c400;border:1px solid #f5c400;padding:8px 15px;border-radius:8px;font-weight:bold}
 section{display:none;padding:22px}
 section.active{display:block}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:18px
-}
-
-/* CARD */
-.card{
-  background:linear-gradient(145deg,#151c26,#0d121a);
-  padding:18px;border-radius:16px;
-  border:1px solid #2d3748;
-}
-
-/* HIGHLIGHT CARD (YouTube style) */
-.h-card{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.h-league{
-  font-size:11px;
-  color:#f5c400;
-  font-weight:700;
-}
-.h-teams{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.team-box{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  width:40%;
-}
-.team-box.right{
-  justify-content:flex-end;
-}
-.team-box img{
-  width:36px;height:36px;
-}
-.vs{
-  font-weight:900;
-  color:#f5c400;
-}
-.watch-btn{
-  display:block;
-  background:linear-gradient(145deg,#000,#111);
-  border-radius:12px;
-  padding:22px;
-  text-align:center;
-  color:#f5c400;
-  font-weight:900;
-  letter-spacing:.5px;
-  text-decoration:none;
-  transition:.2s;
-}
-.watch-btn:hover{
-  transform:scale(1.03);
-}
-
-.center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{background:linear-gradient(145deg,#151c26,#0d121a);padding:18px;border-radius:15px;border:1px solid #2d3748}
+.league{font-size:11px;color:#f5c400;font-weight:bold;margin-bottom:6px}
+.match{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.team{display:flex;align-items:center;gap:8px;font-size:14px}
+.team img{width:28px;height:28px}
+.vs{color:#f5c400;font-weight:900}
+.watch-btn{display:block;background:#000;border-radius:12px;padding:26px;text-align:center;color:#f5c400;font-weight:900;text-decoration:none}
+.center{text-align:center;opacity:.6;padding:40px}
 footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </style>
 </head>
@@ -138,115 +48,59 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </header>
 
 <div class="controls" id="controls">
-  <select>
-    <option>Premier League</option>
+  <select id="league" onchange="loadFixtures()">
+    <option value="4328">Premier League</option>
+    <option value="4335">La Liga</option>
+    <option value="4331">Bundesliga</option>
+    <option value="4332">Serie A</option>
+    <option value="4334">Ligue 1</option>
   </select>
 </div>
 
-<section id="live" class="active">
-  <div class="center">Live coming soon</div>
-</section>
+<section id="live" class="active"><div id="liveBox" class="grid"></div></section>
+<section id="fixtures"><div id="fixtureBox" class="grid"></div></section>
+<section id="highlights"><div id="highlightBox" class="grid"></div></section>
 
-<section id="fixtures">
-  <div class="center">Fixtures coming soon</div>
-</section>
-
-<section id="highlights">
-  <div id="highlightBox" class="grid"></div>
-</section>
-
-<footer>GOAL GUIDE © 2026 · MYANMAR TIME</footer>
+<footer>GOAL GUIDE © 2026</footer>
 
 <script>
-const DB = "https://www.thesportsdb.com/api/v1/json/3";
+const DB="https://www.thesportsdb.com/api/v1/json/3";
 
-/* TEAM NAME FIX */
-const TEAM_ALIAS = {
-  "Man City": "Manchester City",
-  "Man Utd": "Manchester United",
-  "Spurs": "Tottenham",
-  "Newcastle": "Newcastle United",
-  "PSG": "Paris Saint-Germain"
-};
-
-function fixName(name){
-  return TEAM_ALIAS[name] || name;
-}
-
-/* NAV */
 function showPage(id,btn){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  btn.classList.add("active");
-  document.getElementById("controls").style.display =
-    id==="highlights" ? "none" : "flex";
-
-  if(id==="highlights") loadHighlights();
+ document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ document.getElementById(id).classList.add("active"); btn.classList.add("active");
+ document.getElementById("controls").style.display=id==="highlights"?"none":"flex";
+ if(id==="live")loadLive(); if(id==="fixtures")loadFixtures(); if(id==="highlights")loadHighlights();
 }
 
-/* TEAM SEARCH */
-async function getTeam(name){
-  const fixed = fixName(name);
-  const r = await fetch(`${DB}/searchteams.php?t=${encodeURIComponent(fixed)}`);
-  const j = await r.json();
-  return j.teams ? j.teams[0] : null;
-}
-
-/* HIGHLIGHTS */
 async function loadHighlights(){
-  const box = document.getElementById("highlightBox");
-  box.innerHTML = "<div class='center'>Loading...</div>";
-
-  try{
-    const j = await fetch(
-      "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
-    ).then(r=>r.json());
-
-    box.innerHTML = "";
-
-    for(const v of j.highlights){
-      const [home,away] = v.title.split(" vs ");
-
-      const h = await getTeam(home);
-      const a = await getTeam(away);
-
-      const hLogo = h?.strTeamBadge || "https://www.thesportsdb.com/images/media/team/badge/default.png";
-      const aLogo = a?.strTeamBadge || "https://www.thesportsdb.com/images/media/team/badge/default.png";
-
-      box.innerHTML += `
-        <div class="card">
-          <div style="color:#f5c400;font-size:12px;font-weight:700;margin-bottom:10px">
-            ${v.competition}
-          </div>
-
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:8px">
-              <img src="${hLogo}" width="34">
-              <strong>${home}</strong>
-            </div>
-
-            <div style="color:#f5c400;font-weight:900">VS</div>
-
-            <div style="display:flex;align-items:center;gap:8px">
-              <strong>${away}</strong>
-              <img src="${aLogo}" width="34">
-            </div>
-          </div>
-
-          <a class="watch-btn"
-             href="${v.video.replace("embed/","watch?v=")}"
-             target="_blank">
-             ▶ Watch on YouTube
-          </a>
-        </div>
-      `;
-    }
-
-  }catch{
-    box.innerHTML="<div class='center'>Highlights unavailable</div>";
-  }
+ const box=document.getElementById("highlightBox");
+ box.innerHTML="<div class='center'>Loading...</div>";
+ const today=new Date().toISOString().slice(0,10);
+ const r=await fetch(`${DB}/eventsday.php?s=Soccer&d=${today}`);
+ const j=await r.json();
+ if(!j.events){box.innerHTML="<div class='center'>No highlights</div>";return;}
+ box.innerHTML=j.events.map(e=>{
+  const q=`${e.strHomeTeam} vs ${e.strAwayTeam} highlights`;
+  return `
+  <div class="card">
+    <div class="league">${e.strLeague}</div>
+    <div class="match">
+      <div class="team"><img src="${e.strHomeTeamBadge}">${e.strHomeTeam}</div>
+      <div class="vs">VS</div>
+      <div class="team"><img src="${e.strAwayTeamBadge}">${e.strAwayTeam}</div>
+    </div>
+    <a class="watch-btn" target="_blank"
+      href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}">
+      ▶ Watch Highlights
+    </a>
+  </div>`;
+ }).join("");
 }
+
+async function loadLive(){document.getElementById("liveBox").innerHTML="<div class='center'>Today matches</div>";}
+async function loadFixtures(){document.getElementById("fixtureBox").innerHTML="<div class='center'>Fixtures loading</div>";}
 </script>
 
 </body>

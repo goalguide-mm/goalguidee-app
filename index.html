@@ -58,6 +58,12 @@ select{
   padding:24px;
 }
 
+.grid h3{
+  grid-column:1/-1;
+  margin:10px 0 0;
+  color:#f5c400;
+}
+
 .card{
   background:linear-gradient(145deg,#121a26,#0b0f14);
   border:1px solid #1f2a3a;
@@ -129,7 +135,7 @@ footer{
 ========================= */
 const API_KEY = "123";
 
-/* LOCAL TODAY (NO UTC BUG) */
+/* LOCAL TODAY */
 function getLocalDate(){
   const d = new Date();
   const y = d.getFullYear();
@@ -139,7 +145,27 @@ function getLocalDate(){
 }
 const TODAY = getLocalDate();
 
-/* LEAGUES */
+/* =========================
+   HELPERS (NEW)
+========================= */
+function formatDate(d){
+  const x = new Date(d);
+  return x.toLocaleDateString("en-GB", {
+    day:"2-digit", month:"short", year:"numeric"
+  });
+}
+
+function groupByDate(events){
+  return events.reduce((acc,e)=>{
+    acc[e.dateEvent] = acc[e.dateEvent] || [];
+    acc[e.dateEvent].push(e);
+    return acc;
+  },{});
+}
+
+/* =========================
+   LEAGUES
+========================= */
 const LEAGUES = {
   "Premier League": 4328,
   "La Liga": 4335,
@@ -152,8 +178,7 @@ const LEAGUES = {
   "EFL Cup": 4486
 };
 
-/* CUP IDS */
-const CUP_LEAGUES = [4480, 4481, 4485, 4486];
+const CUP_LEAGUES = [4480,4481,4485,4486];
 
 const grid = document.getElementById("grid");
 const leagueSelect = document.getElementById("leagueSelect");
@@ -162,118 +187,99 @@ const leagueSelect = document.getElementById("leagueSelect");
    UI
 ========================= */
 Object.keys(LEAGUES).forEach(name=>{
-  const o = document.createElement("option");
-  o.value = LEAGUES[name];
-  o.textContent = name;
+  const o=document.createElement("option");
+  o.value=LEAGUES[name];
+  o.textContent=name;
   leagueSelect.appendChild(o);
 });
 
-leagueSelect.onchange = () => loadFixtures(leagueSelect.value);
+leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
 
 /* =========================
-   FIXTURES
+   FIXTURES (FUTURE)
 ========================= */
 async function loadFixtures(id){
-  grid.innerHTML = "Loading...";
+  grid.innerHTML="Loading...";
 
-  const isCup = CUP_LEAGUES.includes(Number(id));
-  const url = isCup
+  const isCup=CUP_LEAGUES.includes(Number(id));
+  const url=isCup
     ? `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsnextleague.php?id=${id}`
     : `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventsseason.php?id=${id}&s=2025-2026`;
 
-  try{
-    const r = await fetch(url);
-    const d = await r.json();
-    const events = d.events || d.event;
+  const r=await fetch(url);
+  const d=await r.json();
+  const events=d.events||d.event;
 
-    grid.innerHTML = "";
+  grid.innerHTML="";
+  if(!events) return grid.innerHTML="No fixtures";
 
-    if(!events || events.length === 0){
-      grid.innerHTML = "No fixtures available";
-      return;
-    }
+  const future=events.filter(e=>e.dateEvent>=TODAY);
+  if(!future.length) return grid.innerHTML="No upcoming fixtures";
 
-    /* TODAY FIRST */
-    let list = events.filter(e => e.dateEvent === TODAY);
+  const groups=groupByDate(future);
 
-    /* IF NO TODAY → SHOW UPCOMING */
-    if(list.length === 0){
-      list = events
-        .filter(e => e.dateEvent > TODAY)
-        .slice(0, 10);
-    }
+  Object.keys(groups).sort().forEach(date=>{
+    const h=document.createElement("h3");
+    h.textContent=formatDate(date);
+    grid.appendChild(h);
 
-    if(list.length === 0){
-      grid.innerHTML = "No upcoming matches";
-      return;
-    }
-
-    list.forEach(e => grid.appendChild(card(e,false)));
-
-  }catch(err){
-    grid.innerHTML = "Error loading fixtures";
-    console.error(err);
-  }
+    groups[date].forEach(e=>{
+      grid.appendChild(card(e,false));
+    });
+  });
 }
 
 /* =========================
-   HIGHLIGHTS
+   HIGHLIGHTS (PAST)
 ========================= */
 async function loadHighlights(id){
-  grid.innerHTML = "Loading...";
+  grid.innerHTML="Loading...";
 
-  try{
-    const url = `https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
-    const r = await fetch(url);
-    const d = await r.json();
-    const events = d.events || d.event;
+  const url=`https://www.thesportsdb.com/api/v1/json/${API_KEY}/eventspastleague.php?id=${id}`;
+  const r=await fetch(url);
+  const d=await r.json();
+  const events=d.events||d.event;
 
-    grid.innerHTML = "";
+  grid.innerHTML="";
+  if(!events) return grid.innerHTML="No highlights";
 
-    if(!events || events.length === 0){
-      grid.innerHTML = "No highlights available";
-      return;
-    }
+  const past=events.filter(e=>e.dateEvent<TODAY && e.strVideo);
+  if(!past.length) return grid.innerHTML="No highlights yet";
 
-    /* NO TODAY FILTER – SHOW LATEST */
-    const highlights = events
-      .filter(e => e.strVideo)
-      .slice(0, 10);
+  const groups=groupByDate(past);
 
-    if(highlights.length === 0){
-      grid.innerHTML = "No highlight videos";
-      return;
-    }
+  Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(date=>{
+    const h=document.createElement("h3");
+    h.textContent=formatDate(date);
+    grid.appendChild(h);
 
-    highlights.forEach(e => grid.appendChild(card(e,true)));
-
-  }catch(err){
-    grid.innerHTML = "Error loading highlights";
-    console.error(err);
-  }
+    groups[date].forEach(e=>{
+      grid.appendChild(card(e,true));
+    });
+  });
 }
 
 /* =========================
    CARD
 ========================= */
-function card(e, video){
-  const c = document.createElement("div");
-  c.className = "card";
-  c.innerHTML = `
-    <div class="league">${e.strLeague || ""}</div>
+function card(e,video){
+  const c=document.createElement("div");
+  c.className="card";
+  c.innerHTML=`
+    <div class="league">${e.strLeague||""}</div>
     <div class="match">
       <div class="team">
-        <img src="${e.strHomeTeamBadge || ""}">
-        ${e.strHomeTeam || ""}
+        <img src="${e.strHomeTeamBadge||""}">
+        ${e.strHomeTeam||""}
       </div>
       <b>VS</b>
       <div class="team">
-        <img src="${e.strAwayTeamBadge || ""}">
-        ${e.strAwayTeam || ""}
+        <img src="${e.strAwayTeamBadge||""}">
+        ${e.strAwayTeam||""}
       </div>
     </div>
-    <div class="date">${e.dateEvent || ""}</div>
-    ${video ? `<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>` : ""}
+    <div class="date">${formatDate(e.dateEvent)}</div>
+    ${video?`<button onclick="window.open('${e.strVideo}')">▶ Watch Highlights</button>`:""}
   `;
   return c;
 }
@@ -285,21 +291,17 @@ function showFixtures(){
   setActive(0);
   loadFixtures(leagueSelect.value);
 }
-
 function showHighlights(){
   setActive(1);
   loadHighlights(leagueSelect.value);
 }
-
 function setActive(i){
   document.querySelectorAll("nav button")
     .forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
-/* =========================
-   DEFAULT LOAD
-========================= */
-leagueSelect.value = 4328;
+/* DEFAULT */
+leagueSelect.value=4328;
 loadFixtures(4328);
 </script>
 

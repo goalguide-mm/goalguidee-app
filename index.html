@@ -176,19 +176,33 @@ async function loadLive(){
 
 /* FIXTURES */
 async function loadFixtures(){
-  const league=document.getElementById("league").value;
-  const box=document.getElementById("fixtureBox");
-  box.innerHTML="<div class='center'>Loading...</div>";
-  const j=await fetch(`${DB}/eventsnextleague.php?id=${league}`).then(r=>r.json());
-  box.innerHTML=j.events?j.events.map(e=>`
-    <div class="card">
-      <div class="league">${e.strLeague}</div>
-      <div class="match">
-        <div class="team">${e.strHomeTeam}</div>
-        <div class="vs">VS</div>
-        <div class="team right">${e.strAwayTeam}</div>
+  const league = document.getElementById("league").value;
+  const box = document.getElementById("fixtureBox");
+
+  box.innerHTML = "<div class='center'>Loading...</div>";
+
+  const j = await fetch(`${DB}/eventsnextleague.php?id=${league}`)
+    .then(r => r.json());
+
+  box.innerHTML = j.events
+    ? j.events.map(e => `
+      <div class="card">
+        <div class="league">${e.strLeague}</div>
+        <div class="match">
+          <div class="team">
+            <img src="${e.strHomeTeamBadge}">
+            ${e.strHomeTeam}
+          </div>
+          <div class="vs">VS</div>
+          <div class="team right">
+            ${e.strAwayTeam}
+            <img src="${e.strAwayTeamBadge}">
+          </div>
+        </div>
+        <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
       </div>
-    </div>`).join(""):"<div class='center'>No data</div>";
+    `).join("")
+    : "<div class='center'>No data</div>";
 }
 
 /* HIGHLIGHTS — GitHub RAW JSON */

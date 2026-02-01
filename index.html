@@ -224,28 +224,31 @@ async function loadHighlights(){
   box.innerHTML = "<div class='center'>Loading...</div>";
 
   try{
-    const r = await fetch(
+    const j = await fetch(
       "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
-    );
-    const j = await r.json();
+    ).then(r => r.json());
 
-    if(!j.highlights){
-      box.innerHTML = "<div class='center'>No highlights</div>";
-      return;
-    }
-
-    box.innerHTML = j.highlights.map(v=>`
+    box.innerHTML = j.highlights.map(v => `
       <div class="card">
         <div class="league">${v.competition}</div>
-        <div style="font-weight:bold">${v.title}</div>
-        <div class="video">
-          <iframe src="${v.video}" allowfullscreen></iframe>
-        </div>
+        <div style="font-weight:bold;margin-bottom:8px">${v.title}</div>
+
+        <a href="${v.video.replace("embed/","watch?v=")}"
+           target="_blank"
+           style="display:block;
+                  background:#000;
+                  border-radius:10px;
+                  padding:30px;
+                  text-align:center;
+                  color:#f5c400;
+                  font-weight:bold;
+                  text-decoration:none">
+          ▶ Watch on YouTube
+        </a>
       </div>
     `).join("");
-  }catch(err){
-    console.error(err);
-    box.innerHTML = "<div class='center'>Highlights unavailable</div>";
+  }catch(e){
+    box.innerHTML="<div class='center'>Highlights unavailable</div>";
   }
 }
 </script>

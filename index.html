@@ -59,66 +59,63 @@ section{display:none;padding:22px}
 section.active{display:block}
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
   gap:18px
 }
 
 /* CARD */
 .card{
   background:linear-gradient(145deg,#151c26,#0d121a);
-  padding:18px;border-radius:15px;
+  padding:18px;border-radius:16px;
   border:1px solid #2d3748;
-  display:flex;flex-direction:column
-}
-.league{
-  font-size:11px;color:#f5c400;
-  font-weight:bold;margin-bottom:8px
 }
 
-/* MATCH */
-.match{
+/* HIGHLIGHT CARD (YouTube style) */
+.h-card{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.h-league{
+  font-size:11px;
+  color:#f5c400;
+  font-weight:700;
+}
+.h-teams{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:12px
 }
-.team{
+.team-box{
   display:flex;
   align-items:center;
   gap:8px;
   width:40%;
-  font-size:14px
 }
-.team.right{justify-content:flex-end;text-align:right}
-.team img{
-  width:26px;
-  height:26px;
+.team-box.right{
+  justify-content:flex-end;
 }
-.vs{color:#f5c400;font-weight:900}
-
-/* TIME */
-.time{
-  margin-top:auto;font-size:12px;color:#f5c400;
-  background:rgba(245,196,0,.1);
-  padding:8px;border-radius:8px;
-  text-align:center;font-weight:bold
+.team-box img{
+  width:36px;height:36px;
 }
-
-/* WATCH BUTTON */
-a.watch-btn{
+.vs{
+  font-weight:900;
+  color:#f5c400;
+}
+.watch-btn{
   display:block;
   background:linear-gradient(145deg,#000,#111);
   border-radius:12px;
-  padding:26px;
+  padding:22px;
   text-align:center;
   color:#f5c400;
   font-weight:900;
-  transition:.2s;
+  letter-spacing:.5px;
   text-decoration:none;
+  transition:.2s;
 }
-a.watch-btn:hover{
+.watch-btn:hover{
   transform:scale(1.03);
-  background:#000;
 }
 
 .center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
@@ -141,21 +138,17 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </header>
 
 <div class="controls" id="controls">
-  <select id="league" onchange="loadFixtures()">
-    <option value="4328">Premier League</option>
-    <option value="4335">La Liga</option>
-    <option value="4331">Bundesliga</option>
-    <option value="4332">Serie A</option>
-    <option value="4334">Ligue 1</option>
+  <select>
+    <option>Premier League</option>
   </select>
 </div>
 
 <section id="live" class="active">
-  <div id="liveBox" class="grid"></div>
+  <div class="center">Live coming soon</div>
 </section>
 
 <section id="fixtures">
-  <div id="fixtureBox" class="grid"></div>
+  <div class="center">Fixtures coming soon</div>
 </section>
 
 <section id="highlights">
@@ -165,75 +158,75 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 <footer>GOAL GUIDE © 2026 · MYANMAR TIME</footer>
 
 <script>
-const DB="https://www.thesportsdb.com/api/v1/json/3";
-const badgeCache={};
+const DB = "https://www.thesportsdb.com/api/v1/json/3";
 
-async function getBadge(team){
-  if(badgeCache[team]) return badgeCache[team];
-  const r=await fetch(`${DB}/searchteams.php?t=${encodeURIComponent(team)}`);
-  const j=await r.json();
-  const badge=j.teams?.[0]?.strTeamBadge||"";
-  badgeCache[team]=badge;
-  return badge;
-}
-
+/* NAV */
 function showPage(id,btn){
   document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   btn.classList.add("active");
-  document.getElementById("controls").style.display=id==="highlights"?"none":"flex";
-  if(id==="fixtures") loadFixtures();
+  document.getElementById("controls").style.display =
+    id==="highlights" ? "none" : "flex";
+
   if(id==="highlights") loadHighlights();
 }
 
-async function loadFixtures(){
-  const league=document.getElementById("league").value;
-  const box=document.getElementById("fixtureBox");
-  box.innerHTML="<div class='center'>Loading...</div>";
-
-  try{
-    const r=await fetch(`${DB}/eventsnextleague.php?id=${league}`);
-    const j=await r.json();
-
-    if(!j.events){ box.innerHTML="<div class='center'>Fixtures unavailable</div>"; return;}
-
-    box.innerHTML=await Promise.all(j.events.map(async e=>{
-      const hLogo=await getBadge(e.strHomeTeam);
-      const aLogo=await getBadge(e.strAwayTeam);
-      return `
-      <div class="card">
-        <div class="league">${e.strLeague}</div>
-        <div class="match">
-          <div class="team"><img src="${hLogo}">${e.strHomeTeam}</div>
-          <div class="vs">VS</div>
-          <div class="team right">${e.strAwayTeam}<img src="${aLogo}"></div>
-        </div>
-        <div class="time">${e.dateEvent}</div>
-      </div>`;
-    })).then(x=>x.join(""));
-  }catch{
-    box.innerHTML="<div class='center'>Fixtures unavailable</div>";
-  }
+/* TEAM SEARCH */
+async function getTeam(name){
+  const r = await fetch(`${DB}/searchteams.php?t=${encodeURIComponent(name)}`);
+  const j = await r.json();
+  return j.teams ? j.teams[0] : null;
 }
 
+/* HIGHLIGHTS */
 async function loadHighlights(){
-  const box=document.getElementById("highlightBox");
-  box.innerHTML="<div class='center'>Loading...</div>";
+  const box = document.getElementById("highlightBox");
+  box.innerHTML = "<div class='center'>Loading...</div>";
 
-  const j=await fetch(
-    "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
-  ).then(r=>r.json());
+  try{
+    const j = await fetch(
+      "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
+    ).then(r=>r.json());
 
-  box.innerHTML=j.highlights.map(v=>`
-    <div class="card">
-      <div class="league">${v.competition}</div>
-      <div style="font-weight:bold;margin-bottom:10px">${v.title}</div>
-      <a class="watch-btn" href="${v.video.replace("embed/","watch?v=")}" target="_blank">
-        ▶ Watch on YouTube
-      </a>
-    </div>
-  `).join("");
+    box.innerHTML = "";
+
+    for(const v of j.highlights){
+      const [home,away] = v.title.split(" vs ");
+
+      const h = await getTeam(home);
+      const a = await getTeam(away);
+
+      box.innerHTML += `
+        <div class="card h-card">
+          <div class="h-league">${v.competition}</div>
+
+          <div class="h-teams">
+            <div class="team-box">
+              <img src="${h?.strTeamBadge||""}">
+              <span>${home}</span>
+            </div>
+
+            <div class="vs">VS</div>
+
+            <div class="team-box right">
+              <span>${away}</span>
+              <img src="${a?.strTeamBadge||""}">
+            </div>
+          </div>
+
+          <a class="watch-btn"
+             href="${v.video.replace("embed/","watch?v=")}"
+             target="_blank">
+            ▶ Watch on YouTube
+          </a>
+        </div>
+      `;
+    }
+
+  }catch{
+    box.innerHTML="<div class='center'>Highlights unavailable</div>";
+  }
 }
 </script>
 

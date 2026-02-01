@@ -189,21 +189,29 @@ async function loadFixtures(id){
     grid.innerHTML = "";
 
     if(!events || events.length === 0){
-      grid.innerHTML = "No matches";
+      grid.innerHTML = "No fixtures available";
       return;
     }
 
-    const todayFixtures = events.filter(e => e.dateEvent === TODAY);
+    /* TODAY FIRST */
+    let list = events.filter(e => e.dateEvent === TODAY);
 
-    if(todayFixtures.length === 0){
-      grid.innerHTML = "No matches today";
+    /* IF NO TODAY → SHOW UPCOMING */
+    if(list.length === 0){
+      list = events
+        .filter(e => e.dateEvent > TODAY)
+        .slice(0, 10);
+    }
+
+    if(list.length === 0){
+      grid.innerHTML = "No upcoming matches";
       return;
     }
 
-    todayFixtures.forEach(e => grid.appendChild(card(e,false)));
+    list.forEach(e => grid.appendChild(card(e,false)));
 
   }catch(err){
-    grid.innerHTML = "Error loading data";
+    grid.innerHTML = "Error loading fixtures";
     console.error(err);
   }
 }
@@ -223,23 +231,24 @@ async function loadHighlights(id){
     grid.innerHTML = "";
 
     if(!events || events.length === 0){
-      grid.innerHTML = "No highlights";
+      grid.innerHTML = "No highlights available";
       return;
     }
 
-    const todayHighlights = events.filter(e =>
-      e.dateEvent === TODAY && e.strVideo
-    );
+    /* NO TODAY FILTER – SHOW LATEST */
+    const highlights = events
+      .filter(e => e.strVideo)
+      .slice(0, 10);
 
-    if(todayHighlights.length === 0){
-      grid.innerHTML = "No highlights today";
+    if(highlights.length === 0){
+      grid.innerHTML = "No highlight videos";
       return;
     }
 
-    todayHighlights.forEach(e => grid.appendChild(card(e,true)));
+    highlights.forEach(e => grid.appendChild(card(e,true)));
 
   }catch(err){
-    grid.innerHTML = "Error loading data";
+    grid.innerHTML = "Error loading highlights";
     console.error(err);
   }
 }

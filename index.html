@@ -13,8 +13,12 @@ body{margin:0;font-family:'Poppins',sans-serif;background:#0b0f14;color:#fff}
 
 /* HEADER */
 header{
-  padding:14px 22px;display:flex;justify-content:space-between;align-items:center;
-  border-bottom:3px solid #f5c400;background:#0d121a;
+  padding:14px 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:3px solid #f5c400;
+  background:#0d121a;
 }
 .logo-area{display:flex;align-items:center;gap:15px}
 .logo-area img{
@@ -22,25 +26,31 @@ header{
   border:2px solid #f5c400;padding:2px;background:#000
 }
 header h1{
-  margin:0;color:#f5c400;font-family:'Montserrat',sans-serif;
+  margin:0;color:#f5c400;
+  font-family:'Montserrat',sans-serif;
   font-size:26px;font-weight:800
 }
 
 /* NAV */
 nav button{
-  background:none;border:none;color:#fff;font-weight:600;
-  cursor:pointer;margin-left:12px;opacity:.6
+  background:none;border:none;color:#fff;
+  font-weight:600;cursor:pointer;
+  margin-left:12px;opacity:.6
 }
 nav button.active{
-  opacity:1;color:#f5c400;border-bottom:2px solid #f5c400;padding-bottom:4px
+  opacity:1;color:#f5c400;
+  border-bottom:2px solid #f5c400;padding-bottom:4px
 }
 
 /* CONTROLS */
 .controls{
-  padding:14px 22px;display:flex;gap:10px;background:#111823
+  padding:14px 22px;
+  display:flex;gap:10px;
+  background:#111823
 }
 select,button{
-  background:#1a222f;color:#f5c400;border:1px solid #f5c400;
+  background:#1a222f;color:#f5c400;
+  border:1px solid #f5c400;
   padding:8px 15px;border-radius:8px;font-weight:bold
 }
 
@@ -56,13 +66,21 @@ section.active{display:block}
 /* CARD */
 .card{
   background:linear-gradient(145deg,#151c26,#0d121a);
-  padding:18px;border-radius:15px;border:1px solid #2d3748;
+  padding:18px;border-radius:15px;
+  border:1px solid #2d3748;
   display:flex;flex-direction:column
 }
-.league{font-size:11px;color:#f5c400;font-weight:bold;margin-bottom:8px}
+.league{
+  font-size:11px;color:#f5c400;
+  font-weight:bold;margin-bottom:8px
+}
 
 /* MATCH */
-.match{display:flex;align-items:center;justify-content:space-between;min-height:60px}
+.match{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  min-height:60px
+}
 .team{display:flex;align-items:center;gap:8px;width:40%;font-size:14px}
 .team.right{justify-content:flex-end;text-align:right}
 .team img{width:28px;height:28px}
@@ -71,7 +89,8 @@ section.active{display:block}
 /* TIME */
 .time{
   margin-top:auto;font-size:12px;color:#f5c400;
-  background:rgba(245,196,0,.1);padding:8px;border-radius:8px;
+  background:rgba(245,196,0,.1);
+  padding:8px;border-radius:8px;
   text-align:center;font-weight:bold
 }
 
@@ -79,12 +98,14 @@ section.active{display:block}
 .video{position:relative;padding-bottom:56.25%;height:0;margin-top:10px}
 .video iframe{position:absolute;width:100%;height:100%;border:0}
 
-/* HIGHLIGHT BADGE */
+/* BADGE */
 .badge{
-  display:inline-block;font-size:10px;padding:3px 8px;
-  border-radius:12px;font-weight:bold;margin-bottom:6px
+  display:inline-block;font-size:10px;
+  padding:3px 8px;border-radius:12px;
+  font-weight:bold;margin-bottom:6px
 }
 .today{background:#f5c400;color:#000}
+.yesterday{background:#2d3748;color:#f5c400}
 
 .center{text-align:center;opacity:.6;padding:40px;grid-column:1/-1}
 footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
@@ -106,14 +127,13 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 </header>
 
 <div class="controls" id="controls">
-  <select id="league" onchange="refreshCurrent()">
+  <select id="league">
     <option value="4328">Premier League</option>
     <option value="4335">La Liga</option>
     <option value="4331">Bundesliga</option>
     <option value="4332">Serie A</option>
     <option value="4334">Ligue 1</option>
   </select>
-  <button onclick="refreshCurrent()">REFRESH</button>
 </div>
 
 <section id="live" class="active"><div id="liveBox" class="grid"></div></section>
@@ -123,7 +143,7 @@ footer{text-align:center;padding:25px;font-size:12px;opacity:.5}
 <footer>GOAL GUIDE © 2026 · MYANMAR TIME</footer>
 
 <script>
-const DB="https://www.thesportsdb.com/api/v1/json/3";
+const DB = "https://www.thesportsdb.com/api/v1/json/3";
 
 /* NAV */
 function showPage(id,btn){
@@ -131,27 +151,27 @@ function showPage(id,btn){
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   btn.classList.add("active");
+  document.getElementById("controls").style.display = id==="highlights"?"none":"flex";
 
-  document.getElementById("controls").style.display =
-    id==="highlights" ? "none" : "flex";
-
-  if(id==="live")loadLive();
-  if(id==="fixtures")loadFixtures();
-  if(id==="highlights")loadHighlights();
+  if(id==="live") loadLive();
+  if(id==="fixtures") loadFixtures();
+  if(id==="highlights") loadHighlights();
 }
 
-function refreshCurrent(){
-  const a=document.querySelector("section.active").id;
-  if(a==="live")loadLive();
-  else if(a==="fixtures")loadFixtures();
-}
-
-/* TIME */
-function mmt(d,t){
-  if(!d||!t)return"TBA";
-  const x=new Date(d+"T"+t+"Z");
-  x.setMinutes(x.getMinutes()+390);
-  return x.toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})+" MMT";
+/* LIVE */
+async function loadLive(){
+  const box=document.getElementById("liveBox");
+  box.innerHTML="<div class='center'>Loading...</div>";
+  const j=await fetch(`${DB}/eventsday.php?s=Soccer`).then(r=>r.json());
+  box.innerHTML=j.events?j.events.map(e=>`
+    <div class="card">
+      <div class="league">${e.strLeague}</div>
+      <div class="match">
+        <div class="team">${e.strHomeTeam}</div>
+        <div class="vs">VS</div>
+        <div class="team right">${e.strAwayTeam}</div>
+      </div>
+    </div>`).join(""):"<div class='center'>No matches</div>";
 }
 
 /* FIXTURES */
@@ -161,85 +181,41 @@ async function loadFixtures(){
   box.innerHTML="<div class='center'>Loading...</div>";
   const j=await fetch(`${DB}/eventsnextleague.php?id=${league}`).then(r=>r.json());
   box.innerHTML=j.events?j.events.map(e=>`
-  <div class="card">
-    <div class="league">${e.strLeague}</div>
-    <div class="match">
-      <div class="team">${e.strHomeTeam}</div>
-      <div class="vs">VS</div>
-      <div class="team right">${e.strAwayTeam}</div>
-    </div>
-    <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
-  </div>`).join(""):"<div class='center'>No data</div>";
+    <div class="card">
+      <div class="league">${e.strLeague}</div>
+      <div class="match">
+        <div class="team">${e.strHomeTeam}</div>
+        <div class="vs">VS</div>
+        <div class="team right">${e.strAwayTeam}</div>
+      </div>
+    </div>`).join(""):"<div class='center'>No data</div>";
 }
 
-/* LIVE */
-async function loadLive(){
-  const box=document.getElementById("liveBox");
+/* HIGHLIGHTS — GitHub RAW JSON */
+async function loadHighlights(){
+  const box=document.getElementById("highlightBox");
   box.innerHTML="<div class='center'>Loading...</div>";
-  const j=await fetch(`${DB}/eventsday.php?s=Soccer`).then(r=>r.json());
-  box.innerHTML=j.events?j.events.map(e=>`
-  <div class="card">
-    <div class="league">${e.strLeague}</div>
-    <div class="match">
-      <div class="team">${e.strHomeTeam}</div>
-      <div class="vs">VS</div>
-      <div class="team right">${e.strAwayTeam}</div>
-    </div>
-    <div class="time">${mmt(e.dateEvent,e.strTime)}</div>
-  </div>`).join(""):"<div class='center'>No matches</div>";
-}
+  try{
+    const r = await fetch(
+      "https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json"
+    );
+    const j = await r.json();
 
-/* HIGHLIGHTS */
-async function loadHighlights() {
-  const box = document.getElementById("highlightBox");
-  box.innerHTML = "<div class='center'>Loading highlights...</div>";
-
-  // URL ထဲမှာ timestamp ထည့်ပြီး Cache error ကို ဖြေရှင်းမယ်
-  const url = `https://raw.githubusercontent.com/goalguide-mm/goalguidee-app/main/highlights.json?t=${new Date().getTime()}`;
-
-  try {
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`လက်ရှိ file ကို ရှာမတွေ့ပါ (Error: ${response.status})`);
-    }
-
-    const data = await response.json();
-
-    if (!data.highlights || data.highlights.length === 0) {
-      box.innerHTML = "<div class='center'>ပြသစရာ Highlight မရှိသေးပါ။</div>";
-      return;
-    }
-
-    box.innerHTML = data.highlights.map(h => {
-      // YouTube Embed Link ကို ပိုစိတ်ချရအောင် format ပြန်လုပ်ပေးခြင်း
-      const searchUrl = h.video;
-      
-      return `
+    box.innerHTML = j.highlights.map(v=>`
       <div class="card">
-        <span class="badge today">HIGHLIGHT</span>
-        <div class="league">${h.competition}</div>
-        <div style="font-size:14px; font-weight:bold; margin-bottom:10px;">${h.title}</div>
+        <div class="league">${v.competition}</div>
+        <div style="font-size:14px;font-weight:bold">${v.title}</div>
         <div class="video">
-          <iframe 
-            src="${searchUrl}" 
-            allowfullscreen 
-            loading="lazy">
-          </iframe>
+          <iframe src="${v.video}" allowfullscreen></iframe>
         </div>
       </div>
-      `;
-    }).join("");
-
-  } catch (error) {
-    console.error("Error details:", error);
-    box.innerHTML = `
-      <div class='center'>
-        <p>Highlight ခေါ်ယူ၍ မရနိုင်ပါ</p>
-        <small style="color: #f5c400;">အကြောင်းရင်း: ${error.message}</small>
-      </div>`;
+    `).join("");
+  }catch(e){
+    box.innerHTML="<div class='center'>Highlights unavailable</div>";
   }
 }
+
+loadLive();
 </script>
 
 </body>

@@ -87,6 +87,11 @@ footer{
   padding:20px;
   color:#666;
 }
+  .logo img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
 </style>
 </head>
 
@@ -122,21 +127,32 @@ async function showLive(){
       grid.innerHTML = "No live matches";
       return;
     }
+    
+grid.innerHTML = "<h3>🔴 Live Matches</h3>";
 
-    grid.innerHTML = "<h3>🔴 Live Matches</h3>";
-    data.forEach(m=>{
-      const c = document.createElement("div");
-      c.className = "card";
-      c.innerHTML = `
-        <div class="league">${m.league_name || "Live"}</div>
-        <div class="match">
-          <div class="team">${m.event_home_team}</div>
-          <b>${m.event_final_result || "VS"}</b>
-          <div class="team">${m.event_away_team}</div>
-        </div>
-      `;
-      grid.appendChild(c);
-    });
+   data.forEach(m=>{
+  const c = document.createElement("div");
+  c.className = "card";
+  c.innerHTML = `
+    <div class="league">${m.league_name || "Live"}</div>
+
+    <div class="match">
+      <div class="team">
+        <img class="logo" src="${m.home_team_logo}">
+        ${m.event_home_team}
+      </div>
+
+      <b>${m.event_final_result || "VS"}</b>
+
+      <div class="team">
+        <img class="logo" src="${m.away_team_logo}">
+        ${m.event_away_team}
+      </div>
+    </div>
+  `;
+  grid.appendChild(c);
+});
+
   }catch{
     grid.innerHTML = "Failed to load live matches";
   }
@@ -153,41 +169,46 @@ async function showFixtures(){
     const r = await fetch("/api/fixtures");
     const data = await r.json();
 
-    if(!data.length){
+    const TODAY = new Date().toISOString().split("T")[0];
+    const todayMatches = data.filter(e => e.event_date === TODAY);
+
+    if(!todayMatches.length){
       grid.innerHTML = "No fixtures today";
       return;
     }
 
     grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
-    data.forEach(m=>{
+
+    todayMatches.forEach(m=>{
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
         <div class="league">${m.league_name || ""}</div>
+
         <div class="match">
-          <div class="team">${m.event_home_team}</div>
+          <div class="team">
+            <img class="logo" src="${m.home_team_logo}" />
+            ${m.event_home_team}
+          </div>
+
           <b>VS</b>
-          <div class="team">${m.event_away_team}</div>
+
+          <div class="team">
+            <img class="logo" src="${m.away_team_logo}" />
+            ${m.event_away_team}
+          </div>
         </div>
+
         <div class="date">${m.event_time || ""}</div>
       `;
       grid.appendChild(c);
     });
+
   }catch{
     grid.innerHTML = "Failed to load fixtures";
   }
 }
-
-/* =====================
-   MENU ACTIVE
-===================== */
-function setActive(i){
-  document.querySelectorAll("nav button")
-    .forEach((b,x)=>b.classList.toggle("active",x===i));
-}
-
-/* DEFAULT */
-showLive();
+  
 </script>
 
 </body>

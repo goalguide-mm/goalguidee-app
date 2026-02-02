@@ -110,9 +110,6 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-/* 🔑 မင်းရဲ့ AllSports API KEY ထည့် */
-const API_KEY = "YOUR_ALLSPORTS_API_KEY";
-
 const grid = document.getElementById("grid");
 
 function setActive(i){
@@ -120,21 +117,16 @@ function setActive(i){
     .forEach((b,x)=>b.classList.toggle("active", x===i));
 }
 
-/* =====================
-   LIVE MATCHES
-===================== */
 async function showLive(){
   setActive(0);
   grid.innerHTML = "Loading live matches...";
 
   try{
-    const r = await fetch(
-      `https://apiv2.allsportsapi.com/football/?met=Livescore&APIkey=${API_KEY}`
-    );
+    const r = await fetch("/api/live");
     const json = await r.json();
-    const data = json.result || [];
+    const data = json.result; // ⭐ အရေးကြီး
 
-    if(!data.length){
+    if(!data || data.length === 0){
       grid.innerHTML = "No live matches";
       return;
     }
@@ -145,19 +137,19 @@ async function showLive(){
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name}</div>
+        <div class="league">${m.league_name ?? "Live"}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ""}">
-            ${m.event_home_team}
+            <img class="team-logo" src="${m.home_team_logo ?? ''}">
+            ${m.event_home_team ?? ''}
           </div>
 
           <b>${m.event_final_result || "VS"}</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ""}">
-            ${m.event_away_team}
+            <img class="team-logo" src="${m.away_team_logo ?? ''}">
+            ${m.event_away_team ?? ''}
           </div>
         </div>
       `;
@@ -170,50 +162,46 @@ async function showLive(){
   }
 }
 
-/* =====================
-   TODAY FIXTURES
-===================== */
 async function showFixtures(){
   setActive(1);
   grid.innerHTML = "Loading fixtures...";
 
   try{
-    const TODAY = new Date().toISOString().split("T")[0];
-
-    const r = await fetch(
-      `https://apiv2.allsportsapi.com/football/?met=Fixtures&from=${TODAY}&to=${TODAY}&APIkey=${API_KEY}`
-    );
+    const r = await fetch("/api/fixtures");
     const json = await r.json();
-    const data = json.result || [];
+    const data = json.result; // ⭐ အရေးကြီး
 
-    if(!data.length){
+    const TODAY = new Date().toISOString().split("T")[0];
+    const todayMatches = data.filter(m => m.event_date === TODAY);
+
+    if(todayMatches.length === 0){
       grid.innerHTML = "No fixtures today";
       return;
     }
 
     grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
 
-    data.forEach(m=>{
+    todayMatches.forEach(m=>{
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name}</div>
+        <div class="league">${m.league_name ?? ""}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ""}">
-            ${m.event_home_team}
+            <img class="team-logo" src="${m.home_team_logo ?? ''}">
+            ${m.event_home_team ?? ''}
           </div>
 
           <b>VS</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ""}">
-            ${m.event_away_team}
+            <img class="team-logo" src="${m.away_team_logo ?? ''}">
+            ${m.event_away_team ?? ''}
           </div>
         </div>
 
-        <div class="date">${m.event_time || ""}</div>
+        <div class="date">${m.event_time ?? ""}</div>
       `;
       grid.appendChild(c);
     });
@@ -224,7 +212,7 @@ async function showFixtures(){
   }
 }
 
-/* default */
+// default
 showLive();
 </script>
 

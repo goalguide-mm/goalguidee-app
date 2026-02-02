@@ -15,117 +15,207 @@ body{
   color:#fff;
 }
 header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   padding:14px 24px;
   border-bottom:3px solid #f5c400;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
   font-weight:600;
   color:#f5c400;
 }
+nav button{
+  background:none;
+  border:none;
+  color:#fff;
+  margin-left:15px;
+  cursor:pointer;
+  opacity:.6;
+  font-weight:600;
+}
+nav button.active{
+  opacity:1;
+  border-bottom:2px solid #f5c400;
+}
+
 .grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:18px;
   padding:24px;
 }
-.league{
-  margin:20px 0 10px;
-  font-weight:600;
+.grid h3{
+  grid-column:1/-1;
+  margin:10px 0 0;
   color:#f5c400;
+}
+
+.card{
+  background:linear-gradient(145deg,#121a26,#0b0f14);
+  border:1px solid #1f2a3a;
+  border-radius:14px;
+  padding:16px;
+}
+.league{
+  color:#f5c400;
+  font-weight:600;
+  margin-bottom:8px;
 }
 .match{
   display:flex;
   align-items:center;
-  justify-content:center;
-  gap:14px;
-  padding:12px;
-  border-bottom:1px solid #1f2a3a;
+  justify-content:space-between;
+  gap:10px;
 }
 .team{
   display:flex;
   align-items:center;
   gap:8px;
-  min-width:140px;
+  font-size:14px;
 }
-.team img{
-  width:26px;
-  height:26px;
+.team-logo{
+  width:22px;
+  height:22px;
   object-fit:contain;
 }
-.score{
-  font-weight:600;
+.date{
+  margin-top:10px;
+  font-size:13px;
+  color:#ccc;
+}
+footer{
+  text-align:center;
+  padding:20px;
+  color:#666;
 }
 </style>
 </head>
 
 <body>
 
-<header>⚽ GOAL GUIDE — 02 / 02 / 2026</header>
+<header>
+  <div class="logo">⚽ GOAL GUIDE</div>
+  <nav>
+    <button class="active" onclick="showLive()">LIVE</button>
+    <button onclick="showFixtures()">FIXTURES</button>
+  </nav>
+</header>
 
-<div id="grid" class="grid"></div>
+<div id="grid" class="grid">Loading...</div>
+
+<footer>GOAL GUIDE © 2026</footer>
 
 <script>
-// ================= MOCK DATA (02/02/2026) =================
-const data = [
-  {
-    league: "Spain - LaLiga",
-    home: "Getafe",
-    homeLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/530",
-    away: "Celta Vigo",
-    awayLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/547",
-    score: "0 - 0"
-  },
-  {
-    league: "Spain - LaLiga",
-    home: "Athletic Club",
-    homeLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/531",
-    away: "Real Sociedad",
-    awayLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/548",
-    score: "1 - 1"
-  },
-  {
-    league: "Italy - Serie A",
-    home: "Parma",
-    homeLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/612",
-    away: "Juventus",
-    awayLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/496",
-    score: "1 - 4"
-  },
-  {
-    league: "France - Ligue 1",
-    home: "Strasbourg",
-    homeLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/620",
-    away: "PSG",
-    awayLogo: "https://api.allorigins.win/raw?url=https://apiv2.allsportsapi.com/logo/524",
-    score: "1 - 2"
-  }
-];
-
-// ================= RENDER =================
 const grid = document.getElementById("grid");
-let currentLeague = "";
 
-data.forEach(m=>{
-  if(m.league !== currentLeague){
-    currentLeague = m.league;
-    const h = document.createElement("div");
-    h.className = "league";
-    h.textContent = currentLeague;
-    grid.appendChild(h);
+function setActive(i){
+  document.querySelectorAll("nav button")
+    .forEach((b,x)=>b.classList.toggle("active", x===i));
+}
+
+/* =====================
+   LIVE MATCHES
+===================== */
+async function showLive(){
+  setActive(0);
+  grid.innerHTML = "Loading live matches...";
+
+  try{
+    const r = await fetch("/api/live");
+    const data = await r.json();
+
+    if(!data.length){
+      grid.innerHTML = "No live matches";
+      return;
+    }
+
+    grid.innerHTML = "<h3>🔴 Live Matches</h3>";
+
+    data.forEach(m=>{
+      const c = document.createElement("div");
+      c.className = "card";
+      c.innerHTML = `
+        <div class="league">${m.league_name || "Live"}</div>
+
+        <div class="match">
+          <div class="team">
+            <img class="team-logo" src="${m.home_team_logo || ''}">
+            ${m.event_home_team}
+          </div>
+
+          <b>${m.event_final_result || "VS"}</b>
+
+          <div class="team">
+            <img class="team-logo" src="${m.away_team_logo || ''}">
+            ${m.event_away_team}
+          </div>
+        </div>
+      `;
+      grid.appendChild(c);
+    });
+
+  }catch{
+    grid.innerHTML = "Failed to load live matches";
   }
+}
 
-  const row = document.createElement("div");
-  row.className = "match";
-  row.innerHTML = `
-    <div class="team">
-      <img src="${m.homeLogo}">
-      ${m.home}
-    </div>
+/* =====================
+   TODAY FIXTURES
+===================== */
+async function showFixtures(){
+  setActive(1);
+  grid.innerHTML = "Loading fixtures...";
 
-    <div class="score">${m.score}</div>
+  try{
+    const r = await fetch("/api/fixtures");
+    const data = await r.json();
 
-    <div class="team">
-      <img src="${m.awayLogo}">
-      ${m.away}
-    </div>
-  `;
-  grid.appendChild(row);
-});
+    const TODAY = new Date().toISOString().split("T")[0];
+    const todayMatches = data.filter(e => e.event_date === TODAY);
+
+    if(!todayMatches.length){
+      grid.innerHTML = "No fixtures today";
+      return;
+    }
+
+    grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
+
+    todayMatches.forEach(m=>{
+      const c = document.createElement("div");
+      c.className = "card";
+      c.innerHTML = `
+        <div class="league">${m.league_name || ""}</div>
+
+        <div class="match">
+          <div class="team">
+            <img class="team-logo" src="${m.home_team_logo || ''}">
+            ${m.event_home_team}
+          </div>
+
+          <b>VS</b>
+
+          <div class="team">
+            <img class="team-logo" src="${m.away_team_logo || ''}">
+            ${m.event_away_team}
+          </div>
+        </div>
+
+        <div class="date">${m.event_time || ""}</div>
+      `;
+      grid.appendChild(c);
+    });
+
+  }catch{
+    grid.innerHTML = "Failed to load fixtures";
+  }
+}
+
+// default load
+showLive();
 </script>
 
 </body>

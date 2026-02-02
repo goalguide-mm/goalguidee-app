@@ -110,6 +110,9 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
+/* 🔑 မင်းရဲ့ AllSports API KEY ထည့် */
+const API_KEY = "YOUR_ALLSPORTS_API_KEY";
+
 const grid = document.getElementById("grid");
 
 function setActive(i){
@@ -125,8 +128,11 @@ async function showLive(){
   grid.innerHTML = "Loading live matches...";
 
   try{
-    const r = await fetch("/api/live");
-    const data = await r.json();
+    const r = await fetch(
+      `https://apiv2.allsportsapi.com/football/?met=Livescore&APIkey=${API_KEY}`
+    );
+    const json = await r.json();
+    const data = json.result || [];
 
     if(!data.length){
       grid.innerHTML = "No live matches";
@@ -139,18 +145,18 @@ async function showLive(){
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name || "Live"}</div>
+        <div class="league">${m.league_name}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ''}">
+            <img class="team-logo" src="${m.home_team_logo || ""}">
             ${m.event_home_team}
           </div>
 
           <b>${m.event_final_result || "VS"}</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ''}">
+            <img class="team-logo" src="${m.away_team_logo || ""}">
             ${m.event_away_team}
           </div>
         </div>
@@ -158,8 +164,9 @@ async function showLive(){
       grid.appendChild(c);
     });
 
-  }catch{
+  }catch(e){
     grid.innerHTML = "Failed to load live matches";
+    console.error(e);
   }
 }
 
@@ -171,35 +178,37 @@ async function showFixtures(){
   grid.innerHTML = "Loading fixtures...";
 
   try{
-    const r = await fetch("/api/fixtures");
-    const data = await r.json();
-
     const TODAY = new Date().toISOString().split("T")[0];
-    const todayMatches = data.filter(e => e.event_date === TODAY);
 
-    if(!todayMatches.length){
+    const r = await fetch(
+      `https://apiv2.allsportsapi.com/football/?met=Fixtures&from=${TODAY}&to=${TODAY}&APIkey=${API_KEY}`
+    );
+    const json = await r.json();
+    const data = json.result || [];
+
+    if(!data.length){
       grid.innerHTML = "No fixtures today";
       return;
     }
 
     grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
 
-    todayMatches.forEach(m=>{
+    data.forEach(m=>{
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name || ""}</div>
+        <div class="league">${m.league_name}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ''}">
+            <img class="team-logo" src="${m.home_team_logo || ""}">
             ${m.event_home_team}
           </div>
 
           <b>VS</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ''}">
+            <img class="team-logo" src="${m.away_team_logo || ""}">
             ${m.event_away_team}
           </div>
         </div>
@@ -209,12 +218,13 @@ async function showFixtures(){
       grid.appendChild(c);
     });
 
-  }catch{
+  }catch(e){
     grid.innerHTML = "Failed to load fixtures";
+    console.error(e);
   }
 }
 
-// default load
+/* default */
 showLive();
 </script>
 

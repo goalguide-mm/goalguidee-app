@@ -39,7 +39,7 @@ nav button{
 }
 nav button.active{
   opacity:1;
-  border-bottom:2px solid #f5c400
+  border-bottom:2px solid #f5c400;
 }
 
 .grid{
@@ -77,6 +77,11 @@ nav button.active{
   gap:8px;
   font-size:14px;
 }
+.team-logo{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
 .date{
   margin-top:10px;
   font-size:13px;
@@ -86,11 +91,6 @@ footer{
   text-align:center;
   padding:20px;
   color:#666;
-}
-  .logo img{
-  width:22px;
-  height:22px;
-  object-fit:contain;
 }
 </style>
 </head>
@@ -112,6 +112,11 @@ footer{
 <script>
 const grid = document.getElementById("grid");
 
+function setActive(i){
+  document.querySelectorAll("nav button")
+    .forEach((b,x)=>b.classList.toggle("active", x===i));
+}
+
 /* =====================
    LIVE MATCHES
 ===================== */
@@ -127,31 +132,31 @@ async function showLive(){
       grid.innerHTML = "No live matches";
       return;
     }
-    
-grid.innerHTML = "<h3>🔴 Live Matches</h3>";
 
-   data.forEach(m=>{
-  const c = document.createElement("div");
-  c.className = "card";
-  c.innerHTML = `
-    <div class="league">${m.league_name || "Live"}</div>
+    grid.innerHTML = "<h3>🔴 Live Matches</h3>";
 
-    <div class="match">
-      <div class="team">
-        <img class="logo" src="${m.home_team_logo}">
-        ${m.event_home_team}
-      </div>
+    data.forEach(m=>{
+      const c = document.createElement("div");
+      c.className = "card";
+      c.innerHTML = `
+        <div class="league">${m.league_name || "Live"}</div>
 
-      <b>${m.event_final_result || "VS"}</b>
+        <div class="match">
+          <div class="team">
+            <img class="team-logo" src="${m.home_team_logo || ''}">
+            ${m.event_home_team}
+          </div>
 
-      <div class="team">
-        <img class="logo" src="${m.away_team_logo}">
-        ${m.event_away_team}
-      </div>
-    </div>
-  `;
-  grid.appendChild(c);
-});
+          <b>${m.event_final_result || "VS"}</b>
+
+          <div class="team">
+            <img class="team-logo" src="${m.away_team_logo || ''}">
+            ${m.event_away_team}
+          </div>
+        </div>
+      `;
+      grid.appendChild(c);
+    });
 
   }catch{
     grid.innerHTML = "Failed to load live matches";
@@ -187,14 +192,14 @@ async function showFixtures(){
 
         <div class="match">
           <div class="team">
-            <img class="logo" src="${m.home_team_logo}" />
+            <img class="team-logo" src="${m.home_team_logo || ''}">
             ${m.event_home_team}
           </div>
 
           <b>VS</b>
 
           <div class="team">
-            <img class="logo" src="${m.away_team_logo}" />
+            <img class="team-logo" src="${m.away_team_logo || ''}">
             ${m.event_away_team}
           </div>
         </div>
@@ -208,7 +213,9 @@ async function showFixtures(){
     grid.innerHTML = "Failed to load fixtures";
   }
 }
-  
+
+// default load
+showLive();
 </script>
 
 </body>

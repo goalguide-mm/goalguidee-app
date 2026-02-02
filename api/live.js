@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const API_KEY = process.env.ALLSPORTS_API_KEY;
 
-  const url = `https://apiv2.allsportsapi.com/football/?met=Livescore&APIkey=${API_KEY}`;
+  const url = `https://apiv2.allsportsapi.com/football/?met=Fixtures&APIkey=${API_KEY}`;
 
   try {
     const r = await fetch(url);

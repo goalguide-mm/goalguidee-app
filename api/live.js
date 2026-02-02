@@ -5,10 +5,13 @@ export default async function handler(req, res) {
 
   try {
     const r = await fetch(url);
-    const data = await r.json();
+    const json = await r.json();
 
-    res.status(200).json(data.result || []);
+    res.status(200).json({
+      result: json.result || []
+    });
+
   } catch (e) {
-    res.status(500).json([]);
+    res.status(500).json({ result: [] });
   }
 }

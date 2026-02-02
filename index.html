@@ -127,9 +127,10 @@ async function showLive(){
   try{
     const r = await fetch("/api/live");
     const json = await r.json();
-    const data = json.result || [];
 
-    if(!data.length){
+    const data = json.result; // ⭐ အရေးကြီး
+
+    if(!data || data.length === 0){
       grid.innerHTML = "No live matches";
       return;
     }
@@ -140,19 +141,19 @@ async function showLive(){
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name || ""}</div>
+        <div class="league">${m.league_name}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ""}">
-            ${m.event_home_team || ""}
+            <img class="team-logo" src="${m.home_team_logo}">
+            ${m.event_home_team}
           </div>
 
           <b>${m.event_final_result || "VS"}</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ""}">
-            ${m.event_away_team || ""}
+            <img class="team-logo" src="${m.away_team_logo}">
+            ${m.event_away_team}
           </div>
         </div>
       `;
@@ -160,8 +161,8 @@ async function showLive(){
     });
 
   }catch(e){
-    console.error(e);
     grid.innerHTML = "Failed to load live matches";
+    console.error(e);
   }
 }
 
@@ -174,11 +175,23 @@ async function showFixtures(){
 
   try{
     const r = await fetch("/api/fixtures");
-    const json = await r.json();
-    const data = json.result || [];
 
+    // (1) API response ကို parse
+    const json = await r.json();
+    const data = json.result;
+
+    if(!data || data.length === 0){
+      grid.innerHTML = "No fixtures";
+      return;
+    }
+
+    // (2) ဒီနေ့ date
     const TODAY = new Date().toISOString().split("T")[0];
-    const todayMatches = data.filter(e => e.event_date === TODAY);
+
+    // (3) ဒီနေ့ fixtures ကို filter
+    const todayMatches = data.filter(
+      e => e.event_date === TODAY
+    );
 
     if(!todayMatches.length){
       grid.innerHTML = "No fixtures today";
@@ -191,30 +204,30 @@ async function showFixtures(){
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name || ""}</div>
+        <div class="league">${m.league_name}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ""}">
-            ${m.event_home_team || ""}
+            <img class="team-logo" src="${m.home_team_logo}">
+            ${m.event_home_team}
           </div>
 
           <b>VS</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ""}">
-            ${m.event_away_team || ""}
+            <img class="team-logo" src="${m.away_team_logo}">
+            ${m.event_away_team}
           </div>
         </div>
 
-        <div class="date">${m.event_time || ""}</div>
+        <div class="date">${m.event_time}</div>
       `;
       grid.appendChild(c);
     });
 
   }catch(e){
-    console.error(e);
     grid.innerHTML = "Failed to load fixtures";
+    console.error(e);
   }
 }
 

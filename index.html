@@ -120,9 +120,9 @@ function setActive(i){
 /* =====================
    LIVE MATCHES
 ===================== */
-<script>
 async function showLive() {
-  document.getElementById("grid").innerHTML = "Loading live matches...";
+  setActive(0);
+  grid.innerHTML = "Loading live matches...";
 
   try {
     const r = await fetch("http://localhost:3000/api/live");
@@ -130,7 +130,7 @@ async function showLive() {
     const data = json.result || [];
 
     if (!data.length) {
-      document.getElementById("grid").innerHTML = "No live matches";
+      grid.innerHTML = "No live matches";
       return;
     }
 
@@ -158,10 +158,10 @@ async function showLive() {
       `;
     });
 
-    document.getElementById("grid").innerHTML = html;
+    grid.innerHTML = html;
 
   } catch (e) {
-    document.getElementById("grid").innerHTML = "Failed to load live matches";
+    grid.innerHTML = "Failed to load live matches";
     console.error(e);
   }
 }
@@ -174,7 +174,7 @@ async function showFixtures(){
   grid.innerHTML = "Loading fixtures...";
 
   try{
-    const r = await fetch("/api/fixtures");
+    const r = await fetch("http://localhost:3000/api/fixtures");
     const json = await r.json();
     const data = json.result || [];
 
@@ -221,7 +221,7 @@ async function showFixtures(){
   }
 }
 
-// default
+// default load
 showLive();
 </script>
 

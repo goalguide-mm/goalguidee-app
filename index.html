@@ -127,10 +127,9 @@ async function showLive(){
   try{
     const r = await fetch("/api/live");
     const json = await r.json();
+    const data = json.result || [];
 
-    const data = json.result; // ⭐ အရေးကြီး
-
-    if(!data || data.length === 0){
+    if(!data.length){
       grid.innerHTML = "No live matches";
       return;
     }
@@ -175,20 +174,10 @@ async function showFixtures(){
 
   try{
     const r = await fetch("/api/fixtures");
-
-    // (1) API response ကို parse
     const json = await r.json();
-    const data = json.result;
+    const data = json.result || [];
 
-    if(!data || data.length === 0){
-      grid.innerHTML = "No fixtures";
-      return;
-    }
-
-    // (2) ဒီနေ့ date
     const TODAY = new Date().toISOString().split("T")[0];
-
-    // (3) ဒီနေ့ fixtures ကို filter
     const todayMatches = data.filter(
       e => e.event_date === TODAY
     );

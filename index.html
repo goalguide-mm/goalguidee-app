@@ -126,32 +126,33 @@ async function showLive(){
 
   try{
     const r = await fetch("/api/live");
-    const data = await r.json();
+    const json = await r.json();
+    const data = json.result || [];
 
-    if(!data.result || data.result.length === 0){
+    if(!data.length){
       grid.innerHTML = "No live matches";
       return;
     }
 
     grid.innerHTML = "<h3>🔴 Live Matches</h3>";
 
-    data.result.forEach(m=>{
+    data.forEach(m=>{
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
-        <div class="league">${m.league_name || "Live"}</div>
+        <div class="league">${m.league_name || ""}</div>
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ''}">
-            ${m.event_home_team}
+            <img class="team-logo" src="${m.home_team_logo || ""}">
+            ${m.event_home_team || ""}
           </div>
 
           <b>${m.event_final_result || "VS"}</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ''}">
-            ${m.event_away_team}
+            <img class="team-logo" src="${m.away_team_logo || ""}">
+            ${m.event_away_team || ""}
           </div>
         </div>
       `;
@@ -173,16 +174,20 @@ async function showFixtures(){
 
   try{
     const r = await fetch("/api/fixtures");
-    const data = await r.json();
+    const json = await r.json();
+    const data = json.result || [];
 
-    if(!data.result || data.result.length === 0){
+    const TODAY = new Date().toISOString().split("T")[0];
+    const todayMatches = data.filter(e => e.event_date === TODAY);
+
+    if(!todayMatches.length){
       grid.innerHTML = "No fixtures today";
       return;
     }
 
     grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
 
-    data.result.forEach(m=>{
+    todayMatches.forEach(m=>{
       const c = document.createElement("div");
       c.className = "card";
       c.innerHTML = `
@@ -190,15 +195,15 @@ async function showFixtures(){
 
         <div class="match">
           <div class="team">
-            <img class="team-logo" src="${m.home_team_logo || ''}">
-            ${m.event_home_team}
+            <img class="team-logo" src="${m.home_team_logo || ""}">
+            ${m.event_home_team || ""}
           </div>
 
           <b>VS</b>
 
           <div class="team">
-            <img class="team-logo" src="${m.away_team_logo || ''}">
-            ${m.event_away_team}
+            <img class="team-logo" src="${m.away_team_logo || ""}">
+            ${m.event_away_team || ""}
           </div>
         </div>
 
@@ -213,7 +218,7 @@ async function showFixtures(){
   }
 }
 
-// default load
+// default
 showLive();
 </script>
 

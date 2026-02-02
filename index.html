@@ -37,16 +37,9 @@ nav button{
   opacity:.6;
   font-weight:600;
 }
-nav button.active{opacity:1;border-bottom:2px solid #f5c400}
-
-.controls{padding:16px 24px}
-select{
-  background:#111823;
-  color:#f5c400;
-  border:1px solid #f5c400;
-  padding:8px 14px;
-  border-radius:6px;
-  font-weight:600;
+nav button.active{
+  opacity:1;
+  border-bottom:2px solid #f5c400
 }
 
 .grid{
@@ -55,7 +48,6 @@ select{
   gap:18px;
   padding:24px;
 }
-
 .grid h3{
   grid-column:1/-1;
   margin:10px 0 0;
@@ -85,25 +77,10 @@ select{
   gap:8px;
   font-size:14px;
 }
-.team img{
-  width:26px;
-  height:26px;
-  object-fit:contain;
-}
 .date{
   margin-top:10px;
   font-size:13px;
   color:#ccc;
-}
-.card button{
-  margin-top:10px;
-  width:100%;
-  padding:10px;
-  background:#f5c400;
-  border:none;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
 }
 footer{
   text-align:center;
@@ -118,168 +95,99 @@ footer{
 <header>
   <div class="logo">⚽ GOAL GUIDE</div>
   <nav>
-    <button class="active" onclick="showFixtures()">FIXTURES</button>
-    <button onclick="showHighlights()">HIGHLIGHTS</button>
+    <button class="active" onclick="showLive()">LIVE</button>
+    <button onclick="showFixtures()">FIXTURES</button>
   </nav>
 </header>
-
-<div class="controls">
-  <select id="leagueSelect"></select>
-</div>
 
 <div id="grid" class="grid">Loading...</div>
 
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-/* =========================
-   DATE
-========================= */
-function getLocalDate(){
-  const d=new Date();
-  return d.toISOString().split("T")[0];
-}
-const TODAY=getLocalDate();
+const grid = document.getElementById("grid");
 
-/* =========================
-   HELPERS
-========================= */
-function formatDate(d){
-  return new Date(d).toLocaleDateString("en-GB",
-    {day:"2-digit",month:"short",year:"numeric"});
-}
-
-function groupByDate(events){
-  return events.reduce((a,e)=>{
-    a[e.dateEvent]=a[e.dateEvent]||[];
-    a[e.dateEvent].push(e);
-    return a;
-  },{});
-}
-
-/* =========================
-   LEAGUES
-========================= */
-const LEAGUES={
-  "Premier League":4328,
-  "La Liga":4335,
-  "Serie A":4332,
-  "Bundesliga":4331,
-  "Ligue 1":4334,
-  "Champions League":4480
-};
-
-const grid=document.getElementById("grid");
-const leagueSelect=document.getElementById("leagueSelect");
-
-Object.keys(LEAGUES).forEach(n=>{
-  const o=document.createElement("option");
-  o.value=LEAGUES[n];
-  o.textContent=n;
-  leagueSelect.appendChild(o);
-});
-
-leagueSelect.onchange=()=>loadFixtures(leagueSelect.value);
-
-/* =========================
-   FIXTURES (TODAY ONLY)
-========================= */
-async function loadFixtures(id){
-  grid.innerHTML="Loading...";
-
-  const r=await fetch(`/api/fixtures?league=${id}`);
-  const events=await r.json();
-
-  const today=events.filter(e=>e.dateEvent===TODAY);
-
-  grid.innerHTML="";
-  if(!today.length) return grid.innerHTML="No matches today";
-
-  const groups=groupByDate(today);
-
-  Object.keys(groups).forEach(d=>{
-    const h=document.createElement("h3");
-    h.textContent=formatDate(d);
-    grid.appendChild(h);
-
-    groups[d].forEach(e=>grid.appendChild(card(e,false)));
-  });
-}
-
-/* =========================
-   HIGHLIGHTS
-========================= */
-async function loadHighlights(id){
-  grid.innerHTML="Loading...";
-
-  const r=await fetch(`/api/highlights?league=${id}`);
-  const events=await r.json();
-
-  grid.innerHTML="";
-  if(!events.length) return grid.innerHTML="No highlights";
-
-  const groups=groupByDate(events);
-
-  Object.keys(groups).reverse().forEach(d=>{
-    const h=document.createElement("h3");
-    h.textContent=formatDate(d);
-    grid.appendChild(h);
-
-    groups[d].forEach(e=>grid.appendChild(card(e,true)));
-  });
-}
-
-/* =========================
-   CARD (LOGO FIXED)
-========================= */
-function teamLogo(name){
-  return `https://apiv2.allsportsapi.com/logo/${encodeURIComponent(name)}.png`;
-}
-
-function card(e,video){
-  const c=document.createElement("div");
-  c.className="card";
-  c.innerHTML=`
-    <div class="league">${e.league_name||""}</div>
-    <div class="match">
-      <div class="team">
-        <img src="${teamLogo(e.event_home_team)}"
-             onerror="this.src='https://via.placeholder.com/26'">
-        ${e.event_home_team}
-      </div>
-      <b>${e.event_final_result||"VS"}</b>
-      <div class="team">
-        <img src="${teamLogo(e.event_away_team)}"
-             onerror="this.src='https://via.placeholder.com/26'">
-        ${e.event_away_team}
-      </div>
-    </div>
-    <div class="date">${e.event_time||""}</div>
-    ${video?`<button onclick="window.open('${e.event_highlights}')">
-      ▶ Watch Highlights</button>`:""}
-  `;
-  return c;
-}
-
-/* =========================
-   MENU
-========================= */
-function showFixtures(){
+/* =====================
+   LIVE MATCHES
+===================== */
+async function showLive(){
   setActive(0);
-  loadFixtures(leagueSelect.value);
+  grid.innerHTML = "Loading live matches...";
+
+  try{
+    const r = await fetch("/api/live");
+    const data = await r.json();
+
+    if(!data.length){
+      grid.innerHTML = "No live matches";
+      return;
+    }
+
+    grid.innerHTML = "<h3>🔴 Live Matches</h3>";
+    data.forEach(m=>{
+      const c = document.createElement("div");
+      c.className = "card";
+      c.innerHTML = `
+        <div class="league">${m.league_name || "Live"}</div>
+        <div class="match">
+          <div class="team">${m.event_home_team}</div>
+          <b>${m.event_final_result || "VS"}</b>
+          <div class="team">${m.event_away_team}</div>
+        </div>
+      `;
+      grid.appendChild(c);
+    });
+  }catch{
+    grid.innerHTML = "Failed to load live matches";
+  }
 }
-function showHighlights(){
+
+/* =====================
+   TODAY FIXTURES
+===================== */
+async function showFixtures(){
   setActive(1);
-  loadHighlights(leagueSelect.value);
+  grid.innerHTML = "Loading fixtures...";
+
+  try{
+    const r = await fetch("/api/fixtures");
+    const data = await r.json();
+
+    if(!data.length){
+      grid.innerHTML = "No fixtures today";
+      return;
+    }
+
+    grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
+    data.forEach(m=>{
+      const c = document.createElement("div");
+      c.className = "card";
+      c.innerHTML = `
+        <div class="league">${m.league_name || ""}</div>
+        <div class="match">
+          <div class="team">${m.event_home_team}</div>
+          <b>VS</b>
+          <div class="team">${m.event_away_team}</div>
+        </div>
+        <div class="date">${m.event_time || ""}</div>
+      `;
+      grid.appendChild(c);
+    });
+  }catch{
+    grid.innerHTML = "Failed to load fixtures";
+  }
 }
+
+/* =====================
+   MENU ACTIVE
+===================== */
 function setActive(i){
   document.querySelectorAll("nav button")
     .forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
 /* DEFAULT */
-leagueSelect.value=4328;
-loadFixtures(4328);
+showLive();
 </script>
 
 </body>

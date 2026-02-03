@@ -1,18 +1,17 @@
-export default async function handler(req, res) {
-  const API_KEY = process.env.ALLSPORTS_API_KEY;
-
-  const url =
-    `https://apiv2.allsportsapi.com/football/?met=Livescore&APIkey=${API_KEY}`;
-
+app.get("/api/live", async (req, res) => {
   try {
-    const r = await fetch(url);
+    const r = await fetch(
+      "https://v3.football.api-sports.io/fixtures?live=all",
+      {
+        headers: {
+          "x-apisports-key": process.env.FOOTBALL_API_KEY
+        }
+      }
+    );
+
     const data = await r.json();
-
-    res.status(200).json({
-      result: data.result || []
-    });
-
+    res.json(data.response);
   } catch (e) {
-    res.status(500).json({ result: [] });
+    res.status(500).json({ error: e.message });
   }
-}
+});

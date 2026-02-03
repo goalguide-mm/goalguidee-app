@@ -115,15 +115,18 @@ const grid = document.getElementById("grid");
 
 function renderMatches(matches, title) {
   grid.innerHTML = `<h3>${title}</h3>`;
+
   matches.forEach(m => {
     grid.innerHTML += `
       <div class="card">
         <div class="league">Premier League</div>
+
         <div class="match">
           <div>${m.home}</div>
           <strong>VS</strong>
           <div>${m.away}</div>
         </div>
+
         <div class="date">${m.date} • ${m.time}</div>
       </div>
     `;

@@ -110,7 +110,6 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-<script>
 const grid = document.getElementById("grid");
 const API_BASE = "https://goalguide-api.onrender.com";
 
@@ -125,22 +124,21 @@ async function showLive() {
 
   try {
     const r = await fetch(`${API_BASE}/api/live`);
-    const data = await r.json(); // ✅ array တန်း
+    const data = await r.json();
 
-    if (!Array.isArray(data) || !data.length) {
+    if (!Array.isArray(data) || data.length === 0) {
       grid.innerHTML = "No live matches";
       return;
     }
 
     let html = "<h3>🔴 Live Matches</h3>";
-
     data.forEach(m => {
       html += `
         <div class="card">
           <div class="league">${m.league_name || "League"}</div>
           <div class="match">
             <div class="team">${m.event_home_team}</div>
-            <b>${m.event_final_result || "VS"}</b>
+            <b>VS</b>
             <div class="team">${m.event_away_team}</div>
           </div>
         </div>
@@ -155,39 +153,10 @@ async function showLive() {
   }
 }
 
-async function showFixtures() {
+async function showFixtures(){
   setActive(1);
   grid.innerHTML = "Loading fixtures...";
-
-  try {
-    const r = await fetch(`${API_BASE}/api/fixtures`);
-    const data = await r.json(); // ✅ array
-
-    if (!Array.isArray(data) || !data.length) {
-      grid.innerHTML = "No fixtures today";
-      return;
-    }
-
-    grid.innerHTML = "<h3>📅 Fixtures</h3>";
-
-    data.forEach(m => {
-      grid.innerHTML += `
-        <div class="card">
-          <div class="league">${m.league_name}</div>
-          <div class="match">
-            <div class="team">${m.event_home_team}</div>
-            <b>VS</b>
-            <div class="team">${m.event_away_team}</div>
-          </div>
-          <div class="date">${m.event_time || ""}</div>
-        </div>
-      `;
-    });
-
-  } catch (e) {
-    grid.innerHTML = "Failed to load fixtures";
-    console.error(e);
-  }
+  grid.innerHTML = "No fixtures today";
 }
 
 showLive();

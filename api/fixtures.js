@@ -1,7 +1,9 @@
 app.get("/api/fixtures", async (req, res) => {
   try {
+    const today = new Date().toISOString().split("T")[0];
+
     const r = await fetch(
-      "https://v3.football.api-sports.io/fixtures?next=10&timezone=Asia/Yangon",
+      `https://v3.football.api-sports.io/fixtures?date=${today}&timezone=Asia/Yangon`,
       {
         headers: {
           "x-apisports-key": process.env.FOOTBALL_API_KEY

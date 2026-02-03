@@ -113,12 +113,50 @@ footer{
 const API_BASE = "https://goalguide-api-1.onrender.com";
 const grid = document.getElementById("grid");
 
+function renderMatches(matches, title) {
+  grid.innerHTML = "";
+
+  if (!matches.length) {
+    grid.innerHTML = `<h3>No ${title}</h3>`;
+    return;
+  }
+
+  grid.innerHTML = `<h3>${title}</h3>`;
+
+  matches.forEach(m => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="league">${m.league.name}</div>
+
+      <div class="match">
+        <div class="team">
+          <img class="team-logo" src="${m.teams.home.logo}">
+          ${m.teams.home.name}
+        </div>
+
+        <strong>${m.goals.home} - ${m.goals.away}</strong>
+
+        <div class="team">
+          <img class="team-logo" src="${m.teams.away.logo}">
+          ${m.teams.away.name}
+        </div>
+      </div>
+
+      <div class="date">${m.fixture.status.elapsed ?? "-"}'</div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
 async function showLive() {
   grid.innerHTML = "Loading live matches...";
   try {
     const r = await fetch(`${API_BASE}/api/live`);
     const data = await r.json();
-    console.log(data);
+    renderMatches(data, "LIVE MATCHES");
   } catch (e) {
     grid.innerHTML = "Failed to load live matches";
   }
@@ -129,7 +167,7 @@ async function showFixtures() {
   try {
     const r = await fetch(`${API_BASE}/api/fixtures`);
     const data = await r.json();
-    console.log(data);
+    renderMatches(data, "TODAY FIXTURES");
   } catch (e) {
     grid.innerHTML = "Failed to load fixtures";
   }

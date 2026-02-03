@@ -110,24 +110,22 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
+<script>
 const grid = document.getElementById("grid");
+const API_BASE = "https://goalguide-api.onrender.com";
 
 function setActive(i){
   document.querySelectorAll("nav button")
     .forEach((b,x)=>b.classList.toggle("active", x===i));
 }
 
-/* =====================
-   LIVE MATCHES
-===================== */
 async function showLive() {
   setActive(0);
   grid.innerHTML = "Loading live matches...";
 
   try {
-    const r = await fetch("http://localhost:3000/api/live");
-    const json = await r.json();
-    const data = json.result || [];
+    const r = await fetch(`${API_BASE}/api/live`);
+    const data = await r.json();
 
     if (!data.length) {
       grid.innerHTML = "No live matches";
@@ -135,93 +133,57 @@ async function showLive() {
     }
 
     let html = "<h3>🔴 Live Matches</h3>";
-
     data.forEach(m => {
       html += `
         <div class="card">
           <div class="league">${m.league_name}</div>
-
           <div class="match">
-            <div class="team">
-              <img class="team-logo" src="${m.home_team_logo}">
-              ${m.event_home_team}
-            </div>
-
+            <div class="team">${m.event_home_team}</div>
             <b>${m.event_final_result || "VS"}</b>
-
-            <div class="team">
-              <img class="team-logo" src="${m.away_team_logo}">
-              ${m.event_away_team}
-            </div>
+            <div class="team">${m.event_away_team}</div>
           </div>
-        </div>
-      `;
+        </div>`;
     });
 
     grid.innerHTML = html;
-
   } catch (e) {
     grid.innerHTML = "Failed to load live matches";
     console.error(e);
   }
 }
 
-/* =====================
-   TODAY FIXTURES
-===================== */
-async function showFixtures(){
+async function showFixtures() {
   setActive(1);
   grid.innerHTML = "Loading fixtures...";
 
-  try{
-    const r = await fetch("http://localhost:3000/api/fixtures");
-    const json = await r.json();
-    const data = json.result || [];
+  try {
+    const r = await fetch(`${API_BASE}/api/fixtures`);
+    const data = await r.json();
 
-    const TODAY = new Date().toISOString().split("T")[0];
-    const todayMatches = data.filter(
-      e => e.event_date === TODAY
-    );
-
-    if(!todayMatches.length){
+    if (!data.length) {
       grid.innerHTML = "No fixtures today";
       return;
     }
 
     grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
-
-    todayMatches.forEach(m=>{
-      const c = document.createElement("div");
-      c.className = "card";
-      c.innerHTML = `
-        <div class="league">${m.league_name}</div>
-
-        <div class="match">
-          <div class="team">
-            <img class="team-logo" src="${m.home_team_logo}">
-            ${m.event_home_team}
+    data.forEach(m => {
+      grid.innerHTML += `
+        <div class="card">
+          <div class="league">${m.league_name}</div>
+          <div class="match">
+            <div class="team">${m.event_home_team}</div>
+            <b>VS</b>
+            <div class="team">${m.event_away_team}</div>
           </div>
-
-          <b>VS</b>
-
-          <div class="team">
-            <img class="team-logo" src="${m.away_team_logo}">
-            ${m.event_away_team}
-          </div>
-        </div>
-
-        <div class="date">${m.event_time}</div>
-      `;
-      grid.appendChild(c);
+          <div class="date">${m.event_time}</div>
+        </div>`;
     });
-
-  }catch(e){
+  } catch (e) {
     grid.innerHTML = "Failed to load fixtures";
     console.error(e);
   }
 }
 
-// default load
 showLive();
 </script>
 

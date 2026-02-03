@@ -1,16 +1,21 @@
 app.get("/api/fixtures", async (req, res) => {
   try {
-    const r = await fetch(
-      "https://v3.football.api-sports.io/fixtures?next=20",
+    res.json([
       {
-        headers: {
-          "x-apisports-key": process.env.FOOTBALL_API_KEY
-        }
+        id: 1,
+        home: "Liverpool",
+        away: "Chelsea",
+        date: "2026-02-06",
+        time: "20:00"
+      },
+      {
+        id: 2,
+        home: "Man City",
+        away: "Arsenal",
+        date: "2026-02-07",
+        time: "22:30"
       }
-    );
-
-    const data = await r.json();
-    res.json(data.response || []);
+    ]);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

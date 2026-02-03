@@ -150,8 +150,8 @@ async function showFixtures() {
     const data = await r.json();
     renderMatches(data, "TODAY FIXTURES");
   } catch (e) {
-    grid.innerHTML = "Failed to load fixtures";
-  }
+  console.error(e);
+  grid.innerHTML = "Failed to load fixtures (see console)";
 }
 
 showFixtures();

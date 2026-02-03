@@ -100,7 +100,7 @@ footer{
 <header>
   <div class="logo">⚽ GOAL GUIDE</div>
   <nav>
-    <button class="active" onclick="showLive()">LIVE</button>
+    <button class="active" onclick=">showLive()"</button>
     <button onclick="showFixtures()">FIXTURES</button>
   </nav>
 </header>
@@ -114,32 +114,19 @@ const API_BASE = "https://goalguide-api-1.onrender.com";
 const grid = document.getElementById("grid");
 
 function renderMatches(matches, title) {
-  grid.innerHTML = "";
-
-  if (!matches.length) {
-    grid.innerHTML = `<h3>No ${title}</h3>`;
-    return;
-  }
-
   grid.innerHTML = `<h3>${title}</h3>`;
-
   matches.forEach(m => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <div class="league">Premier League</div>
-
-      <div class="match">
-        <div class="team">${m.home}</div>
-        <strong>VS</strong>
-        <div class="team">${m.away}</div>
+    grid.innerHTML += `
+      <div class="card">
+        <div class="league">Premier League</div>
+        <div class="match">
+          <div>${m.home}</div>
+          <strong>VS</strong>
+          <div>${m.away}</div>
+        </div>
+        <div class="date">${m.date} • ${m.time}</div>
       </div>
-
-      <div class="date">${m.date} • ${m.time}</div>
     `;
-
-    grid.appendChild(card);
   });
 }
 
@@ -150,10 +137,17 @@ async function showFixtures() {
     const data = await r.json();
     renderMatches(data, "TODAY FIXTURES");
   } catch (e) {
-  console.error(e);
-  grid.innerHTML = "Failed to load fixtures (see console)";
+    console.error(e);
+    grid.innerHTML = "Failed to load fixtures (see console)";
+  }
 }
 
+// ✅ ဒီနေရာမှာပဲ ထည့်
+function showLive() {
+  showFixtures(); // အခုတော့ fixtures ကိုပဲ ပြ
+}
+
+// page load
 showFixtures();
 </script>
 

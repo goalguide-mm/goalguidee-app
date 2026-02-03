@@ -1,14 +1,17 @@
-export default async function handler(req, res) {
-  const API_KEY = process.env.ALLSPORTS_API_KEY;
-
-  const url = `https://apiv2.allsportsapi.com/football/?met=Fixtures&APIkey=${API_KEY}`;
-
+app.get("/api/fixtures", async (req, res) => {
   try {
-    const r = await fetch(url);
-    const data = await r.json();
+    const r = await fetch(
+      "https://v3.football.api-sports.io/fixtures?next=10",
+      {
+        headers: {
+          "x-apisports-key": process.env.FOOTBALL_API_KEY
+        }
+      }
+    );
 
-    res.status(200).json(data.result || []);
+    const data = await r.json();
+    res.json(data.response); // ⭐ အရေးကြီး
   } catch (e) {
-    res.status(500).json([]);
+    res.status(500).json({ error: e.message });
   }
-}
+});

@@ -110,53 +110,29 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
+const API_BASE = "https://goalguide-api-1.onrender.com";
 const grid = document.getElementById("grid");
-const API_BASE = "https://goalguide-api.onrender.com";
-
-function setActive(i){
-  document.querySelectorAll("nav button")
-    .forEach((b,x)=>b.classList.toggle("active", x===i));
-}
 
 async function showLive() {
-  setActive(0);
   grid.innerHTML = "Loading live matches...";
-
   try {
     const r = await fetch(`${API_BASE}/api/live`);
     const data = await r.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      grid.innerHTML = "No live matches";
-      return;
-    }
-
-    let html = "<h3>🔴 Live Matches</h3>";
-    data.forEach(m => {
-      html += `
-        <div class="card">
-          <div class="league">${m.league_name || "League"}</div>
-          <div class="match">
-            <div class="team">${m.event_home_team}</div>
-            <b>VS</b>
-            <div class="team">${m.event_away_team}</div>
-          </div>
-        </div>
-      `;
-    });
-
-    grid.innerHTML = html;
-
+    console.log(data);
   } catch (e) {
     grid.innerHTML = "Failed to load live matches";
-    console.error(e);
   }
 }
 
-async function showFixtures(){
-  setActive(1);
+async function showFixtures() {
   grid.innerHTML = "Loading fixtures...";
-  grid.innerHTML = "No fixtures today";
+  try {
+    const r = await fetch(`${API_BASE}/api/fixtures`);
+    const data = await r.json();
+    console.log(data);
+  } catch (e) {
+    grid.innerHTML = "Failed to load fixtures";
+  }
 }
 
 showLive();

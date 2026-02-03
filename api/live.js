@@ -1,17 +1,12 @@
-export default async function handler(req, res) {
-  const API_KEY = process.env.ALLSPORTS_API_KEY;
+const API_BASE = "https://goalguide-api.onrender.com";
 
-  const url = `https://apiv2.allsportsapi.com/football/?met=Fixtures&APIkey=${API_KEY}`;
-
-  try {
-    const r = await fetch(url);
-    const json = await r.json();
-
-    res.status(200).json({
-      result: json.result || []
-    });
-
-  } catch (e) {
-    res.status(500).json({ result: [] });
-  }
-}
+fetch(`${API_BASE}/api/live`)
+  .then(res => res.json())
+  .then(data => {
+    console.log("LIVE DATA:", data);
+    // render matches here
+  })
+  .catch(err => {
+    console.error("LIVE FETCH ERROR:", err);
+    document.body.innerHTML = "Failed to load live matches";
+  });

@@ -114,10 +114,10 @@ const API_BASE = "https://goalguide-api-1.onrender.com";
 const grid = document.getElementById("grid");
 
 function renderMatches(matches, title) {
-  grid.innerHTML = `<h3>${title}</h3>`;
+  let html = `<h3>${title}</h3>`;
 
   matches.forEach(m => {
-    grid.innerHTML += `
+    html += `
       <div class="card">
         <div class="league">Premier League</div>
 
@@ -131,6 +131,8 @@ function renderMatches(matches, title) {
       </div>
     `;
   });
+
+  grid.innerHTML = html;
 }
 
 async function showFixtures() {

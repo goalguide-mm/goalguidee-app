@@ -125,27 +125,30 @@ async function showLive() {
 
   try {
     const r = await fetch(`${API_BASE}/api/live`);
-    const data = await r.json();
+    const data = await r.json(); // ✅ array တန်း
 
-    if (!data.length) {
+    if (!Array.isArray(data) || !data.length) {
       grid.innerHTML = "No live matches";
       return;
     }
 
     let html = "<h3>🔴 Live Matches</h3>";
+
     data.forEach(m => {
       html += `
         <div class="card">
-          <div class="league">${m.league_name}</div>
+          <div class="league">${m.league_name || "League"}</div>
           <div class="match">
             <div class="team">${m.event_home_team}</div>
             <b>${m.event_final_result || "VS"}</b>
             <div class="team">${m.event_away_team}</div>
           </div>
-        </div>`;
+        </div>
+      `;
     });
 
     grid.innerHTML = html;
+
   } catch (e) {
     grid.innerHTML = "Failed to load live matches";
     console.error(e);
@@ -158,14 +161,15 @@ async function showFixtures() {
 
   try {
     const r = await fetch(`${API_BASE}/api/fixtures`);
-    const data = await r.json();
+    const data = await r.json(); // ✅ array
 
-    if (!data.length) {
+    if (!Array.isArray(data) || !data.length) {
       grid.innerHTML = "No fixtures today";
       return;
     }
 
-    grid.innerHTML = "<h3>📅 Today Fixtures</h3>";
+    grid.innerHTML = "<h3>📅 Fixtures</h3>";
+
     data.forEach(m => {
       grid.innerHTML += `
         <div class="card">
@@ -175,9 +179,11 @@ async function showFixtures() {
             <b>VS</b>
             <div class="team">${m.event_away_team}</div>
           </div>
-          <div class="date">${m.event_time}</div>
-        </div>`;
+          <div class="date">${m.event_time || ""}</div>
+        </div>
+      `;
     });
+
   } catch (e) {
     grid.innerHTML = "Failed to load fixtures";
     console.error(e);

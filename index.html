@@ -4,122 +4,137 @@
 <meta charset="UTF-8">
 <title>GOAL GUIDE</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
 body{
-  font-family: Poppins, sans-serif;
+  font-family:Inter,system-ui,sans-serif;
   background:#0b0f14;
   color:#fff;
 }
-  
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 24px;
-  border-bottom:3px solid #f5c400;
-}
 
-.logo{
+/* ---------- TOP BAR ---------- */
+header{
   display:flex;
   align-items:center;
   gap:12px;
-  font-weight:700;
-  font-size:40px;
-  letter-spacing:1px;
-  color:#f5c400;
+  padding:12px 16px;
+  background:#111827;
 }
 
-nav button{
-  background:none;
+.logo{
+  font-weight:800;
+  color:#facc15;
+}
+
+.search{
+  flex:1;
+  background:#151a21;
+  border:none;
+  border-radius:999px;
+  padding:8px 14px;
+  color:#fff;
+}
+
+/* ---------- DATE BAR ---------- */
+.date-bar{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  padding:10px;
+}
+
+.date-bar button{
+  background:#151a21;
   border:none;
   color:#fff;
-  margin-left:15px;
+  width:32px;
+  height:32px;
+  border-radius:50%;
   cursor:pointer;
-  font-size:14px;
-}
-  
-nav button.active{
-  opacity:1;
-  border-bottom:2px solid #f5c400;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-  gap:18px;
-  padding:24px;
-}
-.grid h3{
-  grid-column:1/-1;
-  margin:10px 0 0;
-  color:#f5c400;
-}
-
-.card{
-  background:linear-gradient(145deg,#121a26,#0b0f14);
-  border:1px solid #1f2a3a;
-  border-radius:14px;
-  padding:16px;
-}
-.league{
-  color:#f5c400;
+.date-text{
   font-weight:600;
-  margin-bottom:8px;
 }
-.match{
+
+/* ---------- TABS ---------- */
+.tabs{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
+  gap:8px;
+  padding:10px 12px;
 }
-.date{
-  margin-top:10px;
-  font-size:13px;
-  color:#ccc;
+
+.tab{
+  background:#151a21;
+  border:none;
+  padding:6px 14px;
+  border-radius:999px;
+  color:#9aa4b2;
+  cursor:pointer;
+}
+
+.tab.active{
+  background:#facc15;
+  color:#000;
+  font-weight:700;
+}
+
+/* ---------- LEAGUE ---------- */
+.league{
+  margin:12px;
+  background:#151a21;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.league-header{
+  padding:10px 14px;
+  font-size:14px;
+  font-weight:600;
+  background:#1b2230;
+}
+
+/* ---------- MATCH ROW ---------- */
+.match{
+  display:grid;
+  grid-template-columns:42px 1fr auto 1fr;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-top:1px solid #222833;
+}
+
+.match:hover{
+  background:#1b2230;
+}
+
+.status{
+  font-size:12px;
+  color:#9aa4b2;
+}
+
+.status.live{
+  color:#ef4444;
+  font-weight:700;
+}
+
+.score{
+  font-weight:700;
+}
+
+.live .score{
+  color:#22c55e;
 }
 
 footer{
   text-align:center;
   padding:20px;
-  color:#666;
-}
-
-.date-bar{
-  max-width:720px;
-  margin:24px auto;
-  background:#1a1a1a;
-  border-radius:18px;
-  padding:14px 18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.date-text{
-  font-weight:600;
-  font-size:15px;
-}
-
-.nav-btn{
-  background:#2a2a2a;
-  border:none;
-  color:#fff;
-  width:30px;
-  height:30px;
-  border-radius:40%;
-  cursor:pointer;
-}
-
-.nav-btn:hover{
-  background:#333;
+  color:#6b7280;
+  font-size:13px;
 }
 </style>
 </head>
@@ -128,49 +143,47 @@ footer{
 
 <header>
   <div class="logo">⚽ GOAL GUIDE</div>
- <nav>
-  <button class="active">FIXTURES</button>
-</nav>
+  <input class="search" placeholder="Search teams or leagues">
 </header>
 
 <div class="date-bar">
-  <button class="nav-btn" onclick="changeDate(-1)">◀</button>
+  <button onclick="changeDate(-1)">◀</button>
   <span class="date-text" id="dateText">Today</span>
-  <button class="nav-btn" onclick="changeDate(1)">▶</button>
+  <button onclick="changeDate(1)">▶</button>
 </div>
 
-<!-- FIXTURES -->
-<div id="fixtures" class="grid">Loading...</div>
+<div class="tabs">
+  <button class="tab active">LIVE</button>
+  <button class="tab">TODAY</button>
+  <button class="tab">TOMORROW</button>
+  <button class="tab">RESULTS</button>
+</div>
 
-<h2 style="padding:0 24px;color:#f54242;">🔴 LIVE</h2>
-<div id="live" class="grid"></div>
+<!-- LEAGUE -->
+<section class="league">
+  <div class="league-header">🇮🇹 Italy – Serie A</div>
 
-<h2 style="padding:0 24px;color:#f5c400;">📅 TODAY</h2>
-<div id="today" class="grid"></div>
+  <div class="match live">
+    <span class="status live">63'</span>
+    <span>Bologna</span>
+    <span class="score">0 - 3</span>
+    <span>Milan</span>
+  </div>
 
-<h2 style="padding:0 24px;color:#5da9ff;">⏭️ TOMORROW</h2>
-<div id="tomorrow" class="grid"></div>
-
-<h2 style="padding:0 24px;color:#aaa;">⏮️ RESULTS</h2>
-<div id="yesterday" class="grid"></div>
-
+  <div class="match">
+    <span class="status">FT</span>
+    <span>Roma</span>
+    <span class="score">1 - 1</span>
+    <span>Lazio</span>
+  </div>
+</section>
 
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-const API_BASE = "https://goalguide-api-1.onrender.com";
-
-const fixturesGrid = document.getElementById("fixtures");
-const liveGrid = document.getElementById("live");
-const todayGrid = document.getElementById("today");
-const tomorrowGrid = document.getElementById("tomorrow");
-const yesterdayGrid = document.getElementById("yesterday");
-
+let dayOffset = 0;
 const dateText = document.getElementById("dateText");
 
-let dayOffset = 0;
-
-/* ---------- DATE TEXT ---------- */
 function updateDateUI(){
   if(dayOffset === 0) dateText.textContent = "Today";
   else if(dayOffset === -1) dateText.textContent = "Yesterday";
@@ -181,59 +194,11 @@ function updateDateUI(){
     dateText.textContent = d.toDateString();
   }
 }
-/* ---------- CHANGE DATE ---------- */
+
 function changeDate(step){
   dayOffset += step;
   updateDateUI();
-  loadMatches();
 }
-
-/* ---------- RENDER ---------- */
-function renderMatches(matches){
-  let title = "TODAY FIXTURES";
-  if(dayOffset === -1) title = "YESTERDAY FIXTURES";
-  if(dayOffset === 1) title = "TOMORROW FIXTURES";
-
-  let html = `<h3>${title}</h3>`;
-
-  if(matches.length === 0){
-    grid.innerHTML = html + "<p>No matches</p>";
-    return;
-  }
-
-  matches.forEach(m => {
-    html += `
-      <div class="card">
-        <div class="league">Premier League</div>
-        <div class="match">
-          <div>${m.home}</div>
-          <strong>VS</strong>
-          <div>${m.away}</div>
-        </div>
-        <div class="date">${dateText.textContent}</div>
-      </div>
-    `;
-  });
-
-  grid.innerHTML = html;
-}
-
-/* ---------- LOAD ---------- */
-async function loadMatches(){
-  grid.innerHTML = "Loading...";
-
-  try{
-    const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
-    const data = await res.json();
-    renderMatches(data);
-  }catch(e){
-    grid.innerHTML = "Failed to load data";
-  }
-}
-
-/* ---------- INIT ---------- */
-updateDateUI();
-loadMatches();
 </script>
 
 </body>

@@ -188,24 +188,52 @@ function changeDate(step){
   }
 }
 
-function renderMatches(matches, title){
-  let html = `<h3>${title}</h3>`;
+fmatches.forEach(m => {
 
-  matches
-    .filter(m => isSameDate(m.date, dayOffset))
-    .forEach(m => {
-      html += `
-        <div class="card">
-          <div class="league">Premier League</div>
-          <div class="match">
-            <div>${m.home}</div>
-            <strong>VS</strong>
-            <div>${m.away}</div>
-          </div>
-          <div class="date">${m.date} • ${m.time}</div>
+  // LIVE
+  if(currentTab === "live"){
+    html += `
+      <div class="card">
+        <div class="league">LIVE • ${m.minute}'</div>
+        <div class="match">
+          <div>${m.home}</div>
+          <strong>VS</strong>
+          <div>${m.away}</div>
         </div>
-      `;
-    });
+      </div>
+    `;
+  }
+
+  // RESULTS
+  else if(currentTab === "results"){
+    html += `
+      <div class="card">
+        <div class="league">FULL TIME</div>
+        <div class="match">
+          <div>${m.home}</div>
+          <strong>${m.score}</strong>
+          <div>${m.away}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // FIXTURES
+  else{
+    html += `
+      <div class="card">
+        <div class="league">Premier League</div>
+        <div class="match">
+          <div>${m.home}</div>
+          <strong>VS</strong>
+          <div>${m.away}</div>
+        </div>
+        <div class="date">${m.date} • ${m.time}</div>
+      </div>
+    `;
+  }
+
+});
 
   grid.innerHTML = html || "No matches";
 }
@@ -215,18 +243,35 @@ async function loadMatches(){
 
   const apiDate = formatApiDate(dayOffset);
 
-  let url = currentTab === "live"
-    ? `${API_BASE}/api/live`
-    : `${API_BASE}/api/fixtures?date=${apiDate}`;
+  llet url = "";
+
+if(currentTab === "live"){
+  url = `${API_BASE}/api/live`;
+}
+else if(currentTab === "results"){
+  url = `${API_BASE}/api/results`;
+}
+else{
+  url = `${API_BASE}/api/fixtures`;
+}
 
   try{
     const r = await fetch(url);
     const data = await r.json();
 
-    let title = "TODAY FIXTURES";
-    if(dayOffset === -1) title = "YESTERDAY FIXTURES";
-    if(dayOffset === 1) title = "TOMORROW FIXTURES";
-    if(currentTab === "live") title = "LIVE MATCHES";
+    let title = "";
+
+if(currentTab === "live"){
+  title = "LIVE MATCHES";
+}
+else if(currentTab === "results"){
+  title = "MATCH RESULTS";
+}
+else{
+  title = "TODAY FIXTURES";
+  if(dayOffset === -1) title = "YESTERDAY FIXTURES";
+  if(dayOffset === 1) title = "TOMORROW FIXTURES";
+}
 
     renderMatches(data, title);
   }catch(e){

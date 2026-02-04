@@ -181,8 +181,11 @@ function isSameDate(matchDate, offset){
 /* change date */
 function changeDate(step){
   dayOffset += step;
-  dateText.innerText = formatDate(dayOffset);
-  loadMatches();
+  updateDateUI();
+
+  if(currentTab === "fixtures"){
+    loadMatches();
+  }
 }
 
 function renderMatches(matches, title){
@@ -250,7 +253,7 @@ function showFixtures(){
   loadMatches();
 }
 
-/* initial load */
+updateDateUI();
 loadMatches();
 </script>
 

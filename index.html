@@ -8,14 +8,11 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-
 body{
   font-family:Inter,system-ui,sans-serif;
   background:#0b0f14;
   color:#fff;
 }
-
-/* ---------- TOP BAR ---------- */
 header{
   display:flex;
   align-items:center;
@@ -23,12 +20,7 @@ header{
   padding:12px 16px;
   background:#111827;
 }
-
-.logo{
-  font-weight:800;
-  color:#facc15;
-}
-
+.logo{font-weight:800;color:#facc15}
 .search{
   flex:1;
   background:#151a21;
@@ -37,8 +29,6 @@ header{
   padding:8px 14px;
   color:#fff;
 }
-
-/* ---------- DATE BAR ---------- */
 .date-bar{
   display:flex;
   justify-content:center;
@@ -46,7 +36,6 @@ header{
   gap:14px;
   padding:10px;
 }
-
 .date-bar button{
   background:#151a21;
   border:none;
@@ -56,49 +45,36 @@ header{
   border-radius:50%;
   cursor:pointer;
 }
-
-.date-text{
-  font-weight:600;
-}
-
-/* ---------- TABS ---------- */
+.date-text{font-weight:600}
 .tabs{
   display:flex;
   gap:8px;
   padding:10px 12px;
 }
-
 .tab{
   background:#151a21;
   border:none;
   padding:6px 14px;
   border-radius:999px;
   color:#9aa4b2;
-  cursor:pointer;
 }
-
 .tab.active{
   background:#facc15;
   color:#000;
   font-weight:700;
 }
-
-/* ---------- LEAGUE ---------- */
 .league{
   margin:12px;
   background:#151a21;
   border-radius:12px;
   overflow:hidden;
 }
-
 .league-header{
   padding:10px 14px;
   font-size:14px;
   font-weight:600;
   background:#1b2230;
 }
-
-/* ---------- MATCH ROW ---------- */
 .match{
   display:grid;
   grid-template-columns:42px 1fr auto 1fr;
@@ -107,29 +83,11 @@ header{
   padding:10px 14px;
   border-top:1px solid #222833;
 }
-
-.match:hover{
-  background:#1b2230;
-}
-
-.status{
-  font-size:12px;
-  color:#9aa4b2;
-}
-
-.status.live{
-  color:#ef4444;
-  font-weight:700;
-}
-
-.score{
-  font-weight:700;
-}
-
-.live .score{
-  color:#22c55e;
-}
-
+.match:hover{background:#1b2230}
+.status{font-size:12px;color:#9aa4b2}
+.status.live{color:#ef4444;font-weight:700}
+.score{font-weight:700}
+.live .score{color:#22c55e}
 footer{
   text-align:center;
   padding:20px;
@@ -159,24 +117,8 @@ footer{
   <button class="tab">RESULTS</button>
 </div>
 
-<!-- LEAGUE -->
-<section class="league">
-  <div class="league-header">🇮🇹 Italy – Serie A</div>
-
-  <div class="match live">
-    <span class="status live">63'</span>
-    <span>Bologna</span>
-    <span class="score">0 - 3</span>
-    <span>Milan</span>
-  </div>
-
-  <div class="match">
-    <span class="status">FT</span>
-    <span>Roma</span>
-    <span class="score">1 - 1</span>
-    <span>Lazio</span>
-  </div>
-</section>
+<!-- API DATA WILL RENDER HERE -->
+<div id="matches"></div>
 
 <footer>GOAL GUIDE © 2026</footer>
 
@@ -201,29 +143,37 @@ function updateDateUI(){
 
 /* ---------- LOAD MATCHES ---------- */
 async function loadMatches(){
-  matchesEl.innerHTML = "Loading...";
+  if(!matchesEl) return;
+
+  matchesEl.innerHTML = "<p style='padding:16px;color:#9aa4b2'>Loading...</p>";
 
   try{
     const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
     const data = await res.json();
-    renderMatches(data);
+
+    // some APIs wrap data
+    const matches = Array.isArray(data) ? data : data.data;
+
+    renderMatches(matches || []);
   }catch(err){
-    matchesEl.innerHTML = "Failed to load data";
+    matchesEl.innerHTML = "<p style='padding:16px;color:#ef4444'>Failed to load data</p>";
+    console.error(err);
   }
 }
 
 /* ---------- RENDER ---------- */
 function renderMatches(matches){
-  if(!matches || matches.length === 0){
-    matchesEl.innerHTML = "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
+  if(matches.length === 0){
+    matchesEl.innerHTML =
+      "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
     return;
   }
 
-  // group by league
   const leagues = {};
   matches.forEach(m=>{
-    if(!leagues[m.league]) leagues[m.league] = [];
-    leagues[m.league].push(m);
+    const league = m.league || "Other";
+    if(!leagues[league]) leagues[league] = [];
+    leagues[league].push(m);
   });
 
   let html = "";
@@ -236,13 +186,13 @@ function renderMatches(matches){
 
     leagues[league].forEach(m=>{
       const isLive = m.status === "LIVE";
-      const statusText = isLive ? `${m.minute}'` : m.status;
+      const statusText = isLive ? `${m.minute || ""}'` : (m.status || "");
 
       html += `
         <div class="match ${isLive ? "live" : ""}">
           <span class="status ${isLive ? "live" : ""}">${statusText}</span>
           <span>${m.home}</span>
-          <span class="score">${m.homeScore} - ${m.awayScore}</span>
+          <span class="score">${m.homeScore ?? "-"} - ${m.awayScore ?? "-"}</span>
           <span>${m.away}</span>
         </div>
       `;

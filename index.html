@@ -101,19 +101,60 @@ footer{
   padding:20px;
   color:#666;
 }
+  /* existing CSS (logo, header, body...) */
+
+    .date-bar{
+      max-width:720px;
+      margin:24px auto;
+      background:#1a1a1a;
+      border-radius:18px;
+      padding:14px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .date-text{
+      font-weight:600;
+      font-size:15px;
+    }
+
+    .nav-btn{
+      background:#2a2a2a;
+      border:none;
+      color:#fff;
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      cursor:pointer;
+    }
+
+    .nav-btn:hover{
+      background:#333;
+    }
+  
 </style>
 </head>
 
 <body>
 
 <header>
+  
   <div class="logo">⚽ GOAL GUIDE</div>
   <nav>
-    <button class="active" onclick=">showLive()"</button>
+    <button class="active" onclick="showLive()">LIVE</button>
     <button onclick="showFixtures()">FIXTURES</button>
   </nav>
 </header>
 
+<!-- ✅ DATE BAR GOES HERE -->
+<div class="date-bar">
+  <button class="nav-btn">◀</button>
+  <span class="date-text">Today</span>
+  <button class="nav-btn">▶</button>
+</div>
+
+<!-- fixtures grid -->
 <div id="grid" class="grid">Loading...</div>
 
 <footer>GOAL GUIDE © 2026</footer>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Match Detail | GOAL GUIDE</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  background:#0b0f14;
+  color:#fff;
+}
+.header{
+  padding:14px;
+  text-align:center;
+  background:#111827;
+}
+.league{
+  color:#9aa4b2;
+  font-size:14px;
+}
+.score-box{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+}
+.team{
+  text-align:center;
+  width:40%;
+}
+.team img{
+  width:48px;
+  height:48px;
+}
+.score{
+  font-size:28px;
+  font-weight:700;
+}
+.status{
+  text-align:center;
+  color:#22c55e;
+  font-weight:700;
+}
+.back{
+  padding:12px;
+  cursor:pointer;
+  color:#facc15;
+}
+</style>
+</head>
+
+<body>
+
+<div class="back" onclick="history.back()">← Back</div>
+
+<div id="content">Loading...</div>
+
+<script>
+const API_BASE = "https://goalguide-api-1.onrender.com";
+const params = new URLSearchParams(location.search);
+const matchId = params.get("id");
+
+async function loadMatch(){
+  try{
+    const res = await fetch(`${API_BASE}/api/match?id=${matchId}`);
+    const m = await res.json();
+
+    document.getElementById("content").innerHTML = `
+      <div class="header">
+        <div class="league">${m.league}</div>
+      </div>
+
+      <div class="score-box">
+        <div class="team">
+          <img src="${m.homeLogo}">
+          <div>${m.home}</div>
+        </div>
+
+        <div class="score">${m.homeScore} - ${m.awayScore}</div>
+
+        <div class="team">
+          <img src="${m.awayLogo}">
+          <div>${m.away}</div>
+        </div>
+      </div>
+
+      <div class="status">
+        ${m.status === "LIVE" ? m.minute + "'" : m.status}
+      </div>
+    `;
+
+  }catch(e){
+    document.getElementById("content").innerHTML = "Error loading match";
+  }
+}
+
+loadMatch();
+</script>
+
+</body>
+</html>

@@ -32,8 +32,8 @@ header{
   align-items:center;
   gap:12px;
   font-weight:700;
-  font-size:40px;      /* စာလုံးကြီး */
-  letter-spacing:1px; /* pro feel */
+  font-size:40px;
+  letter-spacing:1px;
   color:#f5c400;
 }
 
@@ -80,66 +80,53 @@ nav button.active{
   justify-content:space-between;
   gap:10px;
 }
-.team{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:14px;
-}
-.team-logo{
-  width:22px;
-  height:22px;
-  object-fit:contain;
-}
 .date{
   margin-top:10px;
   font-size:13px;
   color:#ccc;
 }
+
 footer{
   text-align:center;
   padding:20px;
   color:#666;
 }
-  /* existing CSS (logo, header, body...) */
 
-    .date-bar{
-      max-width:720px;
-      margin:24px auto;
-      background:#1a1a1a;
-      border-radius:18px;
-      padding:14px 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
+.date-bar{
+  max-width:720px;
+  margin:24px auto;
+  background:#1a1a1a;
+  border-radius:18px;
+  padding:14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    .date-text{
-      font-weight:600;
-      font-size:15px;
-    }
+.date-text{
+  font-weight:600;
+  font-size:15px;
+}
 
-    .nav-btn{
-      background:#2a2a2a;
-      border:none;
-      color:#fff;
-      width:30px;
-      height:30px;
-      border-radius:40%;
-      cursor:pointer;
-    }
+.nav-btn{
+  background:#2a2a2a;
+  border:none;
+  color:#fff;
+  width:30px;
+  height:30px;
+  border-radius:40%;
+  cursor:pointer;
+}
 
-    .nav-btn:hover{
-      background:#333;
-    }
-  
+.nav-btn:hover{
+  background:#333;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  
   <div class="logo">⚽ GOAL GUIDE</div>
   <nav>
     <button class="active" onclick="showLive()">LIVE</button>
@@ -147,13 +134,12 @@ footer{
   </nav>
 </header>
 
-<!-- ✅ DATE BAR GOES HERE -->
 <div class="date-bar">
   <button class="nav-btn" onclick="changeDate(-1)">◀</button>
   <span class="date-text" id="dateText">Today</span>
   <button class="nav-btn" onclick="changeDate(1)">▶</button>
 </div>
-<!-- fixtures grid -->
+
 <div id="grid" class="grid">Loading...</div>
 
 <footer>GOAL GUIDE © 2026</footer>
@@ -165,6 +151,17 @@ const dateText = document.getElementById("dateText");
 
 let dayOffset = 0;
 let currentTab = "fixtures";
+
+/* 🔥 ADD THIS FUNCTION */
+function formatDate(offset){
+  if(offset === 0) return "Today";
+  if(offset === -1) return "Yesterday";
+  if(offset === 1) return "Tomorrow";
+
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toDateString();
+}
 
 /* format date for API */
 function formatApiDate(offset){
@@ -208,8 +205,6 @@ function renderMatches(matches, title){
 async function loadMatches(){
   grid.innerHTML = "Loading...";
 
-  const apiDate = formatApiDate(dayOffset);
-
   let url = currentTab === "live"
     ? `${API_BASE}/api/live`
     : `${API_BASE}/api/fixtures`;
@@ -251,6 +246,6 @@ function showFixtures(){
 /* initial load */
 loadMatches();
 </script>
-  
+
 </body>
 </html>

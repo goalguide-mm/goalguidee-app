@@ -139,13 +139,33 @@ footer{
   <button class="nav-btn" onclick="changeDate(1)">▶</button>
 </div>
 
-<div id="grid" class="grid">Loading...</div>
+<!-- FIXTURES -->
+<div id="fixtures" class="grid">Loading...</div>
+
+<h2 style="padding:0 24px;color:#f54242;">🔴 LIVE</h2>
+<div id="live" class="grid"></div>
+
+<h2 style="padding:0 24px;color:#f5c400;">📅 TODAY</h2>
+<div id="today" class="grid"></div>
+
+<h2 style="padding:0 24px;color:#5da9ff;">⏭️ TOMORROW</h2>
+<div id="tomorrow" class="grid"></div>
+
+<h2 style="padding:0 24px;color:#aaa;">⏮️ RESULTS</h2>
+<div id="yesterday" class="grid"></div>
+
 
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
-const grid = document.getElementById("grid");
+
+const fixturesGrid = document.getElementById("fixtures");
+const liveGrid = document.getElementById("live");
+const todayGrid = document.getElementById("today");
+const tomorrowGrid = document.getElementById("tomorrow");
+const yesterdayGrid = document.getElementById("yesterday");
+
 const dateText = document.getElementById("dateText");
 
 let dayOffset = 0;
@@ -161,7 +181,6 @@ function updateDateUI(){
     dateText.textContent = d.toDateString();
   }
 }
-
 /* ---------- CHANGE DATE ---------- */
 function changeDate(step){
   dayOffset += step;

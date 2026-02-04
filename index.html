@@ -183,6 +183,7 @@ async function loadMatches(){
   try{
     const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
     let data = await res.json();
+    console.log(data[0]);
 
     if(currentTab === "LIVE"){
       data = data.filter(m => m.status === "LIVE");

@@ -154,54 +154,41 @@ tabs.forEach(tab=>{
     tab.classList.add("active");
     currentTab = tab.dataset.tab;
 
-    if(currentTab === "TODAY") dayOffset = 0;
-    if(currentTab === "TOMORROW") dayOffset = 1;
-
-    updateDateUI();
     loadMatches();
   });
 });
 
 /* ---------- DATE ---------- */
 function updateDateUI(){
-  if(dayOffset === 0) dateText.textContent = "Today";
-  else if(dayOffset === 1) dateText.textContent = "Tomorrow";
-  else if(dayOffset === -1) dateText.textContent = "Yesterday";
+  if(currentTab === "LIVE") dateText.textContent = "Live";
+  else dateText.textContent = "Today";
 }
 
-/* ✅ FIX #1 — GLOBAL changeDate */
-window.changeDate = function(step){
-  dayOffset += step;
-  updateDateUI();
-  loadMatches();
-};
-
-/* ---------- LOAD ---------- */
 /* ---------- LOAD ---------- */
 async function loadMatches() {
   matchesEl.innerHTML = "Loading...";
 
   try {
-    const res = await fetch(`${API_BASE}/api/fixtures`);
-    const data = await res.json();
+    let url = "";
 
-    let filtered = data.filter(m => m.day === dayOffset);
-
-    // TODAY tab → yesterday + today
-    if (dayOffset === 0) {
-      filtered = data.filter(m => m.day === 0 || m.day === -1);
+    if (currentTab === "LIVE") {
+      url = `${API_BASE}/api/live`;
+    } else {
+      url = `${API_BASE}/api/today`;
     }
 
-    renderMatches(filtered);
+    const res = await fetch(url);
+    const data = await res.json();
 
+    renderMatches(data.response || []);
   } catch (e) {
     console.error(e);
     matchesEl.innerHTML =
-      "<p style='padding:16px;color:red'>Error</p>";
+      "<p style='padding:16px;color:red'>Error loading matches</p>";
   }
 }
 
-/* ✅ FIX #2 — SAFE MAP RENDER */
+/* ---------- RENDER ---------- */
 function renderMatches(matches){
   if(!matches || !matches.length){
     matchesEl.innerHTML =
@@ -209,68 +196,42 @@ function renderMatches(matches){
     return;
   }
 
-  const leagues = {};
-
-  matches.forEach(m=>{
-    const league = m.league || m.league_name || "Unknown League";
-    if(!leagues[league]) leagues[league] = [];
-    leagues[league].push(m);
-  });
-
   let html = "";
 
-  Object.keys(leagues).forEach(league=>{
-    const lg = leagues[league][0];
+  matches.forEach(m=>{
+    const isLive = m.fixture.status.short === "LIVE";
 
     html += `
       <section class="league">
         <div class="league-header">
-          ${lg.leagueLogo || lg.league_logo ? `<img src="${lg.leagueLogo || lg.league_logo}">` : ""}
-          ${league}
+          <img src="${m.league.logo}">
+          ${m.league.name}
         </div>
-    `;
 
-    leagues[league].forEach(m=>{
-      const isLive = m.status === "LIVE";
-
-      const home = m.home || m.home_team || "-";
-      const away = m.away || m.away_team || "-";
-
-      const hs = m.homeScore ?? m.score_home ?? "";
-      const as = m.awayScore ?? m.score_away ?? "";
-
-      html += `
-        <div class="match ${isLive?"live":""}"
-          onclick="openMatch('${m.id}')">
-
-          <span class="status ${isLive?"live":""}">
-            ${isLive ? (m.minute ?? "") + "'" : m.status}
+        <div class="match ${isLive ? "live" : ""}">
+          <span class="status ${isLive ? "live" : ""}">
+            ${m.fixture.status.elapsed ?? ""}
           </span>
 
           <div class="team">
-            ${m.homeLogo || m.home_logo ? `<img src="${m.homeLogo || m.home_logo}">` : ""}
-            ${home}
+            <img src="${m.teams.home.logo}">
+            ${m.teams.home.name}
           </div>
 
-          <span class="score">${hs !== "" ? hs : ""}${hs !== "" ? " - " : ""}${as !== "" ? as : ""}</span>
+          <span class="score">
+            ${m.goals.home ?? ""} - ${m.goals.away ?? ""}
+          </span>
 
           <div class="team">
-            ${m.awayLogo || m.away_logo ? `<img src="${m.awayLogo || m.away_logo}">` : ""}
-            ${away}
+            <img src="${m.teams.away.logo}">
+            ${m.teams.away.name}
           </div>
         </div>
-      `;
-    });
-
-    html += "</section>";
+      </section>
+    `;
   });
 
   matchesEl.innerHTML = html;
-}
-
-/* ---------- MATCH CLICK ---------- */
-function openMatch(id){
-  window.location.href = `match.html?id=${id}`;
 }
 
 /* ---------- INIT ---------- */

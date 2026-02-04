@@ -152,7 +152,6 @@ const dateText = document.getElementById("dateText");
 let currentTab = "fixtures";
 let dayOffset = 0;
 
-/* ---------- DATE UI ---------- */
 function updateDateUI(){
   if(dayOffset === 0) dateText.textContent = "Today";
   else if(dayOffset === -1) dateText.textContent = "Yesterday";
@@ -164,25 +163,21 @@ function updateDateUI(){
   }
 }
 
-/* ---------- CHANGE DATE ---------- */
 function changeDate(step){
   dayOffset += step;
   updateDateUI();
   loadMatches();
 }
 
-/* ---------- RENDER ---------- */
 function renderMatches(matches, title){
   let html = `<h3>${title}</h3>`;
 
-  if(matches.length === 0){
+  if(!matches || matches.length === 0){
     grid.innerHTML = html + "No matches";
     return;
   }
 
   matches.forEach(m => {
-
-    // LIVE
     if(currentTab === "live"){
       html += `
         <div class="card">
@@ -192,26 +187,8 @@ function renderMatches(matches, title){
             <strong>VS</strong>
             <div>${m.away}</div>
           </div>
-        </div>
-      `;
-    }
-
-    // RESULTS
-    else if(currentTab === "results"){
-      html += `
-        <div class="card">
-          <div class="league">FULL TIME</div>
-          <div class="match">
-            <div>${m.home}</div>
-            <strong>${m.score}</strong>
-            <div>${m.away}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    // FIXTURES
-    else{
+        </div>`;
+    }else{
       html += `
         <div class="card">
           <div class="league">Premier League</div>
@@ -220,42 +197,28 @@ function renderMatches(matches, title){
             <strong>VS</strong>
             <div>${m.away}</div>
           </div>
-          <div class="date">${m.date} • ${m.time}</div>
-        </div>
-      `;
+        </div>`;
     }
-
   });
 
   grid.innerHTML = html;
 }
 
-/* ---------- LOAD FROM API ---------- */
 async function loadMatches(){
   grid.innerHTML = "Loading...";
-
-  let url = "";
-
-  if(currentTab === "live") url = `${API_BASE}/api/live`;
-  else if(currentTab === "results") url = `${API_BASE}/api/results`;
-  else url = `${API_BASE}/api/fixtures`;
+  let url = currentTab === "live"
+    ? `${API_BASE}/api/live`
+    : `${API_BASE}/api/fixtures`;
 
   try{
     const res = await fetch(url);
     const data = await res.json();
-
-    let title = "FIXTURES";
-    if(currentTab === "live") title = "LIVE MATCHES";
-    if(currentTab === "results") title = "MATCH RESULTS";
-
-    renderMatches(data, title);
-  }catch(err){
-    console.error(err);
+    renderMatches(data, currentTab === "live" ? "LIVE MATCHES" : "FIXTURES");
+  }catch(e){
     grid.innerHTML = "Failed to load data";
   }
 }
 
-/* ---------- NAV ---------- */
 function showLive(){
   currentTab = "live";
   document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
@@ -270,7 +233,6 @@ function showFixtures(){
   loadMatches();
 }
 
-/* ---------- INIT ---------- */
 updateDateUI();
 loadMatches();
 </script>

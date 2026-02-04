@@ -163,6 +163,10 @@ footer{
 const API_BASE = "https://goalguide-api-1.onrender.com";
 const grid = document.getElementById("grid");
 
+/* 🔹 current tab state */
+let currentTab = "fixtures";
+
+/* 🔹 render cards */
 function renderMatches(matches, title) {
   let html = `<h3>${title}</h3>`;
 
@@ -185,25 +189,58 @@ function renderMatches(matches, title) {
   grid.innerHTML = html;
 }
 
-async function showFixtures() {
-  grid.innerHTML = "Loading fixtures...";
-  try {
-    const r = await fetch(`${API_BASE}/api/fixtures`);
+/* 🔹 load matches based on tab */
+async function loadMatches(){
+  grid.innerHTML = "Loading...";
+
+  let url = "";
+
+  if(currentTab === "live"){
+    url = `${API_BASE}/api/live`;
+  }else{
+    url = `${API_BASE}/api/fixtures`;
+  }
+
+  try{
+    const r = await fetch(url);
     const data = await r.json();
-    renderMatches(data, "TODAY FIXTURES");
-  } catch (e) {
+
+    renderMatches(
+      data,
+      currentTab === "live" ? "LIVE MATCHES" : "TODAY FIXTURES"
+    );
+  }catch(e){
     console.error(e);
-    grid.innerHTML = "Failed to load fixtures (see console)";
+    grid.innerHTML = "Failed to load data";
   }
 }
 
-// ✅ ဒီနေရာမှာပဲ ထည့်
-function showLive() {
-  showFixtures(); // အခုတော့ fixtures ကိုပဲ ပြ
+/* 🔹 LIVE button */
+function showLive(){
+  currentTab = "live";
+
+  document.querySelectorAll("nav button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  event.target.classList.add("active");
+
+  loadMatches();
 }
 
-// page load
-showFixtures();
+/* 🔹 FIXTURES button */
+function showFixtures(){
+  currentTab = "fixtures";
+
+  document.querySelectorAll("nav button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  event.target.classList.add("active");
+
+  loadMatches();
+}
+
+/* 🔹 initial load */
+loadMatches();
 </script>
   
 </body>

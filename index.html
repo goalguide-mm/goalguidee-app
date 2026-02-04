@@ -177,22 +177,27 @@ window.changeDate = function(step){
 };
 
 /* ---------- LOAD ---------- */
-async function loadMatches(){
-  matchesEl.innerHTML = "<p style='padding:16px'>Loading...</p>";
+/* ---------- LOAD ---------- */
+async function loadMatches() {
+  matchesEl.innerHTML = "Loading...";
 
-  try{
-    const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
-    let data = await res.json();
-    console.log(data[0]);
+  try {
+    const res = await fetch(`${API_BASE}/api/fixtures`);
+    const data = await res.json();
 
-    if(currentTab === "LIVE"){
-      data = data.filter(m => m.status === "LIVE");
+    let filtered = data.filter(m => m.day === dayOffset);
+
+    // TODAY tab → yesterday + today
+    if (dayOffset === 0) {
+      filtered = data.filter(m => m.day === 0 || m.day === -1);
     }
 
-    renderMatches(data);
+    renderMatches(filtered);
 
-  }catch(e){
-    matchesEl.innerHTML = "<p style='padding:16px;color:red'>Error</p>";
+  } catch (e) {
+    console.error(e);
+    matchesEl.innerHTML =
+      "<p style='padding:16px;color:red'>Error</p>";
   }
 }
 

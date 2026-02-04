@@ -148,9 +148,9 @@ const API_BASE = "https://goalguide-api-1.onrender.com";
 const grid = document.getElementById("grid");
 const dateText = document.getElementById("dateText");
 
-let currentTab = "fixtures";
 let dayOffset = 0;
 
+/* ---------- DATE TEXT ---------- */
 function updateDateUI(){
   if(dayOffset === 0) dateText.textContent = "Today";
   else if(dayOffset === -1) dateText.textContent = "Yesterday";
@@ -162,14 +162,25 @@ function updateDateUI(){
   }
 }
 
+/* ---------- CHANGE DATE ---------- */
 function changeDate(step){
   dayOffset += step;
   updateDateUI();
   loadMatches();
 }
 
-function renderMatches(matches, title){
+/* ---------- RENDER ---------- */
+function renderMatches(matches){
+  let title = "TODAY FIXTURES";
+  if(dayOffset === -1) title = "YESTERDAY FIXTURES";
+  if(dayOffset === 1) title = "TOMORROW FIXTURES";
+
   let html = `<h3>${title}</h3>`;
+
+  if(matches.length === 0){
+    grid.innerHTML = html + "<p>No matches</p>";
+    return;
+  }
 
   matches.forEach(m => {
     html += `
@@ -180,7 +191,7 @@ function renderMatches(matches, title){
           <strong>VS</strong>
           <div>${m.away}</div>
         </div>
-        <div class="date">${m.date || "Today"}</div>
+        <div class="date">${dateText.textContent}</div>
       </div>
     `;
   });
@@ -188,9 +199,7 @@ function renderMatches(matches, title){
   grid.innerHTML = html;
 }
 
-  grid.innerHTML = html;
-}
-
+/* ---------- LOAD ---------- */
 async function loadMatches(){
   grid.innerHTML = "Loading...";
 
@@ -198,25 +207,12 @@ async function loadMatches(){
     const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
     const data = await res.json();
     renderMatches(data);
-  }catch(err){
+  }catch(e){
     grid.innerHTML = "Failed to load data";
   }
 }
 
-function showLive(){
-  currentTab = "live";
-  document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-  event.target.classList.add("active");
-  loadMatches();
-}
-
-function showFixtures(){
-  currentTab = "fixtures";
-  document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-  event.target.classList.add("active");
-  loadMatches();
-}
-
+/* ---------- INIT ---------- */
 updateDateUI();
 loadMatches();
 </script>

@@ -131,6 +131,8 @@ let dayOffset = 0;
 
 /* ---------- DATE ---------- */
 function updateDateUI(){
+  if(!dateText) return;
+
   if(dayOffset === 0) dateText.textContent = "Today";
   else if(dayOffset === -1) dateText.textContent = "Yesterday";
   else if(dayOffset === 1) dateText.textContent = "Tomorrow";
@@ -145,35 +147,42 @@ function updateDateUI(){
 async function loadMatches(){
   if(!matchesEl) return;
 
-  matchesEl.innerHTML = "<p style='padding:16px;color:#9aa4b2'>Loading...</p>";
+  matchesEl.innerHTML = "<p style='padding:16px'>Loading...</p>";
 
   try{
     const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
     const data = await res.json();
 
-    // some APIs wrap data
-    const matches = Array.isArray(data) ? data : data.data;
+    // API က array မဟုတ်ရင်
+    if(!Array.isArray(data)){
+      matchesEl.innerHTML =
+        "<p style='padding:16px;color:#ef4444'>Invalid API response</p>";
+      return;
+    }
 
-    renderMatches(matches || []);
+    renderMatches(data);
+
   }catch(err){
-    matchesEl.innerHTML = "<p style='padding:16px;color:#ef4444'>Failed to load data</p>";
     console.error(err);
+    matchesEl.innerHTML =
+      "<p style='padding:16px;color:#ef4444'>Failed to load data</p>";
   }
 }
 
-/* ---------- RENDER ---------- */
+/* ---------- RENDER MATCHES ---------- */
 function renderMatches(matches){
-  if(matches.length === 0){
+  if(!matches || matches.length === 0){
     matchesEl.innerHTML =
       "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
     return;
   }
 
   const leagues = {};
+
   matches.forEach(m=>{
-    const league = m.league || "Other";
-    if(!leagues[league]) leagues[league] = [];
-    leagues[league].push(m);
+    const leagueName = m.league || "Unknown League";
+    if(!leagues[leagueName]) leagues[leagueName] = [];
+    leagues[leagueName].push(m);
   });
 
   let html = "";
@@ -186,14 +195,20 @@ function renderMatches(matches){
 
     leagues[league].forEach(m=>{
       const isLive = m.status === "LIVE";
-      const statusText = isLive ? `${m.minute || ""}'` : (m.status || "");
+      const statusText = isLive
+        ? `${m.minute ?? ""}'`
+        : (m.status || "");
 
       html += `
         <div class="match ${isLive ? "live" : ""}">
-          <span class="status ${isLive ? "live" : ""}">${statusText}</span>
-          <span>${m.home}</span>
-          <span class="score">${m.homeScore ?? "-"} - ${m.awayScore ?? "-"}</span>
-          <span>${m.away}</span>
+          <span class="status ${isLive ? "live" : ""}">
+            ${statusText}
+          </span>
+          <span>${m.home || "-"}</span>
+          <span class="score">
+            ${m.homeScore ?? 0} - ${m.awayScore ?? 0}
+          </span>
+          <span>${m.away || "-"}</span>
         </div>
       `;
     });
@@ -212,8 +227,10 @@ function changeDate(step){
 }
 
 /* ---------- INIT ---------- */
-updateDateUI();
-loadMatches();
+document.addEventListener("DOMContentLoaded", () => {
+  updateDateUI();
+  loadMatches();
+});
 </script>
 
 </body>

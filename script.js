@@ -6,11 +6,8 @@ const API_BASE = "https://goalguide-api-1.onrender.com";
 // =====================
 // DOM Elements
 // =====================
-const fixturesGrid = document.getElementById("fixtures");
 const liveGrid = document.getElementById("live");
 const todayGrid = document.getElementById("today");
-const tomorrowGrid = document.getElementById("tomorrow");
-const yesterdayGrid = document.getElementById("yesterday");
 const dateText = document.getElementById("dateText");
 
 // =====================
@@ -47,17 +44,40 @@ async function loadLive() {
 }
 
 // =====================
-// DATE NAV (Optional)
+// FETCH TODAY FIXTURES ✅ (အရေးကြီး)
 // =====================
-let currentDate = new Date();
+async function loadToday() {
+  todayGrid.innerHTML = "Loading...";
 
-function updateDateText() {
-  dateText.textContent = currentDate.toDateString();
+  try {
+    const res = await fetch(`${API_BASE}/api/fixtures/today`);
+    const data = await res.json();
+
+    todayGrid.innerHTML = "";
+
+    data.forEach(match => {
+      // DEBUG (မဖျက်ပါနဲ့)
+      console.log("MATCH 👉", match);
+
+      todayGrid.innerHTML += `
+        <a href="match.html?id=${match.id}" class="card">
+          <h3>${match.home} vs ${match.away}</h3>
+          <p>${match.league || "Unknown League"}</p>
+        </a>
+      `;
+    });
+
+  } catch (err) {
+    todayGrid.innerHTML = "Error loading fixtures";
+    console.error(err);
+  }
 }
 
-function changeDate(step) {
-  currentDate.setDate(currentDate.getDate() + step);
-  updateDateText();
+// =====================
+// DATE
+// =====================
+function updateDateText() {
+  dateText.textContent = new Date().toDateString();
 }
 
 // =====================
@@ -65,3 +85,4 @@ function changeDate(step) {
 // =====================
 updateDateText();
 loadLive();
+loadToday();

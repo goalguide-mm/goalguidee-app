@@ -169,45 +169,52 @@ function formatApiDate(offset){
   d.setDate(d.getDate() + offset);
   return d.toISOString().split("T")[0];
 }
+  
+function isSameDate(matchDate, offset){
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+
+  const apiDate = d.toISOString().split("T")[0];
+  return matchDate === apiDate;
+}
 
 /* change date */
 function changeDate(step){
   dayOffset += step;
   dateText.innerText = formatDate(dayOffset);
-
-  if(currentTab === "fixtures"){
-    loadMatches();
-  }
+  loadMatches();
 }
 
-/* render cards */
 function renderMatches(matches, title){
   let html = `<h3>${title}</h3>`;
 
-  matches.forEach(m => {
-    html += `
-      <div class="card">
-        <div class="league">Premier League</div>
-        <div class="match">
-          <div>${m.home}</div>
-          <strong>VS</strong>
-          <div>${m.away}</div>
+  matches
+    .filter(m => isSameDate(m.date, dayOffset))
+    .forEach(m => {
+      html += `
+        <div class="card">
+          <div class="league">Premier League</div>
+          <div class="match">
+            <div>${m.home}</div>
+            <strong>VS</strong>
+            <div>${m.away}</div>
+          </div>
+          <div class="date">${m.date} • ${m.time}</div>
         </div>
-        <div class="date">${m.date} • ${m.time}</div>
-      </div>
-    `;
-  });
+      `;
+    });
 
-  grid.innerHTML = html;
+  grid.innerHTML = html || "No matches";
 }
 
-/* load matches */
 async function loadMatches(){
   grid.innerHTML = "Loading...";
 
+  const apiDate = formatApiDate(dayOffset);
+
   let url = currentTab === "live"
     ? `${API_BASE}/api/live`
-    : `${API_BASE}/api/fixtures`;
+    : `${API_BASE}/api/fixtures?date=${apiDate}`;
 
   try{
     const r = await fetch(url);

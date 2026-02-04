@@ -7,13 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body{
-  margin:0;
-  font-family:Poppins,sans-serif;
+  font-family: Poppins, sans-serif;
   background:#0b0f14;
   color:#fff;
 }
+
 header{
   display:flex;
   justify-content:space-between;
@@ -21,6 +26,7 @@ header{
   padding:14px 24px;
   border-bottom:3px solid #f5c400;
 }
+
 .logo{
   display:flex;
   align-items:center;
@@ -28,15 +34,16 @@ header{
   font-weight:600;
   color:#f5c400;
 }
+
 nav button{
   background:none;
   border:none;
   color:#fff;
   margin-left:15px;
   cursor:pointer;
-  opacity:.6;
-  font-weight:600;
+  font-size:14px;
 }
+  
 nav button.active{
   opacity:1;
   border-bottom:2px solid #f5c400;

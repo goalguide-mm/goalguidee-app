@@ -181,9 +181,13 @@ footer{
 <footer>GOAL GUIDE © 2026</footer>
 
 <script>
-let dayOffset = 0;
+const API_BASE = "https://goalguide-api-1.onrender.com";
+const matchesEl = document.getElementById("matches");
 const dateText = document.getElementById("dateText");
 
+let dayOffset = 0;
+
+/* ---------- DATE ---------- */
 function updateDateUI(){
   if(dayOffset === 0) dateText.textContent = "Today";
   else if(dayOffset === -1) dateText.textContent = "Yesterday";
@@ -195,10 +199,71 @@ function updateDateUI(){
   }
 }
 
+/* ---------- LOAD MATCHES ---------- */
+async function loadMatches(){
+  matchesEl.innerHTML = "Loading...";
+
+  try{
+    const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
+    const data = await res.json();
+    renderMatches(data);
+  }catch(err){
+    matchesEl.innerHTML = "Failed to load data";
+  }
+}
+
+/* ---------- RENDER ---------- */
+function renderMatches(matches){
+  if(!matches || matches.length === 0){
+    matchesEl.innerHTML = "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
+    return;
+  }
+
+  // group by league
+  const leagues = {};
+  matches.forEach(m=>{
+    if(!leagues[m.league]) leagues[m.league] = [];
+    leagues[m.league].push(m);
+  });
+
+  let html = "";
+
+  Object.keys(leagues).forEach(league=>{
+    html += `
+      <section class="league">
+        <div class="league-header">${league}</div>
+    `;
+
+    leagues[league].forEach(m=>{
+      const isLive = m.status === "LIVE";
+      const statusText = isLive ? `${m.minute}'` : m.status;
+
+      html += `
+        <div class="match ${isLive ? "live" : ""}">
+          <span class="status ${isLive ? "live" : ""}">${statusText}</span>
+          <span>${m.home}</span>
+          <span class="score">${m.homeScore} - ${m.awayScore}</span>
+          <span>${m.away}</span>
+        </div>
+      `;
+    });
+
+    html += `</section>`;
+  });
+
+  matchesEl.innerHTML = html;
+}
+
+/* ---------- DATE CHANGE ---------- */
 function changeDate(step){
   dayOffset += step;
   updateDateUI();
+  loadMatches();
 }
+
+/* ---------- INIT ---------- */
+updateDateUI();
+loadMatches();
 </script>
 
 </body>

@@ -1,45 +1,29 @@
-const matches = [
-  {
-    id: 101,
-    home: "Liverpool",
-    away: "Man United",
-    status: "LIVE",
-    minute: 67
-  },
-  {
-    id: 201,
-    home: "Arsenal",
-    away: "Chelsea",
-    score: "2 - 1",
-    status: "FT"
-  }
-];
+const API = "http://localhost:3000";
 
-function render(data) {
-  const container = document.getElementById("matches");
-  container.innerHTML = "";
+fetch(API + "/api/fixtures")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("live").innerHTML =
+      data.live.map(m =>
+        `<div>🔴 ${m.home} vs ${m.away} (${m.minute}') </div>`
+      ).join("");
 
-  data.forEach(m => {
-    container.innerHTML += `
-      <div class="card">
-        <div class="league">${m.status}</div>
-        <div class="match">
-          <div>${m.home}</div>
-          <strong>${m.score || "VS"}</strong>
-          <div>${m.away}</div>
-        </div>
-      </div>
-    `;
+    document.getElementById("today").innerHTML =
+      data.today.map(m =>
+        `<div>📅 ${m.home} vs ${m.away} - ${m.time}</div>`
+      ).join("");
+
+    document.getElementById("tomorrow").innerHTML =
+      data.tomorrow.map(m =>
+        `<div>⏭️ ${m.home} vs ${m.away} - ${m.time}</div>`
+      ).join("");
   });
-}
 
-function setLoading(isLoading) {
-  document.querySelector(".loading").style.display =
-    isLoading ? "block" : "none";
-}
-
-setLoading(true);
-setTimeout(() => {
-  render(matches);
-  setLoading(false);
-}, 800);
+fetch(API + "/api/results")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("yesterday").innerHTML =
+      data.map(m =>
+        `<div>⏮️ ${m.home} ${m.score} ${m.away}</div>`
+      ).join("");
+  });

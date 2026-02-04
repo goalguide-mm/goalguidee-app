@@ -166,16 +166,11 @@ const dateText = document.getElementById("dateText");
 let dayOffset = 0;
 let currentTab = "fixtures";
 
-/* format date text */
-function formatDate(offset){
+/* format date for API */
+function formatApiDate(offset){
   const d = new Date();
   d.setDate(d.getDate() + offset);
-
-  if(offset === 0) return "Today";
-  if(offset === -1) return "Yesterday";
-  if(offset === 1) return "Tomorrow";
-
-  return d.toDateString();
+  return d.toISOString().split("T")[0];
 }
 
 /* change date */
@@ -212,6 +207,8 @@ function renderMatches(matches, title){
 /* load matches */
 async function loadMatches(){
   grid.innerHTML = "Loading...";
+
+  const apiDate = formatApiDate(dayOffset);
 
   let url = currentTab === "live"
     ? `${API_BASE}/api/live`

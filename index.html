@@ -57,6 +57,7 @@ header{
   padding:6px 14px;
   border-radius:999px;
   color:#9aa4b2;
+  cursor:pointer;
 }
 .tab.active{
   background:#facc15;
@@ -74,6 +75,13 @@ header{
   font-size:14px;
   font-weight:600;
   background:#1b2230;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.league-header img{
+  width:18px;
+  height:18px;
 }
 .match{
   display:grid;
@@ -82,12 +90,22 @@ header{
   gap:8px;
   padding:10px 14px;
   border-top:1px solid #222833;
+  cursor:pointer;
 }
 .match:hover{background:#1b2230}
 .status{font-size:12px;color:#9aa4b2}
 .status.live{color:#ef4444;font-weight:700}
 .score{font-weight:700}
 .live .score{color:#22c55e}
+.team{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.team img{
+  width:18px;
+  height:18px;
+}
 footer{
   text-align:center;
   padding:20px;
@@ -111,13 +129,11 @@ footer{
 </div>
 
 <div class="tabs">
-  <button class="tab active">LIVE</button>
-  <button class="tab">TODAY</button>
-  <button class="tab">TOMORROW</button>
-  <button class="tab">RESULTS</button>
+  <button class="tab active" data-tab="LIVE">LIVE</button>
+  <button class="tab" data-tab="TODAY">TODAY</button>
+  <button class="tab" data-tab="TOMORROW">TOMORROW</button>
 </div>
 
-<!-- API DATA WILL RENDER HERE -->
 <div id="matches"></div>
 
 <footer>GOAL GUIDE © 2026</footer>
@@ -126,111 +142,117 @@ footer{
 const API_BASE = "https://goalguide-api-1.onrender.com";
 const matchesEl = document.getElementById("matches");
 const dateText = document.getElementById("dateText");
+const tabs = document.querySelectorAll(".tab");
 
 let dayOffset = 0;
+let currentTab = "LIVE";
+
+/* ---------- TAB ---------- */
+tabs.forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    tabs.forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    currentTab = tab.dataset.tab;
+
+    if(currentTab === "TODAY") dayOffset = 0;
+    if(currentTab === "TOMORROW") dayOffset = 1;
+
+    updateDateUI();
+    loadMatches();
+  });
+});
 
 /* ---------- DATE ---------- */
 function updateDateUI(){
-  if(!dateText) return;
-
   if(dayOffset === 0) dateText.textContent = "Today";
-  else if(dayOffset === -1) dateText.textContent = "Yesterday";
   else if(dayOffset === 1) dateText.textContent = "Tomorrow";
-  else{
-    const d = new Date();
-    d.setDate(d.getDate() + dayOffset);
-    dateText.textContent = d.toDateString();
-  }
+  else if(dayOffset === -1) dateText.textContent = "Yesterday";
 }
 
-/* ---------- LOAD MATCHES ---------- */
+/* ---------- LOAD ---------- */
 async function loadMatches(){
-  if(!matchesEl) return;
-
   matchesEl.innerHTML = "<p style='padding:16px'>Loading...</p>";
 
   try{
     const res = await fetch(`${API_BASE}/api/fixtures?day=${dayOffset}`);
-    const data = await res.json();
+    let data = await res.json();
 
-    // API က array မဟုတ်ရင်
-    if(!Array.isArray(data)){
-      matchesEl.innerHTML =
-        "<p style='padding:16px;color:#ef4444'>Invalid API response</p>";
-      return;
+    if(currentTab === "LIVE"){
+      data = data.filter(m => m.status === "LIVE");
     }
 
     renderMatches(data);
 
-  }catch(err){
-    console.error(err);
-    matchesEl.innerHTML =
-      "<p style='padding:16px;color:#ef4444'>Failed to load data</p>";
+  }catch(e){
+    matchesEl.innerHTML = "<p style='padding:16px;color:red'>Error</p>";
   }
 }
 
-/* ---------- RENDER MATCHES ---------- */
+/* ---------- RENDER ---------- */
 function renderMatches(matches){
-  if(!matches || matches.length === 0){
+  if(!matches.length){
     matchesEl.innerHTML =
       "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
     return;
   }
 
   const leagues = {};
-
   matches.forEach(m=>{
-    const leagueName = m.league || "Unknown League";
-    if(!leagues[leagueName]) leagues[leagueName] = [];
-    leagues[leagueName].push(m);
+    if(!leagues[m.league]) leagues[m.league] = [];
+    leagues[m.league].push(m);
   });
 
   let html = "";
 
   Object.keys(leagues).forEach(league=>{
+    const lg = leagues[league][0];
+
     html += `
       <section class="league">
-        <div class="league-header">${league}</div>
+        <div class="league-header">
+          ${lg.leagueLogo ? `<img src="${lg.leagueLogo}">` : ""}
+          ${league}
+        </div>
     `;
 
     leagues[league].forEach(m=>{
       const isLive = m.status === "LIVE";
-      const statusText = isLive
-        ? `${m.minute ?? ""}'`
-        : (m.status || "");
-
       html += `
-        <div class="match ${isLive ? "live" : ""}">
-          <span class="status ${isLive ? "live" : ""}">
-            ${statusText}
+        <div class="match ${isLive?"live":""}"
+          onclick="openMatch('${m.id}')">
+          <span class="status ${isLive?"live":""}">
+            ${isLive ? m.minute+"'" : m.status}
           </span>
-          <span>${m.home || "-"}</span>
-          <span class="score">
-            ${m.homeScore ?? 0} - ${m.awayScore ?? 0}
-          </span>
-          <span>${m.away || "-"}</span>
+
+          <div class="team">
+            ${m.homeLogo ? `<img src="${m.homeLogo}">` : ""}
+            ${m.home}
+          </div>
+
+          <span class="score">${m.homeScore} - ${m.awayScore}</span>
+
+          <div class="team">
+            ${m.awayLogo ? `<img src="${m.awayLogo}">` : ""}
+            ${m.away}
+          </div>
         </div>
       `;
     });
 
-    html += `</section>`;
+    html += "</section>";
   });
 
   matchesEl.innerHTML = html;
 }
 
-/* ---------- DATE CHANGE ---------- */
-function changeDate(step){
-  dayOffset += step;
-  updateDateUI();
-  loadMatches();
+/* ---------- MATCH CLICK ---------- */
+function openMatch(id){
+  window.location.href = `match.html?id=${id}`;
 }
 
 /* ---------- INIT ---------- */
-document.addEventListener("DOMContentLoaded", () => {
-  updateDateUI();
-  loadMatches();
-});
+updateDateUI();
+loadMatches();
 </script>
 
 </body>

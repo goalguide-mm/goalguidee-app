@@ -169,6 +169,13 @@ function updateDateUI(){
   else if(dayOffset === -1) dateText.textContent = "Yesterday";
 }
 
+/* ✅ FIX #1 — GLOBAL changeDate */
+window.changeDate = function(step){
+  dayOffset += step;
+  updateDateUI();
+  loadMatches();
+};
+
 /* ---------- LOAD ---------- */
 async function loadMatches(){
   matchesEl.innerHTML = "<p style='padding:16px'>Loading...</p>";
@@ -188,18 +195,20 @@ async function loadMatches(){
   }
 }
 
-/* ---------- RENDER ---------- */
+/* ✅ FIX #2 — SAFE MAP RENDER */
 function renderMatches(matches){
-  if(!matches.length){
+  if(!matches || !matches.length){
     matchesEl.innerHTML =
       "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
     return;
   }
 
   const leagues = {};
+
   matches.forEach(m=>{
-    if(!leagues[m.league]) leagues[m.league] = [];
-    leagues[m.league].push(m);
+    const league = m.league || m.league_name || "Unknown League";
+    if(!leagues[league]) leagues[league] = [];
+    leagues[league].push(m);
   });
 
   let html = "";
@@ -210,30 +219,38 @@ function renderMatches(matches){
     html += `
       <section class="league">
         <div class="league-header">
-          ${lg.leagueLogo ? `<img src="${lg.leagueLogo}">` : ""}
+          ${lg.leagueLogo || lg.league_logo ? `<img src="${lg.leagueLogo || lg.league_logo}">` : ""}
           ${league}
         </div>
     `;
 
     leagues[league].forEach(m=>{
       const isLive = m.status === "LIVE";
+
+      const home = m.home || m.home_team || "-";
+      const away = m.away || m.away_team || "-";
+
+      const hs = m.homeScore ?? m.score_home ?? "";
+      const as = m.awayScore ?? m.score_away ?? "";
+
       html += `
         <div class="match ${isLive?"live":""}"
           onclick="openMatch('${m.id}')">
+
           <span class="status ${isLive?"live":""}">
-            ${isLive ? m.minute+"'" : m.status}
+            ${isLive ? (m.minute ?? "") + "'" : m.status}
           </span>
 
           <div class="team">
-            ${m.homeLogo ? `<img src="${m.homeLogo}">` : ""}
-            ${m.home}
+            ${m.homeLogo || m.home_logo ? `<img src="${m.homeLogo || m.home_logo}">` : ""}
+            ${home}
           </div>
 
-          <span class="score">${m.homeScore} - ${m.awayScore}</span>
+          <span class="score">${hs !== "" ? hs : ""}${hs !== "" ? " - " : ""}${as !== "" ? as : ""}</span>
 
           <div class="team">
-            ${m.awayLogo ? `<img src="${m.awayLogo}">` : ""}
-            ${m.away}
+            ${m.awayLogo || m.away_logo ? `<img src="${m.awayLogo || m.away_logo}">` : ""}
+            ${away}
           </div>
         </div>
       `;

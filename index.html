@@ -190,55 +190,68 @@ function renderMatches(matches) {
     return;
   }
 
+  // ၁။ ပွဲစဉ်တွေကို အချိန်အလိုက် အရင်စီပါ (Earliest first)
+  matches.sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at));
+
+  // ၂။ ပွဲစဉ်တွေကို League အလိုက် အုပ်စုဖွဲ့ပါ
+  const groupedMatches = matches.reduce((acc, match) => {
+    const leagueName = match.league?.name || "Other Leagues";
+    if (!acc[leagueName]) acc[leagueName] = [];
+    acc[leagueName].push(match);
+    return acc;
+  }, {});
+
   let html = "";
-  matches.forEach(m => {
-    const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
-    const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
-    
-    // Live Status စစ်ဆေးခြင်း
-    const isLive = m.state && ["INPLAY", "HT", "LIVE"].includes(m.state.state);
-    
-    // မြန်မာစံတော်ချိန် ပြောင်းလဲခြင်း
-    const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
 
-    // Score ရယူခြင်း (အမှန်ပြင်ထားသောအပိုင်း)
-    const homeScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
-    const awayScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
-
-    const homeScore = homeScoreObj ? homeScoreObj.score.goals : 0;
-    const awayScore = awayScoreObj ? awayScoreObj.score.goals : 0;
+  // ၃။ အုပ်စုဖွဲ့ထားတဲ့အတိုင်း ပတ်ပြီး HTML ထုတ်ပါ
+  for (const leagueName in groupedMatches) {
+    const leagueLogo = groupedMatches[leagueName][0].league?.image_path;
     
-    // ပွဲမစသေးရင် vs ပြမယ်၊ စနေရင် (သို့) ပြီးရင် ရလဒ်ပြမယ်
-    const displayScore = (m.state?.state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
-
     html += `
       <section class="league">
         <div class="league-header">
-          <img src="${m.league?.image_path}" style="width:16px; vertical-align:middle; margin-right:8px;" onerror="this.style.display='none'">
-          ${m.league?.name || "Football Match"}
+          <img src="${leagueLogo}" style="width:18px; height:18px; vertical-align:middle; margin-right:8px; border-radius:2px;" onerror="this.style.display='none'">
+          ${leagueName}
         </div>
+    `;
+
+    groupedMatches[leagueName].forEach(m => {
+      const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
+      const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
+      
+      const isLive = m.state && ["INPLAY", "HT", "LIVE"].includes(m.state.state);
+      const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
+
+      const homeScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
+      const awayScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
+
+      const homeScore = homeScoreObj ? homeScoreObj.score.goals : 0;
+      const awayScore = awayScoreObj ? awayScoreObj.score.goals : 0;
+      const displayScore = (m.state?.state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
+
+      html += `
         <div class="match">
           <div class="time-status">
             ${isLive ? '<span class="live-dot">● LIVE</span>' : matchTime}
           </div>
-
           <div class="team">
             <img src="${homeTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${homeTeam?.name || 'TBD'}</span>
           </div>
-
           <div class="score-box">
             ${displayScore}
           </div>
-
           <div class="team">
             <img src="${awayTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${awayTeam?.name || 'TBD'}</span>
           </div>
         </div>
-      </section>
-    `;
-  });
+      `;
+    });
+
+    html += `</section>`;
+  }
+
   matchesEl.innerHTML = html;
 }
 

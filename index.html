@@ -37,7 +37,6 @@
     display:grid; grid-template-columns: 80px 1fr 60px 1fr; align-items:center;
     padding:16px 14px; border-top:1px solid #222833; transition: 0.3s;
   }
-  /* Live Glow Effect */
   .match.live-match { background: rgba(239, 68, 68, 0.03); border-left: 3px solid #ef4444; }
 
   .time-status{ font-size:12px; color:#fff; font-weight: 800; text-align: left; }
@@ -48,7 +47,7 @@
 
   .team{ display:flex; flex-direction: column; align-items:center; gap:8px; text-align: center; }
   .team img{ width:30px; height:30px; object-fit: contain; }
-  .team span{ font-size: 12px; font-weight: 500; color: #e5e7eb; }
+  .team span{ font-size: 12px; font-weight: 500; color: #e5e7eb; line-height: 1.2; }
 
   .score-box{ font-size: 18px; font-weight:800; text-align: center; color: #facc15; }
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
@@ -76,7 +75,9 @@ const API_BASE = "https://goalguide-api-1.onrender.com";
 const matchesEl = document.getElementById("matches");
 const dateInput = document.getElementById("matchDate");
 
-let selectedDate = new Date().toISOString().split('T')[0];
+// လက်ရှိ မြန်မာစံတော်ချိန် ရက်စွဲကို ရယူခြင်း
+let now = new Date();
+let selectedDate = now.toLocaleDateString('en-CA'); // YYYY-MM-DD format
 dateInput.value = selectedDate;
 
 function handleDateChange(date) { selectedDate = date; loadMatches(); }
@@ -84,7 +85,7 @@ function handleDateChange(date) { selectedDate = date; loadMatches(); }
 function changeDate(days) {
   let d = new Date(selectedDate);
   d.setDate(d.getDate() + days);
-  selectedDate = d.toISOString().split('T')[0];
+  selectedDate = d.toLocaleDateString('en-CA');
   dateInput.value = selectedDate;
   loadMatches();
 }
@@ -95,7 +96,7 @@ async function loadMatches() {
     const data = await res.json();
     renderMatches(data);
   } catch (e) {
-    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Refreshing connection...</p>";
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Connecting to server...</p>";
   }
 }
 
@@ -106,10 +107,11 @@ const fixUrl = (url) => {
 
 function renderMatches(matches) {
   if (!matches || !matches.length) {
-    matchesEl.innerHTML = "<p style='padding:50px; text-align:center; color:#8b949e;'>No matches found.</p>";
+    matchesEl.innerHTML = "<p style='padding:50px; text-align:center; color:#8b949e;'>No matches found for this date.</p>";
     return;
   }
 
+  // အချိန်အလိုက် စီခြင်း (မြန်မာစံတော်ချိန်သို့ အလိုအလျောက် ပြောင်းလဲပြီးသားဖြစ်မည်)
   matches.sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at));
 
   const grouped = matches.reduce((acc, m) => {
@@ -139,7 +141,7 @@ function renderMatches(matches) {
       const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
       const isFinished = ["FT", "AET", "PEN_FT"].includes(state);
       
-      // မိနစ်နှင့် အခြေအနေပြောင်းခြင်း
+      // Timezone Conversion: UTC မှ Local Time သို့ ပြောင်းခြင်း
       let timeHtml = "";
       if (isLive) {
         const min = m.state?.minute ? `${m.state.minute}'` : (state === "HT" ? "HT" : "LIVE");
@@ -147,6 +149,7 @@ function renderMatches(matches) {
       } else if (isFinished) {
         timeHtml = `<span class="finished">FT</span>`;
       } else {
+        // မြန်မာစံတော်ချိန်ဖြင့် ပြသခြင်း
         timeHtml = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
       }
 
@@ -177,9 +180,7 @@ function renderMatches(matches) {
   matchesEl.innerHTML = html;
 }
 
-// ၁ မိနစ်တစ်ခါ Update လုပ်ရန် (ပိုမြန်စေရန်)
 setInterval(loadMatches, 60000); 
-
 loadMatches();
 </script>
 </body>

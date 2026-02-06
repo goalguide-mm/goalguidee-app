@@ -6,6 +6,7 @@
     <title>GOAL GUIDE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* UI Styling */
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Inter',sans-serif;background:#0b0f14;color:#fff;}
         header{padding:16px;background:#111827;display:flex;justify-content:center;position:sticky;top:0;z-index:100;border-bottom:1px solid #1f2937;}
@@ -16,15 +17,17 @@
         .tabs{display:flex;gap:10px;padding:0 15px 20px;justify-content:center;}
         .tab{background:#151a21;border:1px solid #30363d;padding:10px 25px;border-radius:999px;color:#9aa4b2;cursor:pointer;font-weight:600;}
         .tab.active{background:#facc15;color:#000;border-color:#facc15;}
+        
+        /* Match Display */
         .league{margin:0 15px 15px;background:#151a21;border-radius:12px;border:1px solid #1f2937;overflow:hidden;}
         .league-header{padding:12px 15px;font-size:12px;font-weight:700;background:#1b2230;color:#8b949e;display:flex;align-items:center;gap:10px;}
         .league-header img{width:20px;height:20px;}
         .match{display:grid;grid-template-columns:70px 1fr 70px 1fr;align-items:center;padding:15px;border-top:1px solid #1f2937;}
         .team{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
         .team img{width:35px;height:35px;object-fit:contain;}
-        .team span{font-size:13px;font-weight:600;}
-        .score-box{font-size:20px;font-weight:800;text-align:center;color:#facc15;}
-        .time-status{font-size:12px;color:#9aa4b2;font-weight:700;text-align:center;}
+        .team span{font-size:12px;font-weight:600;}
+        .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
+        .time-status{font-size:11px;color:#9aa4b2;font-weight:700;text-align:center;}
         .live-tag{color:#ef4444;animation:blink 1.2s infinite;}
         @keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }
         .no-data{text-align:center;padding:50px;color:#8b949e;}
@@ -48,6 +51,7 @@
 <div id="matches"></div>
 
 <script>
+    // သင့် Backend API URL - အဆုံးမှာ / မပါစေရပါ
     const API_BASE = "https://goalguide-api-1.onrender.com"; 
     const matchesEl = document.getElementById("matches");
     const dateInput = document.getElementById("matchDate");
@@ -77,21 +81,27 @@
     }
 
     async function loadMatches() {
-        matchesEl.innerHTML = "<p class='no-data'>Loading scores...</p>";
-        const url = (currentTab === "LIVE") ? `${API_BASE}/api/live` : `${API_BASE}/api/fixtures/date/${selectedDate}`;
+        matchesEl.innerHTML = "<p class='no-data'>Updating matches...</p>";
+        
+        // URL Path များကို Backend နှင့် ကိုက်ညီအောင် ပြင်ထားသည်
+        const url = (currentTab === "LIVE") 
+            ? `${API_BASE}/api/live` 
+            : `${API_BASE}/api/fixtures/date/${selectedDate}`;
 
         try {
             const res = await fetch(url);
+            if (!res.ok) throw new Error('API Error');
             const data = await res.json();
             renderMatches(data);
         } catch (e) {
-            matchesEl.innerHTML = "<p class='no-data' style='color:#ef4444;'>Connection Error. Please check if Backend is running.</p>";
+            console.error("Fetch Error:", e);
+            matchesEl.innerHTML = "<p class='no-data' style='color:#ef4444;'>Connection Error. Please check your Backend status.</p>";
         }
     }
 
     function renderMatches(data) {
         if (!data || data.length === 0) {
-            matchesEl.innerHTML = "<p class='no-data'>No matches found for this date.</p>";
+            matchesEl.innerHTML = `<p class='no-data'>No matches available right now.</p>`;
             return;
         }
 
@@ -99,23 +109,27 @@
         data.forEach(m => {
             const status = m.fixture.status.short;
             const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
+            // ဂိုးရလဒ် logic
             const score = (status === "NS") ? "vs" : `${m.goals.home ?? 0} - ${m.goals.away ?? 0}`;
             
             html += `
             <div class="league">
                 <div class="league-header">
-                    <img src="${m.league.logo}"> ${m.league.name}
+                    <img src="${m.league.logo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"> 
+                    ${m.league.name}
                 </div>
                 <div class="match">
                     <div class="time-status">
                         ${isLive ? `<span class="live-tag">● ${m.fixture.status.elapsed}'</span>` : status}
                     </div>
                     <div class="team">
-                        <img src="${m.teams.home.logo}"> <span>${m.teams.home.name}</span>
+                        <img src="${m.teams.home.logo}"> 
+                        <span>${m.teams.home.name}</span>
                     </div>
                     <div class="score-box">${score}</div>
                     <div class="team">
-                        <img src="${m.teams.away.logo}"> <span>${m.teams.away.name}</span>
+                        <img src="${m.teams.away.logo}"> 
+                        <span>${m.teams.away.name}</span>
                     </div>
                 </div>
             </div>`;
@@ -123,7 +137,9 @@
         matchesEl.innerHTML = html;
     }
 
+    // Initialize
     loadMatches();
+    // Live update 每 30 seconds
     setInterval(() => { if(currentTab === "LIVE") loadMatches(); }, 30000);
 </script>
 </body>

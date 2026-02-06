@@ -81,8 +81,9 @@
     border-top:1px solid #222833;
   }
 
-  .time-status{ font-size:14px; color:#fff; font-weight: 800; }
-  .live-dot { color: #ef4444; animation: blink 1.5s infinite; }
+  .time-status{ font-size:13px; color:#fff; font-weight: 800; text-align: left; }
+  .live-dot { color: #ef4444; animation: blink 1.5s infinite; display: block; margin-bottom: 2px; }
+  .match-min { color: #ef4444; font-size: 14px; font-weight: 800; }
   @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
 
   .team{ display:flex; flex-direction: column; align-items:center; gap:8px; text-align: center; }
@@ -138,11 +139,10 @@ async function loadMatches() {
     const data = await res.json();
     renderMatches(data);
   } catch (e) {
-    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Server is starting... Please wait 30s.</p>";
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Connecting to server...</p>";
   }
 }
 
-// Logo URL များကို HTTPS ပြောင်းပေးရန်
 const fixUrl = (url) => {
     if (!url) return 'https://cdn-icons-png.flaticon.com/512/53/53234.png';
     return url.replace('http://', 'https://');
@@ -157,7 +157,6 @@ function renderMatches(matches) {
   // အချိန်အလိုက် စီခြင်း
   matches.sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at));
 
-  // လိဂ်အလိုက် အုပ်စုဖွဲ့ခြင်း
   const grouped = matches.reduce((acc, m) => {
     const lName = m.league?.name || "Other Leagues";
     if (!acc[lName]) acc[lName] = [];
@@ -180,19 +179,25 @@ function renderMatches(matches) {
     grouped[lName].forEach(m => {
       const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
       const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
-      const isLive = m.state && ["INPLAY", "HT", "LIVE"].includes(m.state.state);
+      
+      // Live Status နှင့် Minute တွက်ချက်ခြင်း
+      const state = m.state?.state;
+      const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
+      const matchMinute = m.state?.minute ? `${m.state.minute}'` : (state === "HT" ? "HT" : "");
+      
       const mTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
 
-      // ဂိုးရလဒ် Logic အမှန်
       const hScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
       const aScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
       const hScore = hScoreObj ? hScoreObj.score.goals : 0;
       const aScore = aScoreObj ? aScoreObj.score.goals : 0;
-      const displayScore = (m.state?.state === "NS") ? "vs" : `${hScore} - ${aScore}`;
+      const displayScore = (state === "NS") ? "vs" : `${hScore} - ${aScore}`;
 
       html += `
         <div class="match">
-          <div class="time-status">${isLive ? '<span class="live-dot">● LIVE</span>' : mTime}</div>
+          <div class="time-status">
+            ${isLive ? `<span class="live-dot">● LIVE</span><span class="match-min">${matchMinute}</span>` : mTime}
+          </div>
           <div class="team">
             <img src="${fixUrl(homeTeam?.image_path)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${homeTeam?.name || 'TBD'}</span>
@@ -209,6 +214,9 @@ function renderMatches(matches) {
   }
   matchesEl.innerHTML = html;
 }
+
+// ၅ မိနစ်တစ်ခါ အလိုအလျောက် Refresh လုပ်ရန်
+setInterval(loadMatches, 300000); 
 
 loadMatches();
 </script>

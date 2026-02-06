@@ -111,7 +111,7 @@ function renderMatches(matches) {
     return;
   }
 
-  // အချိန်အလိုက် စီခြင်း (မြန်မာစံတော်ချိန်သို့ အလိုအလျောက် ပြောင်းလဲပြီးသားဖြစ်မည်)
+  // ၁။ အချိန်အလိုက် စီခြင်း (UTC မှ Local သို့ အလိုအလျောက် ပြောင်းမည်)
   matches.sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at));
 
   const grouped = matches.reduce((acc, m) => {
@@ -137,28 +137,36 @@ function renderMatches(matches) {
       const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
       const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
       
-      const state = m.state?.state;
+      const state = m.state?.state; // API မှလာသော ပွဲအခြေအနေ
       const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
       const isFinished = ["FT", "AET", "PEN_FT"].includes(state);
+      const isPostponed = ["POSTPONED", "PP"].includes(state); // PP စစ်ခြင်း
       
-      // Timezone Conversion: UTC မှ Local Time သို့ ပြောင်းခြင်း
+      // ၂။ အချိန်နှင့် အခြေအနေပြသမှု Logic
       let timeHtml = "";
-      if (isLive) {
-        const min = m.state?.minute ? `${m.state.minute}'` : (state === "HT" ? "HT" : "LIVE");
-        timeHtml = `<span class="live-dot">● LIVE</span><span class="match-min">${min}</span>`;
-      } else if (isFinished) {
-        timeHtml = `<span class="finished">FT</span>`;
-      } else {
-        // မြန်မာစံတော်ချိန်ဖြင့် ပြသခြင်း
-        timeHtml = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
-      }
+      let scoreHtml = "";
 
       const hScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
       const aScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
       const hScore = hScoreObj ? hScoreObj.score.goals : 0;
       const aScore = aScoreObj ? aScoreObj.score.goals : 0;
-      
-      const displayScore = (state === "NS") ? "vs" : `${hScore} - ${aScore}`;
+
+      if (isPostponed) {
+        timeHtml = `<span style="color: #ff9f43;">PP</span>`; // PP အတွက် လိမ္မော်ရောင်
+        // ပွဲရွှေ့ရင် ဂိုးမပြဘဲ မူလကန်မည့်အချိန်ကို ခပ်ဖျော့ဖျော့ပြမည်
+        const originalTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "";
+        scoreHtml = `<span style="text-decoration: line-through; color: #4b5563; font-size: 14px;">${originalTime}</span>`;
+      } else if (isLive) {
+        const min = m.state?.minute ? `${m.state.minute}'` : (state === "HT" ? "HT" : "LIVE");
+        timeHtml = `<span class="live-dot">● LIVE</span><span class="match-min">${min}</span>`;
+        scoreHtml = `${hScore} - ${aScore}`;
+      } else if (isFinished) {
+        timeHtml = `<span class="finished">FT</span>`;
+        scoreHtml = `${hScore} - ${aScore}`;
+      } else {
+        timeHtml = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
+        scoreHtml = "vs";
+      }
 
       html += `
         <div class="match ${isLive ? 'live-match' : ''}">
@@ -167,7 +175,7 @@ function renderMatches(matches) {
             <img src="${fixUrl(homeTeam?.image_path)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${homeTeam?.name || 'TBD'}</span>
           </div>
-          <div class="score-box">${displayScore}</div>
+          <div class="score-box" style="${isPostponed ? 'font-size: 14px;' : ''}">${scoreHtml}</div>
           <div class="team">
             <img src="${fixUrl(awayTeam?.image_path)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${awayTeam?.name || 'TBD'}</span>
@@ -179,7 +187,7 @@ function renderMatches(matches) {
   }
   matchesEl.innerHTML = html;
 }
-
+  
 setInterval(loadMatches, 60000); 
 loadMatches();
 </script>

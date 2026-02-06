@@ -3,81 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOAL GUIDE | Scores, Details & Highlights</title>
+<title>GOAL GUIDE | Pro Scores & Details</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Inter,sans-serif;background:#0b0f14;color:#fff;}
-  
   header{display:flex;align-items:center;padding:12px 16px;background:#111827;position:sticky;top:0;z-index:100;gap:12px;border-bottom:1px solid #1f2937;}
   .logo-img{width:40px;height:40px;border-radius:8px;object-fit:cover;}
   .logo-text{font-weight:800;color:#facc15;font-size:20px;}
 
-  /* Navigation */
   .nav-tabs{display:flex;background:#111827;padding:0 16px;gap:20px;position:sticky;top:64px;z-index:99;border-bottom:1px solid #1f2937;}
-  .tab-btn{padding:14px 0;background:none;border:none;color:#8b949e;font-weight:700;font-size:13px;cursor:pointer;position:relative;text-transform:uppercase;letter-spacing:1px;}
+  .tab-btn{padding:14px 0;background:none;border:none;color:#8b949e;font-weight:700;font-size:13px;cursor:pointer;position:relative;text-transform:uppercase;}
   .tab-btn.active{color:#facc15;}
-  .tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:#facc15;border-radius:3px 3px 0 0;}
+  .tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:#facc15;}
 
   .content-section{display:none;}
   .content-section.active{display:block;}
 
-  /* Matches List */
   .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;background:#0b0f14;}
   .date-bar button{background:#1f2937;border:none;color:#fff;width:35px;height:35px;border-radius:10px;cursor:pointer;}
-  .date-bar input[type="date"]{background:#1f2937;border:none;color:#fff;padding:8px 12px;border-radius:8px;outline:none;font-family:inherit;}
+  .date-bar input[type="date"]{background:#1f2937;border:none;color:#fff;padding:8px 12px;border-radius:8px;outline:none;color-scheme:dark;}
   
   .league{margin:0 12px 16px 12px;background:#151a21;border-radius:12px;border:1px solid #30363d;overflow:hidden;}
-  .league-header{padding:10px 14px;font-size:11px;text-transform:uppercase;font-weight:700;background:#1b2230;color:#8b949e;}
+  .league-header{padding:10px 14px;font-size:11px;font-weight:700;background:#1b2230;color:#8b949e;text-transform:uppercase;}
   
-  .match{display:grid;grid-template-columns:80px 1fr 60px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;transition: background 0.2s;}
-  .match:hover{background: rgba(255,255,255,0.03);}
-  .match.live-match{background:rgba(239,68,68,0.03);border-left:3px solid #ef4444;}
-  .time-status{font-size:11px;font-weight:800;}
+  .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;transition:0.2s;}
+  .match:hover{background:rgba(255,255,255,0.03);}
+  .match.live-match{border-left:3px solid #ef4444;background:rgba(239,68,68,0.03);}
+  .time-status{font-size:11px;font-weight:800;text-align:left;}
   .live-dot{color:#ef4444;animation:blink 1.5s infinite;display:block;}
-  .match-min{color:#ef4444;}
   @keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
 
   .team{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
   .team img{width:30px;height:30px;object-fit:contain;}
-  .team span{font-size:12px;font-weight:500;color:#e5e7eb;line-height:1.2;}
+  .team span{font-size:12px;font-weight:500;line-height:1.2;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* Highlights Grid */
   .highlights-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;padding:16px;}
   .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
   .thumb-wrap{position:relative;aspect-ratio:16/9;background:#000;}
   .thumb-wrap img{width:100%;height:100%;object-fit:cover;opacity:0.7;}
-  .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45px;height:45px;background:#facc15;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;}
-  .hl-info{padding:12px;}
-  .hl-title{font-size:14px;font-weight:700;color:#e5e7eb;margin-bottom:5px;}
-  .hl-meta{font-size:11px;color:#8b949e;}
+  .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45px;height:45px;background:#facc15;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;}
 
-  /* Global Modal (Pop-up) */
-  .modal {
-    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
-    width: 100%; height: 100%; background: rgba(0,0,0,0.92);
-    align-items: center; justify-content: center; padding: 20px;
-  }
-  .modal-content {
-    background: #111827; width: 100%; max-width: 550px; border-radius: 16px;
-    position: relative; border: 1px solid #30363d; max-height: 90vh; overflow-y: auto;
-  }
-  .close-modal {
-    position: absolute; top: 15px; right: 20px; color: #8b949e;
-    font-size: 24px; cursor: pointer; font-weight: bold; z-index: 10;
-  }
-  
-  /* Match Detail specific UI */
-  .detail-header { text-align: center; padding: 20px; border-bottom: 1px solid #1f2937; }
-  .event-list { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-  .event-item { display: flex; align-items: center; gap: 12px; font-size: 13px; padding: 10px; background: #1b2230; border-radius: 10px; }
-  .event-time { font-weight: 800; color: #facc15; min-width: 35px; }
-
-  /* Video container inside Modal */
-  .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000; margin: 10px; }
-  .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-
+  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;}
+  .modal-content{background:#111827;width:100%;max-width:550px;border-radius:16px;position:relative;border:1px solid #30363d;max-height:90vh;overflow-y:auto;}
+  .close-modal{position:absolute;top:15px;right:20px;color:#8b949e;font-size:24px;cursor:pointer;z-index:10;}
+  .event-list{padding:15px;display:flex;flex-direction:column;gap:8px;}
+  .event-item{display:flex;align-items:center;gap:12px;font-size:13px;padding:10px;background:#1b2230;border-radius:10px;}
+  .video-container{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;background:#000;margin:10px;}
+  .video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
 </head>
@@ -131,7 +105,6 @@ const mmTimeFormatter = new Intl.DateTimeFormat('en-US', {
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-  
   if(tab === 'matches') {
     document.getElementById('btn-matches').classList.add('active');
     document.getElementById('section-matches').classList.add('active');
@@ -144,7 +117,7 @@ function switchTab(tab) {
 }
 
 async function loadMatches() {
-  matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>အချက်အလက်များ ရယူနေပါသည်...</p>";
+  matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating scores...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
@@ -154,7 +127,7 @@ async function loadMatches() {
 
 function renderMatches(matches) {
   if(!matches || !matches.length) {
-    matchesList.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါ။</p>";
+    matchesList.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>No matches for this date.</p>";
     return;
   }
   matches.sort((a,b) => new Date(a.starting_at) - new Date(b.starting_at));
@@ -173,16 +146,31 @@ function renderMatches(matches) {
       const away = m.participants?.find(p => p.meta?.location === 'away');
       const state = m.state?.state;
       const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
+      const isPP = ["POSTPONED", "PP", "CANCELLED", "ABANDONED"].includes(state);
+      
       const hScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === home?.id)?.score?.goals ?? 0;
       const aScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === away?.id)?.score?.goals ?? 0;
 
-      let timeHtml = isLive ? `<span class="live-dot">● LIVE</span><span class="match-min">${m.state?.minute ? m.state.minute+"'" : "LIVE"}</span>` : (state === "FT" ? "<span style='color:#8b949e;'>FT</span>" : mmTimeFormatter.format(new Date(m.starting_at)));
+      let timeHtml = "";
+      let scoreHtml = hScore + " - " + aScore;
+
+      if(isPP) {
+        timeHtml = `<span style="color:#ef4444; font-weight:bold;">PP</span>`;
+        scoreHtml = `<span style="text-decoration:line-through; color:#4b5563; font-size:14px;">${mmTimeFormatter.format(new Date(m.starting_at))}</span>`;
+      } else if(isLive) {
+        timeHtml = `<span class="live-dot">● LIVE</span><span style="color:#ef4444;">${m.state?.minute ? m.state.minute+"'" : ""}</span>`;
+      } else if(state === "FT") {
+        timeHtml = `<span style="color:#8b949e;">FT</span>`;
+      } else {
+        timeHtml = mmTimeFormatter.format(new Date(m.starting_at));
+        scoreHtml = "vs";
+      }
 
       html += `
         <div class="match ${isLive ? 'live-match' : ''}" onclick="showMatchDetail(${m.id})">
           <div class="time-status">${timeHtml}</div>
           <div class="team"><img src="${home?.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'"><span>${home?.name}</span></div>
-          <div class="score-box">${state === "NS" ? "vs" : hScore + " - " + aScore}</div>
+          <div class="score-box">${scoreHtml}</div>
           <div class="team"><img src="${away?.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'"><span>${away?.name}</span></div>
         </div>`;
     });
@@ -191,44 +179,33 @@ function renderMatches(matches) {
   matchesList.innerHTML = html;
 }
 
-// Match Details Logic
 async function showMatchDetail(id) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = "<p style='text-align:center;padding:40px;'>အသေးစိတ် အချက်အလက်များကို ဆွဲယူနေပါသည်...</p>";
+  body.innerHTML = "<p style='text-align:center;padding:40px;'>Loading...</p>";
   modal.style.display = "flex";
-
   try {
     const res = await fetch(`${API_BASE}/api/match/${id}`);
     const data = await res.json();
-    
     let eventsHtml = data.events && data.events.length > 0 ? data.events.map(ev => {
-      let icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name === "Yellowcard" ? "🟨" : (ev.type?.name === "Redcard" ? "🟥" : "🔄"));
+      let icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name.includes("Yellow") ? "🟨" : "🟥");
       return `<div class="event-item"><span class="event-time">${ev.minute}'</span><span>${icon}</span><span>${ev.player_name || 'Player'}</span></div>`;
-    }).join('') : "<p style='text-align:center;padding:30px;color:#8b949e;'>အချက်အလက်များ မရှိသေးပါ။</p>";
-
-    body.innerHTML = `
-      <div class="detail-header"><h3 style="color:#facc15;">Match Events</h3><p style="font-size:12px;color:#8b949e;margin-top:5px;">ဂိုးနှင့် ကတ်ပြားမှတ်တမ်းများ</p></div>
-      <div class="event-list">${eventsHtml}</div>`;
-  } catch (e) { body.innerHTML = "<p style='padding:20px;'>အချက်အလက်များ ရယူ၍မရပါ။</p>"; }
+    }).join('') : "<p style='text-align:center;padding:30px;color:#8b949e;'>No events yet.</p>";
+    body.innerHTML = `<div style="text-align:center;padding:20px;border-bottom:1px solid #1f2937;"><h3 style="color:#facc15;">Match Events</h3></div><div class="event-list">${eventsHtml}</div>`;
+  } catch (e) { closeModal(); }
 }
 
-// Highlights Logic
 async function loadHighlights() {
-  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>ဗီဒီယိုများကို ရှာဖွေနေပါသည်...</p>";
+  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Loading Highlights...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
-    if(!data || data.length === 0) {
-      highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>လောလောဆယ် Highlight မရှိသေးပါ။</p>";
-      return;
-    }
     highlightsList.innerHTML = data.slice(0, 20).map(item => `
       <div class="hl-card" onclick="openVideo('${item.matchviewUrl}')">
         <div class="thumb-wrap"><img src="${item.thumbnail}"><div class="play-btn">▶</div></div>
         <div class="hl-info"><div class="hl-title">${item.title}</div><div class="hl-meta">${item.competition}</div></div>
       </div>`).join('');
-  } catch (e) { highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Highlight အမှားရှိနေပါသည်။</p>"; }
+  } catch (e) { highlightsList.innerHTML = "<p>Error loading videos.</p>"; }
 }
 
 function openVideo(url) {
@@ -246,10 +223,7 @@ function changeDate(n) {
 }
 
 loadMatches();
-setInterval(loadMatches, 60000); // 1 min auto refresh scores
-setInterval(() => {
-  if(document.getElementById('section-highlights').classList.contains('active')) loadHighlights();
-}, 300000); // 5 min auto refresh highlights
+setInterval(loadMatches, 60000);
 </script>
 </body>
 </html>

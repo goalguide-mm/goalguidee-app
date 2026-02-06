@@ -201,11 +201,19 @@ function renderMatches(matches) {
     // မြန်မာစံတော်ချိန်ပြောင်းလဲခြင်း
     const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
 
-    // Score ရယူခြင်း
-    const homeScore = m.scores?.find(s => s.description === "CURRENT" && s.score.participant_id === homeTeam?.id)?.score?.goals ?? 0;
-    const awayScore = m.scores?.find(s => s.description === "CURRENT" && s.score.participant_id === awayTeam?.id)?.score?.goals ?? 0;
-    const displayScore = (m.state?.state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
+   // Score ရယူခြင်း (Line 204 - 207 နေရာမှာ အစားထိုးရန်)
+    const homeScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
+    const awayScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
 
+    const homeScore = homeScoreObj ? homeScoreObj.score.goals : 0;
+    const awayScore = awayScoreObj ? awayScoreObj.score.goals : 0;
+    const displayScore = (m.state?.state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
+    
+<div class="league-header">
+  <img src="${m.league?.image_path}" style="width:16px; vertical-align:middle; margin-right:8px;">
+  ${m.league?.name || "Football Match"}
+</div>
+  
     html += `
       <section class="league">
         <div class="league-header">${m.league?.name || "Football Match"}</div>

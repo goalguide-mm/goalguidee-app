@@ -245,6 +245,14 @@ function renderMatches(matches) {
           <div class="time-status">
             ${isLive ? '<span class="live-dot">● LIVE</span>' : matchTime}
           </div>
+         
+          const leagueLogo = m.league?.image_path;
+
+      // HTML string ထဲမှာ အစားထိုးရန်
+          <div class="league-header">
+          <img src="${leagueLogo}" style="width:20px; height:20px; margin-right:8px;">
+          ${m.league?.name}
+          </div>
 
           <div class="team">
             <img src="${homeTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">

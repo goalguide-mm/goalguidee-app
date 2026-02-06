@@ -168,9 +168,37 @@ function renderMatches(matches) {
   matchesList.innerHTML = html;
 }
 
+// Highlights Section Update
 async function loadHighlights() {
-  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>Highlights coming soon...</p>";
-  // Highlights API ရှိလျှင် ဤနေရာတွင် fetch လုပ်ပါ
+  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>ဗီဒီယိုများကို ရှာဖွေနေပါသည်...</p>";
+  try {
+    const res = await fetch(`${API_BASE}/api/highlights`);
+    const data = await res.json();
+    
+    if(!data || data.length === 0) {
+      highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>လောလောဆယ် Highlight မရှိသေးပါ။</p>";
+      return;
+    }
+    renderHighlights(data);
+  } catch (e) {
+    highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#ef4444;'>Highlight ဆွဲယူ၍ မရနိုင်ပါ။</p>";
+  }
+}
+
+function renderHighlights(items) {
+  // နောက်ဆုံးရဗီဒီယို ၁၅ ခုကိုပြပေးမည်
+  highlightsList.innerHTML = items.slice(0, 15).map(item => `
+    <div class="hl-card" onclick="window.open('${item.matchviewUrl}', '_blank')">
+      <div class="thumb-wrap">
+        <img src="${item.thumbnail}" alt="Thumbnail" onerror="this.src='https://via.placeholder.com/300x169/111827/FFFFFF?text=Video+Thumbnail'">
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="hl-info">
+        <div class="hl-title">${item.title}</div>
+        <div class="hl-meta">${item.competition}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function handleDateChange(v) { selectedDate = v; loadMatches(); }

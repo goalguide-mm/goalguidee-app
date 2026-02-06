@@ -53,6 +53,20 @@
   .hl-title{font-size:14px;font-weight:700;color:#e5e7eb;margin-bottom:5px;}
   .hl-meta{font-size:11px;color:#8b949e;}
 
+  /* Video Modal (Pop-up) Style */
+  .modal {
+    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.95);
+    align-items: center; justify-content: center;
+  }
+  .modal-content { width: 95%; max-width: 900px; position: relative; }
+  .close-modal {
+    position: absolute; top: -45px; right: 0; color: #fff;
+    font-size: 30px; cursor: pointer; font-weight: bold;
+  }
+  .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000; }
+  .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
 </head>
@@ -79,6 +93,14 @@
 
 <div id="section-highlights" class="content-section">
   <div class="highlights-grid" id="highlights-list"></div>
+</div>
+
+<div id="videoModal" class="modal" onclick="closeVideo()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="close-modal" onclick="closeVideo()">&times;</span>
+    <div class="video-container" id="videoPlayer">
+      </div>
+  </div>
 </div>
 
 <footer>GOAL GUIDE © 2026</footer>
@@ -173,7 +195,6 @@ async function loadHighlights() {
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
-    
     if(!data || data.length === 0) {
       highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>လောလောဆယ် Highlight မရှိသေးပါ။</p>";
       return;
@@ -186,7 +207,7 @@ async function loadHighlights() {
 
 function renderHighlights(items) {
   highlightsList.innerHTML = items.slice(0, 15).map(item => `
-    <div class="hl-card" onclick="window.open('${item.matchviewUrl}', '_blank')">
+    <div class="hl-card" onclick="openVideo('${item.matchviewUrl}')">
       <div class="thumb-wrap">
         <img src="${item.thumbnail}" alt="Thumbnail" onerror="this.src='https://via.placeholder.com/300x169/111827/FFFFFF?text=Video+Thumbnail'">
         <div class="play-btn">▶</div>
@@ -199,27 +220,35 @@ function renderHighlights(items) {
   `).join('');
 }
 
+// Video Popup Logic
+function openVideo(url) {
+  const modal = document.getElementById("videoModal");
+  const player = document.getElementById("videoPlayer");
+  // ScoreBat ရဲ့ Video Link ကို iframe ထဲမှာ ပေါ်အောင် လုပ်ခြင်း
+  player.innerHTML = `<iframe src="${url}" allowfullscreen allow='autoplay'></iframe>`;
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden"; // Background scroll ပိတ်မယ်
+}
+
+function closeVideo() {
+  const modal = document.getElementById("videoModal");
+  const player = document.getElementById("videoPlayer");
+  player.innerHTML = ""; // ဗီဒီယိုကို လုံးဝ ရပ်ပစ်ဖို့ innerHTML ကို ရှင်းမယ်
+  modal.style.display = "none";
+  document.body.style.overflow = "auto"; // Background scroll ပြန်ဖွင့်မယ်
+}
+
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { 
   let d = new Date(selectedDate); d.setDate(d.getDate()+n); 
   selectedDate = d.toLocaleDateString('en-CA'); dateInput.value = selectedDate; loadMatches(); 
 }
 
-// Initial Load
 loadMatches();
-
-// --- အသစ်ထည့်လိုက်သော Auto-Update အပိုင်း ---
-// ၁ မိနစ်တစ်ခါ Matches ကို Update လုပ်မည်
 setInterval(loadMatches, 60000);
-
-// ၅ မိနစ်တစ်ခါ Highlights ကို Update လုပ်မည် (Highlight Tab ရောက်နေမှသာ)
 setInterval(() => {
-  const isHighlightTab = document.getElementById('section-highlights').classList.contains('active');
-  if (isHighlightTab) {
-    loadHighlights();
-  }
-}, 300000); 
-
+  if (document.getElementById('section-highlights').classList.contains('active')) loadHighlights();
+}, 300000);
 </script>
 </body>
 </html>

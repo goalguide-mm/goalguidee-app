@@ -168,7 +168,6 @@ function renderMatches(matches) {
   matchesList.innerHTML = html;
 }
 
-// Highlights Section Update
 async function loadHighlights() {
   highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>ဗီဒီယိုများကို ရှာဖွေနေပါသည်...</p>";
   try {
@@ -186,7 +185,6 @@ async function loadHighlights() {
 }
 
 function renderHighlights(items) {
-  // နောက်ဆုံးရဗီဒီယို ၁၅ ခုကိုပြပေးမည်
   highlightsList.innerHTML = items.slice(0, 15).map(item => `
     <div class="hl-card" onclick="window.open('${item.matchviewUrl}', '_blank')">
       <div class="thumb-wrap">
@@ -207,8 +205,21 @@ function changeDate(n) {
   selectedDate = d.toLocaleDateString('en-CA'); dateInput.value = selectedDate; loadMatches(); 
 }
 
+// Initial Load
 loadMatches();
+
+// --- အသစ်ထည့်လိုက်သော Auto-Update အပိုင်း ---
+// ၁ မိနစ်တစ်ခါ Matches ကို Update လုပ်မည်
 setInterval(loadMatches, 60000);
+
+// ၅ မိနစ်တစ်ခါ Highlights ကို Update လုပ်မည် (Highlight Tab ရောက်နေမှသာ)
+setInterval(() => {
+  const isHighlightTab = document.getElementById('section-highlights').classList.contains('active');
+  if (isHighlightTab) {
+    loadHighlights();
+  }
+}, 300000); 
+
 </script>
 </body>
 </html>

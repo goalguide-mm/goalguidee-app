@@ -2,33 +2,137 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GOAL GUIDE</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOAL GUIDE | Football Scores</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* သင့်ရဲ့ မူလ CSS တွေအတိုင်း ထားလိုက်ပါသည် (ဘာမှပြင်စရာမလိုပါ) */
+  /* Modern FotMob Style */
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Inter,system-ui,sans-serif;background:#0b0f14;color:#fff;}
-  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#111827;}
-  .logo{font-weight:800;color:#facc15}
-  .search{flex:1;background:#151a21;border:none;border-radius:999px;padding:8px 14px;color:#fff;}
-  .date-bar{display:flex;justify-content:center;align-items:center;gap:14px;padding:10px;}
-  .date-bar button{background:#151a21;border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;}
-  .date-text{font-weight:600}
-  .tabs{display:flex;gap:8px;padding:10px 12px;}
-  .tab{background:#151a21;border:none;padding:6px 14px;border-radius:999px;color:#9aa4b2;cursor:pointer;}
-  .tab.active{background:#facc15;color:#000;font-weight:700;}
-  .league{margin:12px;background:#151a21;border-radius:12px;overflow:hidden;}
-  .league-header{padding:10px 14px;font-size:14px;font-weight:600;background:#1b2230;display:flex;align-items:center;gap:8px;}
-  .league-header img{width:18px;height:18px;}
-  .match{display:grid;grid-template-columns:50px 1fr auto 1fr;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #222833;cursor:pointer;}
-  .match:hover{background:#1b2230}
-  .status{font-size:12px;color:#9aa4b2}
-  .status.live{color:#ef4444;font-weight:700}
-  .score{font-weight:700; min-width: 40px; text-align: center;}
-  .live .score{color:#22c55e}
-  .team{display:flex;align-items:center;gap:6px;}
-  .team img{width:18px;height:18px;}
-  footer{text-align:center;padding:20px;color:#6b7280;font-size:13px;}
+  
+  header{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding:16px;
+    background:#111827;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo{font-weight:800;color:#facc15; font-size: 20px;}
+
+  /* Date Bar Styling */
+  .date-bar{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    padding:15px;
+    background:#0b0f14;
+  }
+  .date-bar button{
+    background:#1f2937;
+    border:none;
+    color:#fff;
+    width:35px;
+    height:35px;
+    border-radius:10px;
+    cursor:pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .date-bar input[type="date"] {
+    background: #1f2937;
+    border: none;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 600;
+    outline: none;
+  }
+
+  .tabs{
+    display:flex;
+    gap:8px;
+    padding:0 16px 12px 16px;
+  }
+  .tab{
+    background:#151a21;
+    border:1px solid #30363d;
+    padding:8px 20px;
+    border-radius:999px;
+    color:#9aa4b2;
+    cursor:pointer;
+    font-weight:600;
+    transition: 0.2s;
+  }
+  .tab.active{
+    background:#facc15;
+    color:#000;
+    border-color: #facc15;
+  }
+
+  /* Match Cards */
+  .league{
+    margin:0 12px 16px 12px;
+    background:#151a21;
+    border-radius:12px;
+    border: 1px solid #30363d;
+    overflow:hidden;
+  }
+  .league-header{
+    padding:10px 14px;
+    font-size:12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight:700;
+    background:#1b2230;
+    color: #8b949e;
+  }
+  
+  .match{
+    display:grid;
+    grid-template-columns: 60px 1fr 50px 1fr;
+    align-items:center;
+    padding:16px 14px;
+    border-top:1px solid #222833;
+    transition: 0.2s;
+  }
+  .match:hover{background:#1c2128}
+
+  .time-status{
+    font-size:12px;
+    color:#9aa4b2;
+    font-weight: 600;
+  }
+  .live-dot {
+    color: #ef4444;
+    font-weight: 800;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
+
+  .team{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    gap:8px;
+    text-align: center;
+  }
+  .team img{ width:32px; height:32px; object-fit: contain; }
+  .team span{ font-size: 13px; font-weight: 500; }
+
+  .score-box{
+    font-size: 18px;
+    font-weight:800;
+    text-align: center;
+    color: #facc15;
+  }
+
+  footer{text-align:center;padding:30px;color:#6b7280;font-size:12px;}
 </style>
 </head>
 
@@ -36,18 +140,17 @@
 
 <header>
   <div class="logo">⚽ GOAL GUIDE</div>
-  <input class="search" placeholder="Search teams or leagues">
 </header>
 
-<div class="date-bar">
+<div class="date-bar" id="dateBarContainer">
   <button onclick="changeDate(-1)">◀</button>
-  <span class="date-text" id="dateText">Today</span>
+  <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
   <button onclick="changeDate(1)">▶</button>
 </div>
 
 <div class="tabs">
   <button class="tab active" data-tab="LIVE">LIVE</button>
-  <button class="tab" data-tab="TODAY">TODAY</button>
+  <button class="tab" data-tab="FIXTURES">MATCHES</button>
 </div>
 
 <div id="matches"></div>
@@ -57,82 +160,99 @@
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
 const matchesEl = document.getElementById("matches");
-const dateText = document.getElementById("dateText");
+const dateInput = document.getElementById("matchDate");
 const tabs = document.querySelectorAll(".tab");
 
 let currentTab = "LIVE";
+let selectedDate = new Date().toISOString().split('T')[0];
+
+// Initialize Date Input
+dateInput.value = selectedDate;
 
 tabs.forEach(tab=>{
   tab.addEventListener("click",()=>{
     tabs.forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
     currentTab = tab.dataset.tab;
-    updateDateUI();
+    
+    // LIVE tab နှိပ်ရင် Date Bar ကို ခေတ္တဖျောက်ထားနိုင်သည်
+    document.getElementById('dateBarContainer').style.display = (currentTab === "LIVE") ? "none" : "flex";
+    
     loadMatches();
   });
 });
 
-function updateDateUI(){
-  dateText.textContent = (currentTab === "LIVE") ? "Live Scores" : "Today's Matches";
+function handleDateChange(date) {
+  selectedDate = date;
+  loadMatches();
+}
+
+function changeDate(days) {
+  let d = new Date(selectedDate);
+  d.setDate(d.getDate() + days);
+  selectedDate = d.toISOString().split('T')[0];
+  dateInput.value = selectedDate;
+  loadMatches();
 }
 
 async function loadMatches() {
-  matchesEl.innerHTML = "<p style='padding:16px;'>Loading matches...</p>";
+  matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching matches...</p>";
 
   try {
-    // URL ကို Sportmonks backend route နဲ့ကိုက်အောင်ပြင်လိုက်ပါပြီ
-    let url = (currentTab === "LIVE") ? `${API_BASE}/api/live` : `${API_BASE}/api/fixtures/today`;
+    let url = "";
+    if (currentTab === "LIVE") {
+      url = `${API_BASE}/api/live`;
+    } else {
+      url = `${API_BASE}/api/fixtures/date/${selectedDate}`;
+    }
 
     const res = await fetch(url);
     const data = await res.json();
-
-    // Sportmonks data က array တိုက်ရိုက်လာတာမို့လို့ data ပဲပို့ပါမယ်
     renderMatches(data);
   } catch (e) {
-    console.error(e);
-    matchesEl.innerHTML = "<p style='padding:16px;color:red'>Error connecting to server</p>";
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Failed to load. Please try again.</p>";
   }
 }
 
 function renderMatches(matches){
   if(!matches || !matches.length){
-    matchesEl.innerHTML = "<p style='padding:16px;color:#9aa4b2'>No matches available.</p>";
+    matchesEl.innerHTML = "<p style='padding:50px; text-align:center; color:#8b949e;'>No matches found for this date.</p>";
     return;
   }
 
   let html = "";
 
   matches.forEach(m=>{
-    // Sportmonks Format အရ data ထုတ်ယူခြင်း
     const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
     const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
-    
-    // ပွဲစဉ်အခြေအနေ (Live ဖြစ်မဖြစ်စစ်ဆေးခြင်း)
     const isLive = m.state?.state === "LIVE" || m.state?.short_name === "LIVE";
+    
+    // ပွဲစမည့်အချိန်
+    const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "TBD";
 
     html += `
       <section class="league">
         <div class="league-header">
-          ${m.name || "Football Match"}
+          ${m.league?.name || "Football Match"}
         </div>
 
-        <div class="match ${isLive ? "live" : ""}">
-          <span class="status ${isLive ? "live" : ""}">
-            ${m.starting_at ? new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}
-          </span>
-
-          <div class="team">
-            <img src="${homeTeam?.image_path || ''}">
-            ${homeTeam?.name || 'TBD'}
+        <div class="match">
+          <div class="time-status">
+            ${isLive ? '<span class="live-dot">● LIVE</span>' : matchTime}
           </div>
 
-          <span class="score">
+          <div class="team">
+            <img src="${homeTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
+            <span>${homeTeam?.name || 'TBD'}</span>
+          </div>
+
+          <div class="score-box">
             ${m.result_info || "vs"}
-          </span>
+          </div>
 
           <div class="team">
-            <img src="${awayTeam?.image_path || ''}">
-            ${awayTeam?.name || 'TBD'}
+            <img src="${awayTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
+            <span>${awayTeam?.name || 'TBD'}</span>
           </div>
         </div>
       </section>
@@ -142,6 +262,7 @@ function renderMatches(matches){
   matchesEl.innerHTML = html;
 }
 
+// Initial Load
 loadMatches();
 </script>
 

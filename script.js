@@ -1,15 +1,14 @@
-// script.js ထဲမှာ ဒီလိုမျိုး ပြင်ပေးပါ
-async function loadMatches(type) {
-    const statusElement = document.getElementById('loading-status'); // သင့် ID အလိုက် ပြင်ပါ
+// script.js ထဲမှာ ရှာပြီးပြင်ပါ
+async function fetchMatches() {
     try {
-        // သင့်ရဲ့ Render Backend URL ကို သုံးပါ
-        const response = await fetch(`https://goalguide-api-1.onrender.com/api/fixtures/today`);
+        // သင့်ရဲ့ Render Backend URL ကို အသုံးပြုပါ
+        const response = await fetch('https://goalguide-api-1.onrender.com/api/fixtures/today');
         const data = await response.json();
         
-        // Sportmonks data format က array တိုက်ရိုက်လာတာမို့လို့ပါ
-        displayMatches(data); 
+        // အောက်က display function ကို data လှမ်းပို့ပါ
+        renderMatches(data);
     } catch (error) {
-        console.error("Error:", error);
-        document.body.innerHTML += '<p style="color:red">Error loading matches</p>';
+        console.error("Error fetching data:", error);
+        document.getElementById('matches-container').innerHTML = "Error loading matches";
     }
 }

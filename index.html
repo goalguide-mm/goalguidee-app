@@ -6,70 +6,53 @@
 <title>GOAL GUIDE | Football Scores & Highlights</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Base Style */
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Inter,sans-serif;background:#0b0f14;color:#fff;}
   
-  header{
-    display:flex; align-items:center; padding:12px 16px; background:#111827;
-    position: sticky; top: 0; z-index: 100; gap: 12px; border-bottom: 1px solid #1f2937;
-  }
-  .logo-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
-  .logo-text { font-weight: 800; color: #facc15; font-size: 20px; }
+  header{display:flex;align-items:center;padding:12px 16px;background:#111827;position:sticky;top:0;z-index:100;gap:12px;border-bottom:1px solid #1f2937;}
+  .logo-img{width:40px;height:40px;border-radius:8px;object-fit:cover;}
+  .logo-text{font-weight:800;color:#facc15;font-size:20px;}
 
   /* Tab Navigation */
-  .nav-tabs {
-    display: flex; background: #111827; padding: 0 16px; gap: 20px;
-    position: sticky; top: 64px; z-index: 99;
-  }
-  .tab-btn {
-    padding: 14px 0; background: none; border: none; color: #8b949e;
-    font-weight: 700; font-size: 14px; cursor: pointer; position: relative;
-  }
-  .tab-btn.active { color: #facc15; }
-  .tab-btn.active::after {
-    content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
-    height: 3px; background: #facc15; border-radius: 3px 3px 0 0;
-  }
+  .nav-tabs{display:flex;background:#111827;padding:0 16px;gap:20px;position:sticky;top:64px;z-index:99;border-bottom:1px solid #1f2937;}
+  .tab-btn{padding:14px 0;background:none;border:none;color:#8b949e;font-weight:700;font-size:13px;cursor:pointer;position:relative;text-transform:uppercase;letter-spacing:1px;}
+  .tab-btn.active{color:#facc15;}
+  .tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:#facc15;border-radius:3px 3px 0 0;}
 
-  /* Content Sections */
-  .content-section { display: none; padding-top: 10px; }
-  .content-section.active { display: block; }
+  .content-section{display:none;}
+  .content-section.active{display:block;}
+
+  /* Matches Style */
+  .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;background:#0b0f14;}
+  .date-bar button{background:#1f2937;border:none;color:#fff;width:35px;height:35px;border-radius:10px;cursor:pointer;}
+  .date-bar input[type="date"]{background:#1f2937;border:none;color:#fff;padding:8px 12px;border-radius:8px;outline:none;font-family:inherit;}
+  
+  .league{margin:0 12px 16px 12px;background:#151a21;border-radius:12px;border:1px solid #30363d;overflow:hidden;}
+  .league-header{padding:10px 14px;font-size:11px;text-transform:uppercase;font-weight:700;background:#1b2230;color:#8b949e;display:flex;align-items:center;}
+  
+  .match{display:grid;grid-template-columns:80px 1fr 60px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;}
+  .match.live-match{background:rgba(239,68,68,0.03);border-left:3px solid #ef4444;}
+  .time-status{font-size:11px;font-weight:800;}
+  .live-dot{color:#ef4444;animation:blink 1.5s infinite;display:block;}
+  .match-min{color:#ef4444;}
+  .finished{color:#8b949e;}
+  @keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
+
+  .team{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
+  .team img{width:30px;height:30px;object-fit:contain;}
+  .team span{font-size:12px;font-weight:500;color:#e5e7eb;line-height:1.2;}
+  .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
   /* Highlights Style */
-  .highlights-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px; padding: 16px;
-  }
-  .highlight-card {
-    background: #151a21; border-radius: 12px; overflow: hidden;
-    border: 1px solid #30363d; cursor: pointer; transition: 0.3s;
-  }
-  .highlight-card:hover { transform: translateY(-5px); }
-  .thumb-wrap { position: relative; aspect-ratio: 16/9; background: #000; }
-  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-  .play-icon {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 50px; height: 50px; background: rgba(250,204,21,0.9);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  }
-  .hl-info { padding: 12px; }
-  .hl-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: #e5e7eb; }
-  .hl-meta { font-size: 11px; color: #8b949e; }
+  .highlights-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;padding:16px;}
+  .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
+  .thumb-wrap{position:relative;aspect-ratio:16/9;background:#000;}
+  .thumb-wrap img{width:100%;height:100%;object-fit:cover;opacity:0.7;}
+  .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45px;height:45px;background:#facc15;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;}
+  .hl-info{padding:12px;}
+  .hl-title{font-size:14px;font-weight:700;color:#e5e7eb;margin-bottom:5px;}
+  .hl-meta{font-size:11px;color:#8b949e;}
 
-  /* အရင်ရှိပြီးသား Livescore Style များ */
-  .date-bar{ display:flex; justify-content:center; align-items:center; gap:10px; padding:15px; background:#0b0f14; }
-  .date-bar button{ background:#1f2937; border:none; color:#fff; width:35px; height:35px; border-radius:10px; cursor:pointer; }
-  .date-bar input[type="date"]{ background:#1f2937; border:none; color:#fff; padding:8px 12px; border-radius:8px; outline:none; font-family:inherit; }
-  .league{ margin:0 12px 16px 12px; background:#151a21; border-radius:12px; border:1px solid #30363d; overflow:hidden; }
-  .league-header{ padding:10px 14px; font-size:11px; text-transform:uppercase; font-weight:700; background:#1b2230; color:#8b949e; display:flex; align-items:center; }
-  .match{ display:grid; grid-template-columns: 80px 1fr 60px 1fr; align-items:center; padding:16px 14px; border-top:1px solid #222833; }
-  .time-status{ font-size:12px; font-weight:800; }
-  .live-dot { color: #ef4444; animation: blink 1.5s infinite; }
-  .score-box{ font-size: 18px; font-weight:800; text-align: center; color:#facc15; }
-  .team img{ width:30px; height:30px; margin-bottom: 5px; }
-  .team { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 12px; }
-  @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
 </head>
@@ -81,11 +64,11 @@
 </header>
 
 <nav class="nav-tabs">
-  <button class="tab-btn active" onclick="switchTab('matches')">MATCHES</button>
-  <button class="tab-btn" onclick="switchTab('highlights')">HIGHLIGHTS</button>
+  <button id="btn-matches" class="tab-btn active" onclick="switchTab('matches')">Matches</button>
+  <button id="btn-highlights" class="tab-btn" onclick="switchTab('highlights')">Highlights</button>
 </nav>
 
-<div id="matches-section" class="content-section active">
+<div id="section-matches" class="content-section active">
   <div class="date-bar">
     <button onclick="changeDate(-1)">◀</button>
     <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
@@ -94,9 +77,8 @@
   <div id="matches-list"></div>
 </div>
 
-<div id="highlights-section" class="content-section">
-  <div class="highlights-grid" id="highlights-list">
-    </div>
+<div id="section-highlights" class="content-section">
+  <div class="highlights-grid" id="highlights-list"></div>
 </div>
 
 <footer>GOAL GUIDE © 2026</footer>
@@ -110,67 +92,85 @@ const dateInput = document.getElementById("matchDate");
 let selectedDate = new Date().toLocaleDateString('en-CA');
 dateInput.value = selectedDate;
 
+const mmTimeFormatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Yangon', hour: '2-digit', minute: '2-digit', hour12: true
+});
+
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
   
   if(tab === 'matches') {
-    document.querySelector('button[onclick*="matches"]').classList.add('active');
-    document.getElementById('matches-section').classList.add('active');
+    document.getElementById('btn-matches').classList.add('active');
+    document.getElementById('section-matches').classList.add('active');
     loadMatches();
   } else {
-    document.querySelector('button[onclick*="highlights"]').classList.add('active');
-    document.getElementById('highlights-section').classList.add('active');
+    document.getElementById('btn-highlights').classList.add('active');
+    document.getElementById('section-highlights').classList.add('active');
     loadHighlights();
   }
 }
 
-// --- Livescore Logic (မူလအတိုင်း) ---
 async function loadMatches() {
+  matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating scores...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
-  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;padding:20px;'>Error loading matches...</p>"; }
+  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#ef4444;'>Server error.</p>"; }
 }
 
 function renderMatches(matches) {
-  if(!matches.length) { matchesList.innerHTML = "<p style='text-align:center;padding:50px;'>No matches.</p>"; return; }
-  // အပေါ်က logic အဟောင်းအတိုင်း ဤနေရာတွင် render လုပ်ပါ (ရိုးရှင်းအောင် ချုံ့ထားသည်)
-  let html = ""; 
-  matches.forEach(m => {
-    html += `<div class="league"><div class="league-header">${m.league?.name}</div><div class="match">...</div></div>`;
-  });
+  if(!matches || !matches.length) {
+    matchesList.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>No matches today.</p>";
+    return;
+  }
+  matches.sort((a,b) => new Date(a.starting_at) - new Date(b.starting_at));
+  const grouped = matches.reduce((acc, m) => {
+    const lName = m.league?.name || "Other Leagues";
+    if(!acc[lName]) acc[lName] = [];
+    acc[lName].push(m);
+    return acc;
+  }, {});
+
+  let html = "";
+  for(const lName in grouped) {
+    html += `<section class="league"><div class="league-header">${lName}</div>`;
+    grouped[lName].forEach(m => {
+      const home = m.participants?.find(p => p.meta?.location === 'home');
+      const away = m.participants?.find(p => p.meta?.location === 'away');
+      const state = m.state?.state;
+      const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
+      const isFT = ["FT", "AET", "PEN_FT"].includes(state);
+      const isPP = ["POSTPONED", "PP"].includes(state);
+
+      const hScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === home?.id)?.score?.goals ?? 0;
+      const aScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === away?.id)?.score?.goals ?? 0;
+
+      let timeHtml = "";
+      let scoreHtml = isPP ? `<span style="text-decoration:line-through;color:#4b5563;font-size:14px;">${m.starting_at ? mmTimeFormatter.format(new Date(m.starting_at)) : ""}</span>` : (state === "NS" ? "vs" : `${hScore} - ${aScore}`);
+
+      if(isPP) timeHtml = `<span style="color:#ff9f43;">PP</span>`;
+      else if(isLive) timeHtml = `<span class="live-dot">● LIVE</span><span class="match-min">${m.state?.minute ? m.state.minute+"'" : "LIVE"}</span>`;
+      else if(isFT) timeHtml = `<span class="finished">FT</span>`;
+      else timeHtml = m.starting_at ? mmTimeFormatter.format(new Date(m.starting_at)) : "TBD";
+
+      html += `
+        <div class="match ${isLive ? 'live-match' : ''}">
+          <div class="time-status">${timeHtml}</div>
+          <div class="team"><img src="${home?.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'"><span>${home?.name}</span></div>
+          <div class="score-box">${scoreHtml}</div>
+          <div class="team"><img src="${away?.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'"><span>${away?.name}</span></div>
+        </div>`;
+    });
+    html += `</section>`;
+  }
   matchesList.innerHTML = html;
 }
 
-// --- Highlights Logic ---
 async function loadHighlights() {
-  highlightsList.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding:50px;'>Loading highlights...</p>";
-  try {
-    // API က Highlights ဒေတာပေးတဲ့ URL ကို ပြောင်းလဲအသုံးပြုနိုင်သည်
-    const res = await fetch(`${API_BASE}/api/highlights`); 
-    const data = await res.json();
-    renderHighlights(data);
-  } catch (e) {
-    highlightsList.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding:50px;'>Highlights coming soon!</p>";
-  }
-}
-
-function renderHighlights(items) {
-  if(!items.length) { highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;'>No highlights found.</p>"; return; }
-  highlightsList.innerHTML = items.map(item => `
-    <div class="highlight-card" onclick="window.open('${item.url}', '_blank')">
-      <div class="thumb-wrap">
-        <img src="${item.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/FFFFFF?text=Video+Thumbnail'">
-        <div class="play-icon">▶</div>
-      </div>
-      <div class="hl-info">
-        <div class="hl-title">${item.title}</div>
-        <div class="hl-meta">${item.league} • ${item.date}</div>
-      </div>
-    </div>
-  `).join('');
+  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;color:#8b949e;'>Highlights coming soon...</p>";
+  // Highlights API ရှိလျှင် ဤနေရာတွင် fetch လုပ်ပါ
 }
 
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
@@ -179,7 +179,8 @@ function changeDate(n) {
   selectedDate = d.toLocaleDateString('en-CA'); dateInput.value = selectedDate; loadMatches(); 
 }
 
-loadMatches(); // ပထမဆုံးဝင်ဝင်ချင်း Livescore အရင်ပြမည်
+loadMatches();
+setInterval(loadMatches, 60000);
 </script>
 </body>
 </html>

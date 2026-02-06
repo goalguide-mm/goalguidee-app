@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOAL GUIDE | Pro Scores</title>
+    <title>GOAL GUIDE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
@@ -12,22 +12,21 @@
         .logo{font-weight:800;color:#facc15;font-size:22px;}
         .date-bar{display:flex;justify-content:center;align-items:center;gap:12px;padding:20px 15px;}
         .date-bar button{background:#1f2937;border:none;color:#fff;width:35px;height:35px;border-radius:10px;cursor:pointer;}
-        .date-bar input{background:#1f2937;border:none;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;font-family:inherit;}
+        .date-bar input{background:#1f2937;border:none;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;}
         .tabs{display:flex;gap:10px;padding:0 15px 20px;justify-content:center;}
         .tab{background:#151a21;border:1px solid #30363d;padding:10px 25px;border-radius:999px;color:#9aa4b2;cursor:pointer;font-weight:600;}
-        .tab.active{background:#facc15;color:#000;border-color:#facc15;}
+        .tab.active{background:#facc15;color:#000;}
         .league{margin:0 15px 15px;background:#151a21;border-radius:12px;border:1px solid #1f2937;overflow:hidden;}
         .league-header{padding:12px 15px;font-size:12px;font-weight:700;background:#1b2230;color:#8b949e;display:flex;align-items:center;gap:10px;}
         .league-header img{width:20px;height:20px;}
-        .match{display:grid;grid-template-columns:70px 1fr 70px 1fr;align-items:center;padding:20px 15px;border-top:1px solid #1f2937;}
+        .match{display:grid;grid-template-columns:70px 1fr 70px 1fr;align-items:center;padding:15px;border-top:1px solid #1f2937;}
         .team{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
-        .team img{width:35px;height:35px;object-fit:contain;}
-        .team span{font-size:13px;font-weight:600;}
-        .score-box{font-size:20px;font-weight:800;text-align:center;color:#facc15;}
-        .time-status{font-size:12px;color:#9aa4b2;font-weight:700;text-align:center;}
+        .team img{width:30px;height:30px;object-fit:contain;}
+        .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
+        .time-status{font-size:11px;color:#9aa4b2;font-weight:700;text-align:center;}
         .live-tag{color:#ef4444;animation:blink 1.2s infinite;}
         @keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }
-        .status-msg{text-align:center;padding:50px;color:#8b949e;}
+        .no-data{text-align:center;padding:50px;color:#8b949e;}
     </style>
 </head>
 <body>
@@ -48,13 +47,13 @@
 <div id="matches"></div>
 
 <script>
+    // သင့် Backend API URL
     const API_BASE = "https://goalguide-api-1.onrender.com"; 
     const matchesEl = document.getElementById("matches");
     const dateInput = document.getElementById("matchDate");
     
     let currentTab = "LIVE";
     let selectedDate = new Date().toISOString().split('T')[0];
-
     dateInput.value = selectedDate;
 
     function setTab(tab) {
@@ -64,11 +63,7 @@
         loadMatches();
     }
 
-    function handleDateChange(date) {
-        selectedDate = date;
-        setTab('MATCHES');
-    }
-
+    function handleDateChange(date) { selectedDate = date; setTab('MATCHES'); }
     function changeDate(n) {
         let d = new Date(selectedDate);
         d.setDate(d.getDate() + n);
@@ -78,25 +73,21 @@
     }
 
     async function loadMatches() {
-        matchesEl.innerHTML = "<p class='status-msg'>Loading...</p>";
-        
-        const url = (currentTab === "LIVE") 
-            ? `${API_BASE}/api/live` 
-            : `${API_BASE}/api/fixtures/date/${selectedDate}`;
+        matchesEl.innerHTML = "<p class='no-data'>Loading scores...</p>";
+        const url = (currentTab === "LIVE") ? `${API_BASE}/api/live` : `${API_BASE}/api/fixtures/date/${selectedDate}`;
 
         try {
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Offline');
             const data = await res.json();
             renderMatches(data);
         } catch (e) {
-            matchesEl.innerHTML = "<p class='status-msg' style='color:#ef4444;'>Backend is starting up. Refresh in 1 min.</p>";
+            matchesEl.innerHTML = "<p class='no-data' style='color:#ef4444;'>Backend Offline. Please wait for Render to restart.</p>";
         }
     }
 
     function renderMatches(data) {
         if (!data || data.length === 0) {
-            matchesEl.innerHTML = `<p class='status-msg'>No matches found.</p>`;
+            matchesEl.innerHTML = "<p class='no-data'>No matches found.</p>";
             return;
         }
 
@@ -109,30 +100,25 @@
             html += `
             <div class="league">
                 <div class="league-header">
-                    <img src="${m.league.logo}" onerror="this.style.display='none'"> 
-                    ${m.league.name}
+                    <img src="${m.league.logo}" onerror="this.style.display='none'"> ${m.league.name}
                 </div>
                 <div class="match">
                     <div class="time-status">
                         ${isLive ? `<span class="live-tag">● ${m.fixture.status.elapsed}'</span>` : status}
                     </div>
                     <div class="team">
-                        <img src="${m.teams.home.logo}">
-                        <span>${m.teams.home.name}</span>
+                        <img src="${m.teams.home.logo}"> <span>${m.teams.home.name}</span>
                     </div>
                     <div class="score-box">${score}</div>
                     <div class="team">
-                        <img src="${m.teams.away.logo}">
-                        <span>${m.teams.away.name}</span>
+                        <img src="${m.teams.away.logo}"> <span>${m.teams.away.name}</span>
                     </div>
                 </div>
             </div>`;
         });
         matchesEl.innerHTML = html;
     }
-
     loadMatches();
-    setInterval(() => { if(currentTab === "LIVE") loadMatches(); }, 60000);
 </script>
 </body>
 </html>

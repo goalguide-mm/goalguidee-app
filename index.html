@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOAL GUIDE | Footmob Style</title>
+<title>GOAL GUIDE | Pro Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -39,12 +39,12 @@
   .team span{font-size:12px;font-weight:500;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* Footmob Style Modal */
+  /* Modal */
   .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;}
-  .modal-content{background:#111827;width:100%;max-width:500px;border-radius:20px;position:relative;border:1px solid #30363d;height:90vh;display:flex;flex-direction:column;}
+  .modal-content{background:#111827;width:100%;max-width:500px;border-radius:20px;position:relative;border:1px solid #30363d;height:85vh;display:flex;flex-direction:column;overflow:hidden;}
   .close-modal{position:absolute;top:15px;right:20px;color:#fff;font-size:24px;cursor:pointer;z-index:100;}
   
-  .detail-top{padding:25px 20px;background:#1b2230;border-radius:20px 20px 0 0;text-align:center;}
+  .detail-top{padding:25px 20px;background:#1b2230;text-align:center;border-bottom:1px solid #30363d;}
   .detail-score-row{display:flex;justify-content:space-between;align-items:center;margin-top:15px;}
   .detail-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;}
   .detail-team img{width:45px;height:45px;}
@@ -52,14 +52,12 @@
   .detail-score{font-size:32px;font-weight:900;color:#facc15;}
 
   .timeline-container{flex:1;overflow-y:auto;padding:20px;}
-  .timeline-item{display:flex;align-items:center;margin-bottom:15px;position:relative;}
-  .timeline-min{width:40px;text-align:center;font-size:11px;font-weight:800;color:#facc15;background:#0b0f14;padding:4px;border-radius:5px;}
+  .timeline-item{display:flex;align-items:center;margin-bottom:12px;}
+  .timeline-min{width:45px;text-align:center;font-size:11px;font-weight:800;color:#facc15;background:#0b0f14;padding:4px;border-radius:5px;}
   .timeline-content{flex:1;display:flex;align-items:center;gap:10px;padding:0 15px;}
-  .event-home{justify-content:flex-start;flex-direction:row;}
+  .event-home{justify-content:flex-start;}
   .event-away{justify-content:flex-end;flex-direction:row-reverse;}
-  
-  .event-info{font-size:13px;font-weight:500;}
-  .event-icon{font-size:16px;}
+  .event-info{font-size:13px;}
 
   .highlights-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;padding:16px;}
   .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
@@ -132,7 +130,7 @@ async function loadMatches() {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
-  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;color:#ef4444;'>Error loading scores.</p>"; }
+  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;color:#ef4444;'>Error. Please check internet.</p>"; }
 }
 
 function renderMatches(matches) {
@@ -156,7 +154,7 @@ function renderMatches(matches) {
       const home = m.participants?.find(p => p.meta?.location === 'home');
       const away = m.participants?.find(p => p.meta?.location === 'away');
       const state = m.state?.state;
-      const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
+      const isLive = ["INPLAY", "HT", "LIVE", "ET"].includes(state);
       const isPP = ["POSTPONED", "PP", "CANCELLED"].includes(state);
       const isFT = ["FT", "AET", "PEN_FT"].includes(state);
       
@@ -186,84 +184,77 @@ function renderMatches(matches) {
 async function showMatchDetail(id) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = "<div style='padding:50px;text-align:center;'>Loading...</div>";
+  body.innerHTML = "<div style='height:100%; display:flex; align-items:center; justify-content:center; color:#8b949e;'>Loading...</div>";
   modal.style.display = "flex";
 
   try {
     const res = await fetch(`${API_BASE}/api/match/${id}`);
     const data = await res.json();
     
+    if(!data || !data.participants) throw new Error("Invalid Data");
+
     const home = data.participants.find(p => p.meta.location === 'home');
     const away = data.participants.find(p => p.meta.location === 'away');
     const hScore = data.scores.find(s => s.description === "CURRENT" && s.participant_id === home.id)?.score?.goals ?? 0;
     const aScore = data.scores.find(s => s.description === "CURRENT" && s.participant_id === away.id)?.score?.goals ?? 0;
 
-    let html = `
+    let eventsHtml = "";
+    if(!data.events || data.events.length === 0) {
+      eventsHtml = "<p style='text-align:center;color:#8b949e;padding:40px;'>No timeline events yet.</p>";
+    } else {
+      eventsHtml = data.events.sort((a,b) => a.minute - b.minute).map(ev => {
+        const isHome = ev.participant_id === home.id;
+        const icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name.includes("Yellow") ? "🟨" : "🟥");
+        return `
+          <div class="timeline-item">
+            <div class="timeline-min">${ev.minute}'</div>
+            <div class="timeline-content ${isHome ? 'event-home' : 'event-away'}">
+              <span style="font-size:16px;">${icon}</span>
+              <span class="event-info">${ev.player_name || 'Player'}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    body.innerHTML = `
       <div class="detail-top">
-        <div style="font-size:11px; color:#8b949e; text-transform:uppercase;">${data.league.name}</div>
+        <div style="font-size:11px; color:#8b949e;">${data.league.name}</div>
         <div class="detail-score-row">
           <div class="detail-team"><img src="${home.image_path}"><span>${home.name}</span></div>
           <div class="detail-score">${hScore} - ${aScore}</div>
           <div class="detail-team"><img src="${away.image_path}"><span>${away.name}</span></div>
         </div>
       </div>
-      <div class="timeline-container">`;
-
-    if(!data.events || data.events.length === 0) {
-      html += "<p style='text-align:center;color:#8b949e;padding:20px;'>No timeline events yet.</p>";
-    } else {
-      data.events.sort((a,b) => a.minute - b.minute).forEach(ev => {
-        const isHomeEvent = ev.participant_id === home.id;
-        const icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name.includes("Yellow") ? "🟨" : "🟥");
-        html += `
-          <div class="timeline-item">
-            <div class="timeline-min">${ev.minute}'</div>
-            <div class="timeline-content ${isHomeEvent ? 'event-home' : 'event-away'}">
-              <span class="event-icon">${icon}</span>
-              <span class="event-info">${ev.player_name || 'Player'}</span>
-            </div>
-          </div>`;
-      });
-    }
-    html += "</div>";
-    body.innerHTML = html;
-  } catch (e) { closeModal(); }
+      <div class="timeline-container">${eventsHtml}</div>`;
+  } catch (e) { body.innerHTML = "<p style='padding:50px; text-align:center;'>Match data unavailable.</p>"; }
 }
 
 async function loadHighlights() {
   const highlightsList = document.getElementById("highlights-list");
-  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Loading Highlights...</p>";
+  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Loading...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
     highlightsList.innerHTML = data.slice(0, 20).map(item => `
       <div class="hl-card" onclick="openVideo('${item.matchviewUrl}')">
         <div class="thumb-wrap"><img src="${item.thumbnail}"><div class="play-btn">▶</div></div>
-        <div class="hl-info"><div class="hl-title">${item.title}</div><div class="hl-meta">${item.competition}</div></div>
+        <div class="hl-info" style="padding:12px;"><div style="font-size:14px; font-weight:600;">${item.title}</div></div>
       </div>`).join('');
-  } catch (e) { highlightsList.innerHTML = "<p>Error loading highlights.</p>"; }
+  } catch (e) { highlightsList.innerHTML = "<p>Error.</p>"; }
 }
 
 function openVideo(url) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000;">
-                      <iframe src="${url}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>
-                    </div>`;
+  body.innerHTML = `<iframe src="${url}" style="width:100%; height:300px; border:0;" allowfullscreen></iframe>`;
   modal.style.display = "flex";
 }
 
-function closeModal() {
-  document.getElementById("mainModal").style.display = "none";
-  document.getElementById("modalBody").innerHTML = "";
-}
-
+function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { 
   let d = new Date(selectedDate); d.setDate(d.getDate()+n); 
-  selectedDate = d.toLocaleDateString('en-CA'); 
-  document.getElementById("matchDate").value = selectedDate; 
-  loadMatches(); 
+  selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); 
 }
 
 loadMatches();

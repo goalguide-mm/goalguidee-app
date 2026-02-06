@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOAL GUIDE | Pro Scores & Details</title>
+<title>GOAL GUIDE | Master Version</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -27,17 +27,29 @@
   .league{margin:0 12px 16px 12px;background:#151a21;border-radius:12px;border:1px solid #30363d;overflow:hidden;}
   .league-header{padding:10px 14px;font-size:11px;font-weight:700;background:#1b2230;color:#8b949e;text-transform:uppercase;}
   
-  .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;transition:0.2s;}
+  .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;}
   .match:hover{background:rgba(255,255,255,0.03);}
   .match.live-match{border-left:3px solid #ef4444;background:rgba(239,68,68,0.03);}
-  .time-status{font-size:11px;font-weight:800;text-align:left;}
-  .live-dot{color:#ef4444;animation:blink 1.5s infinite;display:block;}
+  .time-status{font-size:11px;font-weight:800;}
+  .live-dot{color:#ef4444;animation:blink 1.5s infinite;}
   @keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
 
   .team{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
   .team img{width:30px;height:30px;object-fit:contain;}
-  .team span{font-size:12px;font-weight:500;line-height:1.2;}
+  .team span{font-size:12px;font-weight:500;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
+
+  /* Modal Style */
+  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;}
+  .modal-content{background:#111827;width:100%;max-width:550px;border-radius:16px;position:relative;border:1px solid #30363d;max-height:85vh;overflow-y:auto;}
+  .close-modal{position:absolute;top:15px;right:20px;color:#8b949e;font-size:24px;cursor:pointer;z-index:10;}
+  
+  /* Events list style */
+  .event-list{padding:15px;display:flex;flex-direction:column;gap:10px;}
+  .event-card{display:flex;align-items:center;justify-content:space-between;padding:12px;background:#1b2230;border-radius:12px;border:1px solid #2a313c;}
+  .event-side{display:flex;align-items:center;gap:10px;font-size:13px;flex:1;}
+  .event-minute{font-weight:800;color:#facc15;background:#0b0f14;padding:4px 8px;border-radius:6px;font-size:11px;}
+  .event-icon{font-size:16px;}
 
   .highlights-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;padding:16px;}
   .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
@@ -45,13 +57,6 @@
   .thumb-wrap img{width:100%;height:100%;object-fit:cover;opacity:0.7;}
   .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45px;height:45px;background:#facc15;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;}
 
-  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;}
-  .modal-content{background:#111827;width:100%;max-width:550px;border-radius:16px;position:relative;border:1px solid #30363d;max-height:90vh;overflow-y:auto;}
-  .close-modal{position:absolute;top:15px;right:20px;color:#8b949e;font-size:24px;cursor:pointer;z-index:10;}
-  .event-list{padding:15px;display:flex;flex-direction:column;gap:8px;}
-  .event-item{display:flex;align-items:center;gap:12px;font-size:13px;padding:10px;background:#1b2230;border-radius:10px;}
-  .video-container{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;background:#000;margin:10px;}
-  .video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
 </head>
@@ -91,16 +96,10 @@
 
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
-const matchesList = document.getElementById("matches-list");
-const highlightsList = document.getElementById("highlights-list");
-const dateInput = document.getElementById("matchDate");
-
 let selectedDate = new Date().toLocaleDateString('en-CA');
-dateInput.value = selectedDate;
+document.getElementById("matchDate").value = selectedDate;
 
-const mmTimeFormatter = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'Asia/Yangon', hour: '2-digit', minute: '2-digit', hour12: true
-});
+const mmTimeFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Yangon', hour: '2-digit', minute: '2-digit', hour12: true });
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -117,20 +116,23 @@ function switchTab(tab) {
 }
 
 async function loadMatches() {
-  matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating scores...</p>";
+  const matchesList = document.getElementById("matches-list");
+  matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
-  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#ef4444;'>Server error.</p>"; }
+  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;color:#ef4444;'>Error loading scores.</p>"; }
 }
 
 function renderMatches(matches) {
+  const matchesList = document.getElementById("matches-list");
+  matchesList.innerHTML = "";
   if(!matches || !matches.length) {
-    matchesList.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>No matches for this date.</p>";
+    matchesList.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>No matches found.</p>";
     return;
   }
-  matches.sort((a,b) => new Date(a.starting_at) - new Date(b.starting_at));
+  
   const grouped = matches.reduce((acc, m) => {
     const lName = m.league?.name || "Other Leagues";
     if(!acc[lName]) acc[lName] = [];
@@ -138,64 +140,79 @@ function renderMatches(matches) {
     return acc;
   }, {});
 
-  let html = "";
   for(const lName in grouped) {
-    html += `<section class="league"><div class="league-header">${lName}</div>`;
+    let leagueHtml = `<section class="league"><div class="league-header">${lName}</div>`;
     grouped[lName].forEach(m => {
       const home = m.participants?.find(p => p.meta?.location === 'home');
       const away = m.participants?.find(p => p.meta?.location === 'away');
       const state = m.state?.state;
       const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
-      const isPP = ["POSTPONED", "PP", "CANCELLED", "ABANDONED"].includes(state);
+      const isPP = ["POSTPONED", "PP", "CANCELLED"].includes(state);
+      const isFT = ["FT", "AET", "PEN_FT"].includes(state);
       
       const hScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === home?.id)?.score?.goals ?? 0;
       const aScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === away?.id)?.score?.goals ?? 0;
 
-      let timeHtml = "";
-      let scoreHtml = hScore + " - " + aScore;
+      let timeText = mmTimeFormatter.format(new Date(m.starting_at));
+      let scoreText = "vs";
+      let liveClass = isLive ? "live-match" : "";
 
-      if(isPP) {
-        timeHtml = `<span style="color:#ef4444; font-weight:bold;">PP</span>`;
-        scoreHtml = `<span style="text-decoration:line-through; color:#4b5563; font-size:14px;">${mmTimeFormatter.format(new Date(m.starting_at))}</span>`;
-      } else if(isLive) {
-        timeHtml = `<span class="live-dot">● LIVE</span><span style="color:#ef4444;">${m.state?.minute ? m.state.minute+"'" : ""}</span>`;
-      } else if(state === "FT") {
-        timeHtml = `<span style="color:#8b949e;">FT</span>`;
-      } else {
-        timeHtml = mmTimeFormatter.format(new Date(m.starting_at));
-        scoreHtml = "vs";
-      }
+      if(isPP) { timeText = "<span style='color:#ef4444;'>PP</span>"; scoreText = "Cancelled"; }
+      else if(isLive) { timeText = `<span class="live-dot">● LIVE</span> ${m.state?.minute || ""}'`; scoreText = `${hScore} - ${aScore}`; }
+      else if(isFT) { timeText = "FT"; scoreText = `${hScore} - ${aScore}`; }
 
-      html += `
-        <div class="match ${isLive ? 'live-match' : ''}" onclick="showMatchDetail(${m.id})">
-          <div class="time-status">${timeHtml}</div>
-          <div class="team"><img src="${home?.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'"><span>${home?.name}</span></div>
-          <div class="score-box">${scoreHtml}</div>
-          <div class="team"><img src="${away?.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'"><span>${away?.name}</span></div>
+      leagueHtml += `
+        <div class="match ${liveClass}" onclick="showMatchDetail(${m.id}, '${home?.name}', '${away?.name}')">
+          <div class="time-status">${timeText}</div>
+          <div class="team"><img src="${home?.image_path}"><span>${home?.name}</span></div>
+          <div class="score-box">${scoreText}</div>
+          <div class="team"><img src="${away?.image_path}"><span>${away?.name}</span></div>
         </div>`;
     });
-    html += `</section>`;
+    leagueHtml += `</section>`;
+    matchesList.innerHTML += leagueHtml;
   }
-  matchesList.innerHTML = html;
 }
 
-async function showMatchDetail(id) {
+async function showMatchDetail(id, homeName, awayName) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = "<p style='text-align:center;padding:40px;'>Loading...</p>";
+  body.innerHTML = "<div style='padding:40px;text-align:center;'>Loading events...</div>";
   modal.style.display = "flex";
+
   try {
     const res = await fetch(`${API_BASE}/api/match/${id}`);
     const data = await res.json();
-    let eventsHtml = data.events && data.events.length > 0 ? data.events.map(ev => {
-      let icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name.includes("Yellow") ? "🟨" : "🟥");
-      return `<div class="event-item"><span class="event-time">${ev.minute}'</span><span>${icon}</span><span>${ev.player_name || 'Player'}</span></div>`;
-    }).join('') : "<p style='text-align:center;padding:30px;color:#8b949e;'>No events yet.</p>";
-    body.innerHTML = `<div style="text-align:center;padding:20px;border-bottom:1px solid #1f2937;"><h3 style="color:#facc15;">Match Events</h3></div><div class="event-list">${eventsHtml}</div>`;
-  } catch (e) { closeModal(); }
+    
+    // အရင်ဒေတာတွေ မပါအောင် Clear ဖြစ်ပြီးမှ Render လုပ်မယ်
+    let events = data.events || [];
+    let html = `<div style="padding:20px; text-align:center; border-bottom:1px solid #1f2937;">
+                  <h3 style="color:#facc15;">Timeline</h3>
+                  <p style="font-size:12px; color:#8b949e; margin-top:5px;">${homeName} vs ${awayName}</p>
+                </div>
+                <div class="event-list">`;
+    
+    if(events.length === 0) {
+      html += "<p style='text-align:center;color:#8b949e;padding:20px;'>No events yet.</p>";
+    } else {
+      events.sort((a,b) => a.minute - b.minute).forEach(ev => {
+        const icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name.includes("Yellow") ? "🟨" : "🟥");
+        html += `<div class="event-card">
+                  <span class="event-minute">${ev.minute}'</span>
+                  <div class="event-side">
+                    <span class="event-icon">${icon}</span>
+                    <span>${ev.player_name || 'Player'}</span>
+                  </div>
+                </div>`;
+      });
+    }
+    html += "</div>";
+    body.innerHTML = html;
+  } catch (e) { body.innerHTML = "<p style='padding:20px;'>Error fetching details.</p>"; }
 }
 
 async function loadHighlights() {
+  const highlightsList = document.getElementById("highlights-list");
   highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Loading Highlights...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
@@ -205,21 +222,29 @@ async function loadHighlights() {
         <div class="thumb-wrap"><img src="${item.thumbnail}"><div class="play-btn">▶</div></div>
         <div class="hl-info"><div class="hl-title">${item.title}</div><div class="hl-meta">${item.competition}</div></div>
       </div>`).join('');
-  } catch (e) { highlightsList.innerHTML = "<p>Error loading videos.</p>"; }
+  } catch (e) { highlightsList.innerHTML = "<p>Error loading highlights.</p>"; }
 }
 
 function openVideo(url) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = `<div class="video-container"><iframe src="${url}" allowfullscreen></iframe></div>`;
+  body.innerHTML = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000;">
+                      <iframe src="${url}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>
+                    </div>`;
   modal.style.display = "flex";
 }
 
-function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
+function closeModal() {
+  document.getElementById("mainModal").style.display = "none";
+  document.getElementById("modalBody").innerHTML = ""; // Popup ပိတ်ရင် အရင်ဒေတာတွေအကုန် ရှင်းပစ်မယ်
+}
+
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { 
   let d = new Date(selectedDate); d.setDate(d.getDate()+n); 
-  selectedDate = d.toLocaleDateString('en-CA'); dateInput.value = selectedDate; loadMatches(); 
+  selectedDate = d.toLocaleDateString('en-CA'); 
+  document.getElementById("matchDate").value = selectedDate; 
+  loadMatches(); 
 }
 
 loadMatches();

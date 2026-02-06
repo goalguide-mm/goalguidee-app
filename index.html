@@ -163,20 +163,24 @@ function changeDate(days) {
 }
 
 async function loadMatches() {
-  matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching matches...</p>";
+  // ပွဲစဉ်တွေ ရှာနေတုန်းမှာ ပြမယ့်စာသား
+  matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching today's matches...</p>";
 
   try {
-    // /api/today အစား လက်ရှိ အလုပ်လုပ်နေနိုင်တဲ့ fixtures လမ်းကြောင်းကို သုံးကြည့်ပါ
-    let url = `${API_BASE}/api/fixtures/date/${selectedDate}`; 
+    const res = await fetch(`${API_BASE}/api/today`);
     
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Not Found'); // 404 ဖြစ်ရင် catch ထဲသွားမယ်
+    // အကယ်၍ 404 ဖြစ်နေသေးရင် (သို့) server မတက်သေးရင် fixture route ကို ခေတ္တသုံးမည်
+    if (!res.ok) {
+        const altRes = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
+        const altData = await altRes.json();
+        return renderMatches(altData);
+    }
 
     const data = await res.json();
     renderMatches(data);
   } catch (e) {
-    // 404 Error သို့မဟုတ် Server မနိုးသေးလျှင် ပြမည့်စာတန်း
-    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Server is starting or Route not found. Please refresh in 30s.</p>";
+    // Error ဖြစ်ရင် ပြမည့်စာ
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Connecting to server... Please wait.</p>";
   }
 }
 

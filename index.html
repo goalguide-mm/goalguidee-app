@@ -11,87 +11,47 @@
   body{font-family:Inter,system-ui,sans-serif;background:#0b0f14;color:#fff;}
   
   header{
-    display:flex;
-    align-items:center;
-    padding:12px 16px;
-    background:#111827;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    gap: 12px;
+    display:flex; align-items:center; padding:12px 16px; background:#111827;
+    position: sticky; top: 0; z-index: 100; gap: 12px;
   }
   .logo-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
   .logo-text { font-weight: 800; color: #facc15; font-size: 20px; }
 
-  .date-bar{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:10px;
-    padding:15px;
-    background:#0b0f14;
-  }
+  .date-bar{ display:flex; justify-content:center; align-items:center; gap:10px; padding:15px; background:#0b0f14; }
   .date-bar button{
-    background:#1f2937;
-    border:none;
-    color:#fff;
-    width:35px;
-    height:35px;
-    border-radius:10px;
-    cursor:pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background:#1f2937; border:none; color:#fff; width:35px; height:35px;
+    border-radius:10px; cursor:pointer; display: flex; align-items: center; justify-content: center;
   }
   .date-bar input[type="date"] {
-    background: #1f2937;
-    border: none;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-family: inherit;
-    font-weight: 600;
-    outline: none;
+    background: #1f2937; border: none; color: #fff; padding: 8px 12px;
+    border-radius: 8px; font-family: inherit; font-weight: 600; outline: none;
   }
 
-  .league{
-    margin:0 12px 16px 12px;
-    background:#151a21;
-    border-radius:12px;
-    border: 1px solid #30363d;
-    overflow:hidden;
-  }
+  .league{ margin:0 12px 16px 12px; background:#151a21; border-radius:12px; border: 1px solid #30363d; overflow:hidden; }
   .league-header{
-    padding:10px 14px;
-    font-size:12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight:700;
-    background:#1b2230;
-    color: #8b949e;
-    display: flex;
-    align-items: center;
+    padding:10px 14px; font-size:11px; text-transform: uppercase; letter-spacing: 0.5px;
+    font-weight:700; background:#1b2230; color: #8b949e; display: flex; align-items: center;
   }
   
   .match{
-    display:grid;
-    grid-template-columns: 80px 1fr 50px 1fr;
-    align-items:center;
-    padding:16px 14px;
-    border-top:1px solid #222833;
+    display:grid; grid-template-columns: 80px 1fr 60px 1fr; align-items:center;
+    padding:16px 14px; border-top:1px solid #222833; transition: 0.3s;
   }
+  /* Live Glow Effect */
+  .match.live-match { background: rgba(239, 68, 68, 0.03); border-left: 3px solid #ef4444; }
 
-  .time-status{ font-size:13px; color:#fff; font-weight: 800; text-align: left; }
+  .time-status{ font-size:12px; color:#fff; font-weight: 800; text-align: left; }
   .live-dot { color: #ef4444; animation: blink 1.5s infinite; display: block; margin-bottom: 2px; }
-  .match-min { color: #ef4444; font-size: 14px; font-weight: 800; }
+  .match-min { color: #ef4444; font-size: 13px; font-weight: 800; }
+  .finished { color: #8b949e; font-weight: 600; }
   @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
 
   .team{ display:flex; flex-direction: column; align-items:center; gap:8px; text-align: center; }
-  .team img{ width:32px; height:32px; object-fit: contain; }
-  .team span{ font-size: 13px; font-weight: 500; }
+  .team img{ width:30px; height:30px; object-fit: contain; }
+  .team span{ font-size: 12px; font-weight: 500; color: #e5e7eb; }
 
   .score-box{ font-size: 18px; font-weight:800; text-align: center; color: #facc15; }
-  footer{text-align:center;padding:30px;color:#6b7280;font-size:12px;}
+  footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
 </head>
 <body>
@@ -119,10 +79,7 @@ const dateInput = document.getElementById("matchDate");
 let selectedDate = new Date().toISOString().split('T')[0];
 dateInput.value = selectedDate;
 
-function handleDateChange(date) {
-  selectedDate = date;
-  loadMatches();
-}
+function handleDateChange(date) { selectedDate = date; loadMatches(); }
 
 function changeDate(days) {
   let d = new Date(selectedDate);
@@ -133,13 +90,12 @@ function changeDate(days) {
 }
 
 async function loadMatches() {
-  matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching matches...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
   } catch (e) {
-    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Connecting to server...</p>";
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Refreshing connection...</p>";
   }
 }
 
@@ -154,7 +110,6 @@ function renderMatches(matches) {
     return;
   }
 
-  // အချိန်အလိုက် စီခြင်း
   matches.sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at));
 
   const grouped = matches.reduce((acc, m) => {
@@ -171,7 +126,7 @@ function renderMatches(matches) {
     html += `
       <section class="league">
         <div class="league-header">
-          <img src="${fixUrl(lLogo)}" style="width:18px; height:18px; margin-right:8px; border-radius:2px;" onerror="this.style.display='none'">
+          <img src="${fixUrl(lLogo)}" style="width:16px; height:16px; margin-right:8px; border-radius:2px;" onerror="this.style.display='none'">
           ${lName}
         </div>
     `;
@@ -180,24 +135,31 @@ function renderMatches(matches) {
       const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
       const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
       
-      // Live Status နှင့် Minute တွက်ချက်ခြင်း
       const state = m.state?.state;
       const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
-      const matchMinute = m.state?.minute ? `${m.state.minute}'` : (state === "HT" ? "HT" : "");
+      const isFinished = ["FT", "AET", "PEN_FT"].includes(state);
       
-      const mTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
+      // မိနစ်နှင့် အခြေအနေပြောင်းခြင်း
+      let timeHtml = "";
+      if (isLive) {
+        const min = m.state?.minute ? `${m.state.minute}'` : (state === "HT" ? "HT" : "LIVE");
+        timeHtml = `<span class="live-dot">● LIVE</span><span class="match-min">${min}</span>`;
+      } else if (isFinished) {
+        timeHtml = `<span class="finished">FT</span>`;
+      } else {
+        timeHtml = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
+      }
 
       const hScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
       const aScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
       const hScore = hScoreObj ? hScoreObj.score.goals : 0;
       const aScore = aScoreObj ? aScoreObj.score.goals : 0;
+      
       const displayScore = (state === "NS") ? "vs" : `${hScore} - ${aScore}`;
 
       html += `
-        <div class="match">
-          <div class="time-status">
-            ${isLive ? `<span class="live-dot">● LIVE</span><span class="match-min">${matchMinute}</span>` : mTime}
-          </div>
+        <div class="match ${isLive ? 'live-match' : ''}">
+          <div class="time-status">${timeHtml}</div>
           <div class="team">
             <img src="${fixUrl(homeTeam?.image_path)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${homeTeam?.name || 'TBD'}</span>
@@ -215,8 +177,8 @@ function renderMatches(matches) {
   matchesEl.innerHTML = html;
 }
 
-// ၅ မိနစ်တစ်ခါ အလိုအလျောက် Refresh လုပ်ရန်
-setInterval(loadMatches, 300000); 
+// ၁ မိနစ်တစ်ခါ Update လုပ်ရန် (ပိုမြန်စေရန်)
+setInterval(loadMatches, 60000); 
 
 loadMatches();
 </script>

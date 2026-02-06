@@ -166,12 +166,17 @@ async function loadMatches() {
   matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching matches...</p>";
 
   try {
-    // ပွဲစဉ်အားလုံးကို တစ်နေရာတည်းတွင်ပြရန် today API ကိုသုံးသည်
-    const res = await fetch(`${API_BASE}/api/today`);
+    // /api/today အစား လက်ရှိ အလုပ်လုပ်နေနိုင်တဲ့ fixtures လမ်းကြောင်းကို သုံးကြည့်ပါ
+    let url = `${API_BASE}/api/fixtures/date/${selectedDate}`; 
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Not Found'); // 404 ဖြစ်ရင် catch ထဲသွားမယ်
+
     const data = await res.json();
     renderMatches(data);
   } catch (e) {
-    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Server is starting... Please wait 30s.</p>";
+    // 404 Error သို့မဟုတ် Server မနိုးသေးလျှင် ပြမည့်စာတန်း
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Server is starting or Route not found. Please refresh in 30s.</p>";
   }
 }
 

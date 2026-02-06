@@ -6,7 +6,7 @@
 <title>GOAL GUIDE | Football Scores</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Modern FotMob Style */
+  /* Modern Style */
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Inter,system-ui,sans-serif;background:#0b0f14;color:#fff;}
   
@@ -18,22 +18,11 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    gap: 12px; /* Logo နဲ့ စာသားကြား အကွာအဝေး */
+    gap: 12px;
   }
-  /* Logo ပုံအတွက် Style */
-  .logo-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    object-fit: cover;
-  }
-  .logo-text {
-    font-weight: 800;
-    color: #facc15;
-    font-size: 20px;
-  }
+  .logo-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+  .logo-text { font-weight: 800; color: #facc15; font-size: 20px; }
 
-  /* Date Bar Styling */
   .date-bar{
     display:flex;
     justify-content:center;
@@ -65,7 +54,6 @@
     outline: none;
   }
 
-  /* Match Cards */
   .league{
     margin:0 12px 16px 12px;
     background:#151a21;
@@ -81,49 +69,30 @@
     font-weight:700;
     background:#1b2230;
     color: #8b949e;
+    display: flex;
+    align-items: center;
   }
   
   .match{
     display:grid;
-    grid-template-columns: 80px 1fr 50px 1fr; /* အချိန်နေရာကို နည်းနည်းပိုချဲ့ထားသည် */
+    grid-template-columns: 80px 1fr 50px 1fr;
     align-items:center;
     padding:16px 14px;
     border-top:1px solid #222833;
   }
 
-  .time-status{
-    font-size:14px; /* အချိန် Font ကို ပိုကြီးထားသည် */
-    color:#fff;
-    font-weight: 800;
-  }
-  .live-dot {
-    color: #ef4444;
-    font-weight: 800;
-    animation: blink 1.5s infinite;
-  }
+  .time-status{ font-size:14px; color:#fff; font-weight: 800; }
+  .live-dot { color: #ef4444; animation: blink 1.5s infinite; }
   @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
 
-  .team{
-    display:flex;
-    flex-direction: column;
-    align-items:center;
-    gap:8px;
-    text-align: center;
-  }
+  .team{ display:flex; flex-direction: column; align-items:center; gap:8px; text-align: center; }
   .team img{ width:32px; height:32px; object-fit: contain; }
   .team span{ font-size: 13px; font-weight: 500; }
 
-  .score-box{
-    font-size: 18px;
-    font-weight:800;
-    text-align: center;
-    color: #facc15;
-  }
-
+  .score-box{ font-size: 18px; font-weight:800; text-align: center; color: #facc15; }
   footer{text-align:center;padding:30px;color:#6b7280;font-size:12px;}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -131,7 +100,7 @@
   <div class="logo-text">GOAL GUIDE</div>
 </header>
 
-<div class="date-bar" id="dateBarContainer">
+<div class="date-bar">
   <button onclick="changeDate(-1)">◀</button>
   <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
   <button onclick="changeDate(1)">▶</button>
@@ -163,26 +132,21 @@ function changeDate(days) {
 }
 
 async function loadMatches() {
-  // ပွဲစဉ်တွေ ရှာနေတုန်းမှာ ပြမယ့်စာသား
-  matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching today's matches...</p>";
-
+  matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching matches...</p>";
   try {
-    const res = await fetch(`${API_BASE}/api/today`);
-    
-    // အကယ်၍ 404 ဖြစ်နေသေးရင် (သို့) server မတက်သေးရင် fixture route ကို ခေတ္တသုံးမည်
-    if (!res.ok) {
-        const altRes = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
-        const altData = await altRes.json();
-        return renderMatches(altData);
-    }
-
+    const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
   } catch (e) {
-    // Error ဖြစ်ရင် ပြမည့်စာ
-    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Connecting to server... Please wait.</p>";
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Server is starting... Please wait 30s.</p>";
   }
 }
+
+// Logo URL များကို HTTPS ပြောင်းပေးရန်
+const fixUrl = (url) => {
+    if (!url) return 'https://cdn-icons-png.flaticon.com/512/53/53234.png';
+    return url.replace('http://', 'https://');
+};
 
 function renderMatches(matches) {
   if (!matches || !matches.length) {
@@ -190,73 +154,63 @@ function renderMatches(matches) {
     return;
   }
 
-  // ၁။ ပွဲစဉ်တွေကို အချိန်အလိုက် အရင်စီပါ (Earliest first)
+  // အချိန်အလိုက် စီခြင်း
   matches.sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at));
 
-  // ၂။ ပွဲစဉ်တွေကို League အလိုက် အုပ်စုဖွဲ့ပါ
-  const groupedMatches = matches.reduce((acc, match) => {
-    const leagueName = match.league?.name || "Other Leagues";
-    if (!acc[leagueName]) acc[leagueName] = [];
-    acc[leagueName].push(match);
+  // လိဂ်အလိုက် အုပ်စုဖွဲ့ခြင်း
+  const grouped = matches.reduce((acc, m) => {
+    const lName = m.league?.name || "Other Leagues";
+    if (!acc[lName]) acc[lName] = [];
+    acc[lName].push(m);
     return acc;
   }, {});
 
   let html = "";
-
-  // ၃။ အုပ်စုဖွဲ့ထားတဲ့အတိုင်း ပတ်ပြီး HTML ထုတ်ပါ
-  for (const leagueName in groupedMatches) {
-    const leagueLogo = groupedMatches[leagueName][0].league?.image_path;
+  for (const lName in grouped) {
+    const lLogo = grouped[lName][0].league?.image_path;
     
     html += `
       <section class="league">
         <div class="league-header">
-          <img src="${leagueLogo}" style="width:18px; height:18px; vertical-align:middle; margin-right:8px; border-radius:2px;" onerror="this.style.display='none'">
-          ${leagueName}
+          <img src="${fixUrl(lLogo)}" style="width:18px; height:18px; margin-right:8px; border-radius:2px;" onerror="this.style.display='none'">
+          ${lName}
         </div>
     `;
 
-    groupedMatches[leagueName].forEach(m => {
+    grouped[lName].forEach(m => {
       const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
       const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
-      
       const isLive = m.state && ["INPLAY", "HT", "LIVE"].includes(m.state.state);
-      const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
+      const mTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
 
-      const homeScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
-      const awayScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
-
-      const homeScore = homeScoreObj ? homeScoreObj.score.goals : 0;
-      const awayScore = awayScoreObj ? awayScoreObj.score.goals : 0;
-      const displayScore = (m.state?.state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
+      // ဂိုးရလဒ် Logic အမှန်
+      const hScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id);
+      const aScoreObj = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id);
+      const hScore = hScoreObj ? hScoreObj.score.goals : 0;
+      const aScore = aScoreObj ? aScoreObj.score.goals : 0;
+      const displayScore = (m.state?.state === "NS") ? "vs" : `${hScore} - ${aScore}`;
 
       html += `
         <div class="match">
-          <div class="time-status">
-            ${isLive ? '<span class="live-dot">● LIVE</span>' : matchTime}
-          </div>
+          <div class="time-status">${isLive ? '<span class="live-dot">● LIVE</span>' : mTime}</div>
           <div class="team">
-            <img src="${homeTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
+            <img src="${fixUrl(homeTeam?.image_path)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${homeTeam?.name || 'TBD'}</span>
           </div>
-          <div class="score-box">
-            ${displayScore}
-          </div>
+          <div class="score-box">${displayScore}</div>
           <div class="team">
-            <img src="${awayTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
+            <img src="${fixUrl(awayTeam?.image_path)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${awayTeam?.name || 'TBD'}</span>
           </div>
         </div>
       `;
     });
-
     html += `</section>`;
   }
-
   matchesEl.innerHTML = html;
 }
 
 loadMatches();
 </script>
-
 </body>
 </html>

@@ -72,6 +72,8 @@
 
     async function loadMatches() {
         matchesEl.innerHTML = "<p style='text-align:center;padding:40px;'>Loading...</p>";
+        async function loadMatches() {
+        console.log("Fetching data for date:", selectedDate); // 2026-02-06 ဖြစ်ရပါမယ်
         const url = (currentTab === "LIVE") ? `${API_BASE}/api/live` : `${API_BASE}/api/fixtures/date/${selectedDate}`;
         try {
             const res = await fetch(url);

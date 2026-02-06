@@ -3,115 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <title>GOAL GUIDE</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:Inter,system-ui,sans-serif;
-  background:#0b0f14;
-  color:#fff;
-}
-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-  background:#111827;
-}
-.logo{font-weight:800;color:#facc15}
-.search{
-  flex:1;
-  background:#151a21;
-  border:none;
-  border-radius:999px;
-  padding:8px 14px;
-  color:#fff;
-}
-.date-bar{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:14px;
-  padding:10px;
-}
-.date-bar button{
-  background:#151a21;
-  border:none;
-  color:#fff;
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  cursor:pointer;
-}
-.date-text{font-weight:600}
-.tabs{
-  display:flex;
-  gap:8px;
-  padding:10px 12px;
-}
-.tab{
-  background:#151a21;
-  border:none;
-  padding:6px 14px;
-  border-radius:999px;
-  color:#9aa4b2;
-  cursor:pointer;
-}
-.tab.active{
-  background:#facc15;
-  color:#000;
-  font-weight:700;
-}
-.league{
-  margin:12px;
-  background:#151a21;
-  border-radius:12px;
-  overflow:hidden;
-}
-.league-header{
-  padding:10px 14px;
-  font-size:14px;
-  font-weight:600;
-  background:#1b2230;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.league-header img{
-  width:18px;
-  height:18px;
-}
-.match{
-  display:grid;
-  grid-template-columns:42px 1fr auto 1fr;
-  align-items:center;
-  gap:8px;
-  padding:10px 14px;
-  border-top:1px solid #222833;
-  cursor:pointer;
-}
-.match:hover{background:#1b2230}
-.status{font-size:12px;color:#9aa4b2}
-.status.live{color:#ef4444;font-weight:700}
-.score{font-weight:700}
-.live .score{color:#22c55e}
-.team{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.team img{
-  width:18px;
-  height:18px;
-}
-footer{
-  text-align:center;
-  padding:20px;
-  color:#6b7280;
-  font-size:13px;
-}
+  /* သင့်ရဲ့ မူလ CSS တွေအတိုင်း ထားလိုက်ပါသည် (ဘာမှပြင်စရာမလိုပါ) */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;background:#0b0f14;color:#fff;}
+  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#111827;}
+  .logo{font-weight:800;color:#facc15}
+  .search{flex:1;background:#151a21;border:none;border-radius:999px;padding:8px 14px;color:#fff;}
+  .date-bar{display:flex;justify-content:center;align-items:center;gap:14px;padding:10px;}
+  .date-bar button{background:#151a21;border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;}
+  .date-text{font-weight:600}
+  .tabs{display:flex;gap:8px;padding:10px 12px;}
+  .tab{background:#151a21;border:none;padding:6px 14px;border-radius:999px;color:#9aa4b2;cursor:pointer;}
+  .tab.active{background:#facc15;color:#000;font-weight:700;}
+  .league{margin:12px;background:#151a21;border-radius:12px;overflow:hidden;}
+  .league-header{padding:10px 14px;font-size:14px;font-weight:600;background:#1b2230;display:flex;align-items:center;gap:8px;}
+  .league-header img{width:18px;height:18px;}
+  .match{display:grid;grid-template-columns:50px 1fr auto 1fr;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #222833;cursor:pointer;}
+  .match:hover{background:#1b2230}
+  .status{font-size:12px;color:#9aa4b2}
+  .status.live{color:#ef4444;font-weight:700}
+  .score{font-weight:700; min-width: 40px; text-align: center;}
+  .live .score{color:#22c55e}
+  .team{display:flex;align-items:center;gap:6px;}
+  .team img{width:18px;height:18px;}
+  footer{text-align:center;padding:20px;color:#6b7280;font-size:13px;}
 </style>
 </head>
 
@@ -131,7 +48,6 @@ footer{
 <div class="tabs">
   <button class="tab active" data-tab="LIVE">LIVE</button>
   <button class="tab" data-tab="TODAY">TODAY</button>
-  <button class="tab" data-tab="TOMORROW">TOMORROW</button>
 </div>
 
 <div id="matches"></div>
@@ -144,87 +60,79 @@ const matchesEl = document.getElementById("matches");
 const dateText = document.getElementById("dateText");
 const tabs = document.querySelectorAll(".tab");
 
-let dayOffset = 0;
 let currentTab = "LIVE";
 
-/* ---------- TAB ---------- */
 tabs.forEach(tab=>{
   tab.addEventListener("click",()=>{
     tabs.forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
     currentTab = tab.dataset.tab;
-
+    updateDateUI();
     loadMatches();
   });
 });
 
-/* ---------- DATE ---------- */
 function updateDateUI(){
-  if(currentTab === "LIVE") dateText.textContent = "Live";
-  else dateText.textContent = "Today";
+  dateText.textContent = (currentTab === "LIVE") ? "Live Scores" : "Today's Matches";
 }
 
-/* ---------- LOAD ---------- */
 async function loadMatches() {
-  matchesEl.innerHTML = "Loading...";
+  matchesEl.innerHTML = "<p style='padding:16px;'>Loading matches...</p>";
 
   try {
-    let url = "";
-
-    if (currentTab === "LIVE") {
-      url = `${API_BASE}/api/live`;
-    } else {
-      url = `${API_BASE}/api/today`;
-    }
+    // URL ကို Sportmonks backend route နဲ့ကိုက်အောင်ပြင်လိုက်ပါပြီ
+    let url = (currentTab === "LIVE") ? `${API_BASE}/api/live` : `${API_BASE}/api/fixtures/today`;
 
     const res = await fetch(url);
     const data = await res.json();
 
-    renderMatches(data.response || []);
+    // Sportmonks data က array တိုက်ရိုက်လာတာမို့လို့ data ပဲပို့ပါမယ်
+    renderMatches(data);
   } catch (e) {
     console.error(e);
-    matchesEl.innerHTML =
-      "<p style='padding:16px;color:red'>Error loading matches</p>";
+    matchesEl.innerHTML = "<p style='padding:16px;color:red'>Error connecting to server</p>";
   }
 }
 
-/* ---------- RENDER ---------- */
 function renderMatches(matches){
   if(!matches || !matches.length){
-    matchesEl.innerHTML =
-      "<p style='padding:16px;color:#9aa4b2'>No matches</p>";
+    matchesEl.innerHTML = "<p style='padding:16px;color:#9aa4b2'>No matches available.</p>";
     return;
   }
 
   let html = "";
 
   matches.forEach(m=>{
-    const isLive = m.fixture.status.short === "LIVE";
+    // Sportmonks Format အရ data ထုတ်ယူခြင်း
+    const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
+    const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
+    
+    // ပွဲစဉ်အခြေအနေ (Live ဖြစ်မဖြစ်စစ်ဆေးခြင်း)
+    const isLive = m.state?.state === "LIVE" || m.state?.short_name === "LIVE";
 
     html += `
       <section class="league">
         <div class="league-header">
-          <img src="${m.league.logo}">
-          ${m.league.name}
+          ${m.name || "Football Match"}
         </div>
 
         <div class="match ${isLive ? "live" : ""}">
           <span class="status ${isLive ? "live" : ""}">
-            ${m.fixture.status.elapsed ?? ""}
+            ${m.starting_at ? new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}
           </span>
 
           <div class="team">
-            <img src="${m.teams.home.logo}">
-            ${m.teams.home.name}
+            <img src="${homeTeam?.image_path || ''}">
+            ${homeTeam?.name || 'TBD'}
           </div>
 
           <span class="score">
-            ${m.goals.home ?? ""} - ${m.goals.away ?? ""}
+            ${m.result_info || "vs"}
           </span>
 
           <div class="team">
-            <img src="${m.teams.away.logo}">
-            ${m.teams.away.name}
+            <img src="${awayTeam?.image_path || ''}">
+            ${awayTeam?.name || 'TBD'}
           </div>
         </div>
       </section>
@@ -234,8 +142,6 @@ function renderMatches(matches){
   matchesEl.innerHTML = html;
 }
 
-/* ---------- INIT ---------- */
-updateDateUI();
 loadMatches();
 </script>
 

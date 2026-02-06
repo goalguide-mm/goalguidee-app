@@ -199,12 +199,16 @@ async function loadMatches() {
   matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Fetching matches...</p>";
 
   try {
-    let url = "";
-    if (currentTab === "LIVE") {
-      url = `${API_BASE}/api/live`;
-    } else {
-      url = `${API_BASE}/api/fixtures/date/${selectedDate}`;
-    }
+    // Tab ခွဲမနေတော့ဘဲ ဒီနေ့ပွဲစဉ် (Live ရော Match ရောပါတာ) ကို တိုက်ရိုက်ခေါ်လိုက်ပါ
+    let url = `${API_BASE}/api/today`; 
+
+    const res = await fetch(url);
+    const data = await res.json();
+    renderMatches(data);
+  } catch (e) {
+    matchesEl.innerHTML = "<p style='padding:40px; text-align:center; color:#ef4444;'>Failed to load. Please try again.</p>";
+  }
+}
 
     const res = await fetch(url);
     const data = await res.json();
@@ -222,34 +226,36 @@ function renderMatches(matches){
 
   let html = "";
 
-  matches.forEach(m=>{
+  // ပွဲစဉ်တစ်ခုချင်းစီအတွက် လှည့်ပတ်စစ်ဆေးတဲ့နေရာ
+matches.forEach(m => {
     const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
     const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
-    const isLive = m.state?.state === "LIVE" || m.state?.short_name === "LIVE";
+
+    // API ကလာတဲ့ state အပေါ်မူတည်ပြီး LIVE ဟုတ်မဟုတ်စစ်တာပါ
+    const isLive = m.state && ["INPLAY", "HT", "LIVE"].includes(m.state.state);
     
-    // ပွဲစမည့်အချိန်
-    const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "TBD";
+    // မြန်မာစံတော်ချိန်အတွက် (Locale က အလိုအလျောက် Myanmar Time ပြောင်းပေးပါလိမ့်မယ်)
+    const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true}) : "TBD";
+
+    // Score ရလဒ်ပြသခြင်း (Live ဖြစ်ရင် ဂိုးရလဒ်ပြမယ်၊ မဟုတ်ရင် VS ပြမယ်)
+    const homeScore = m.scores?.find(s => s.description === 'CURRENT' && s.score.participant_id === homeTeam?.id)?.score.goals ?? 0;
+    const awayScore = m.scores?.find(s => s.description === 'CURRENT' && s.score.participant_id === awayTeam?.id)?.score.goals ?? 0;
+    const scoreDisplay = (m.state?.state === "NS") ? "VS" : `${homeScore} - ${awayScore}`;
 
     html += `
       <section class="league">
-        <div class="league-header">
-          ${m.league?.name || "Football Match"}
-        </div>
-
+        <div class="league-header">${m.league?.name || "Football Match"}</div>
         <div class="match">
-          <div class="time-status">
+          <div class="time-status" style="font-size: 16px; font-weight: 800; color: #fff;">
             ${isLive ? '<span class="live-dot">● LIVE</span>' : matchTime}
           </div>
-
           <div class="team">
             <img src="${homeTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${homeTeam?.name || 'TBD'}</span>
           </div>
-
-          <div class="score-box">
-            ${m.result_info || "vs"}
+          <div class="score-box" style="font-size: 20px;">
+            ${scoreDisplay}
           </div>
-
           <div class="team">
             <img src="${awayTeam?.image_path || ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53234.png'">
             <span>${awayTeam?.name || 'TBD'}</span>
@@ -257,8 +263,8 @@ function renderMatches(matches){
         </div>
       </section>
     `;
-  });
-
+});
+  
   matchesEl.innerHTML = html;
 }
 

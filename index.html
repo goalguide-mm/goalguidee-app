@@ -6,37 +6,39 @@
     <title>GOAL GUIDE</title>
     <style>
         body { background: #0b0f14; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; }
-        header { text-align: center; padding: 20px; font-size: 24px; font-weight: bold; color: #facc15; border-bottom: 2px solid #1f2937; margin-bottom: 20px; }
-        .match-card { background: #151a21; border-radius: 12px; padding: 20px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; border: 1px solid #1f2937; }
-        
-        /* အချိန်ကို အကြီးဆုံးပြရန် */
+        header { text-align: center; padding: 20px; font-size: 24px; font-weight: bold; color: #facc15; }
+        .match-card { background: #151a21; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 120px 1fr; align-items: center; border: 1px solid #1f2937; }
         .time-box { text-align: center; }
-        .time { font-size: 20px; font-weight: 800; color: #fff; display: block; }
-        .live { color: #ff4d4d; font-size: 12px; font-weight: bold; animation: blink 1s infinite; margin-top: 5px; display: block; }
-        
-        .team { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
-        .team img { width: 45px; height: 45px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; }
-        .team span { font-size: 14px; font-weight: 600; }
-        
-        .score { font-size: 26px; font-weight: 900; color: #facc15; text-align: center; }
-        @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} 100% {opacity:1} }
-        .loading { text-align: center; margin-top: 50px; color: #8b949e; }
+        .time { font-size: 22px; font-weight: 800; color: #fff; } /* အချိန် Font အကြီး */
+        .live { color: #ff4d4d; font-size: 12px; font-weight: bold; animation: blink 1s infinite; display: block; }
+        .team { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+        .team img { width: 40px; height: 40px; object-fit: contain; }
+        .score { font-size: 24px; font-weight: 900; color: #facc15; margin-top: 5px; }
+        @keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }
+        #status { text-align: center; margin-top: 50px; color: #8b949e; }
     </style>
 </head>
 <body>
 
 <header>⚽ GOAL GUIDE</header>
-<div id="matches-list"><p class="loading">Loading matches...</p></div>
+<div id="status">Loading data from server...</div>
+<div id="matches-list"></div>
 
 <script>
-    async function loadData() {
+    async function loadMatches() {
+        const listDiv = document.getElementById("matches-list");
+        const statusDiv = document.getElementById("status");
+
         try {
-            // URL ကို အသေထည့်ထားသည်
             const res = await fetch("https://goalguide-api-1.onrender.com/api/today");
+            if (!res.ok) throw new Error();
             const data = await res.json();
             
+            statusDiv.style.display = "none"; // Data ရရင် စာတန်းဖျောက်မည်
+            
             if (!data || data.length === 0) {
-                document.getElementById("matches-list").innerHTML = "<p style='text-align:center'>No matches scheduled today.</p>";
+                statusDiv.innerHTML = "No matches today.";
+                statusDiv.style.display = "block";
                 return;
             }
 
@@ -45,14 +47,12 @@
                 const home = m.participants.find(p => p.meta.location === 'home');
                 const away = m.participants.find(p => p.meta.location === 'away');
 
-                // မြန်မာစံတော်ချိန် (+6:30) ပြောင်းလဲခြင်း
-                const startTime = new Date(m.starting_at).toLocaleTimeString('en-US', { 
+                // မြန်မာစံတော်ချိန် (+6:30)
+                const startTime = new Date(m.starting_at).toLocaleTimeString('en-GB', { 
                     hour: '2-digit', minute: '2-digit', hour12: true 
                 });
 
-                // Live Status Logic
                 const isLive = m.state && ["INPLAY", "HT"].includes(m.state.state);
-                const scoreDisplay = (m.state && m.state.state === "NS") ? "VS" : "0 - 0"; // အစမ်းပြရန်
 
                 html += `
                 <div class="match-card">
@@ -63,7 +63,7 @@
                     <div class="time-box">
                         <span class="time">${startTime}</span>
                         ${isLive ? '<span class="live">● LIVE</span>' : ''}
-                        <div class="score" style="margin-top:10px;">${scoreDisplay}</div>
+                        <div class="score">${isLive ? '0 - 0' : 'VS'}</div>
                     </div>
                     <div class="team">
                         <img src="${away.image_path}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
@@ -71,14 +71,14 @@
                     </div>
                 </div>`;
             });
-            document.getElementById("matches-list").innerHTML = html;
+            listDiv.innerHTML = html;
         } catch (e) {
-            document.getElementById("matches-list").innerHTML = "<p style='text-align:center; color:red;'>Server is starting... Please refresh in 30s.</p>";
+            statusDiv.innerHTML = "Server is waking up... Please wait 30 seconds.";
         }
     }
 
-    loadData();
-    setInterval(loadData, 30000); // ၃၀ စက္ကန့်တစ်ခါ အလိုအလျောက် update လုပ်မည်
+    loadMatches();
+    setInterval(loadMatches, 30000);
 </script>
 </body>
 </html>

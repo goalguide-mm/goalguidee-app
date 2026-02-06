@@ -216,28 +216,33 @@ async function loadMatches() {
   }
 }
 
-function renderMatches(matches){
-  if(!matches || !matches.length){
-    matchesEl.innerHTML = "<p style='padding:50px; text-align:center; color:#8b949e;'>No matches found for this date.</p>";
+function renderMatches(matches) {
+  if (!matches || !matches.length) {
+    matchesEl.innerHTML = "<p style='padding:50px; text-align:center; color:#8b949e;'>No matches found.</p>";
     return;
   }
 
   let html = "";
 
-  matches.forEach(m=>{
+  matches.forEach(m => {
     const homeTeam = m.participants?.find(p => p.meta?.location === 'home');
     const awayTeam = m.participants?.find(p => p.meta?.location === 'away');
-    const isLive = m.state?.state === "LIVE" || m.state?.short_name === "LIVE";
     
-    // ပွဲစမည့်အချိန်
+    // ဂိုးရလဒ်များကို scores array ထဲမှ ရှာဖွေခြင်း
+    // အကယ်၍ ပွဲမကစားရသေးရင် (သို့) score မရှိရင် '-' ပြပါမယ်
+    const homeScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === homeTeam?.id)?.score?.goals ?? "-";
+    const awayScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === awayTeam?.id)?.score?.goals ?? "-";
+
+    const isLive = m.state?.state === "LIVE" || m.state?.short_name === "LIVE";
     const matchTime = m.starting_at ? new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "TBD";
+
+    // အကယ်၍ ပွဲပြီးသွားပြီဆိုရင် Score ကိုပဲ အထင်အရှားပြမယ်
+    // ပွဲမစရသေးရင် "vs" သို့မဟုတ် အချိန်ပြမယ်
+    let displayScore = (homeScore === "-" && awayScore === "-") ? "vs" : `${homeScore} - ${awayScore}`;
 
     html += `
       <section class="league">
-        <div class="league-header">
-          ${m.league?.name || "Football Match"}
-        </div>
-
+        <div class="league-header">${m.league?.name || "Football Match"}</div>
         <div class="match">
           <div class="time-status">
             ${isLive ? '<span class="live-dot">● LIVE</span>' : matchTime}
@@ -249,7 +254,7 @@ function renderMatches(matches){
           </div>
 
           <div class="score-box">
-            ${m.result_info || "vs"}
+            ${displayScore}
           </div>
 
           <div class="team">
@@ -263,7 +268,6 @@ function renderMatches(matches){
 
   matchesEl.innerHTML = html;
 }
-
 // Initial Load
 loadMatches();
 </script>

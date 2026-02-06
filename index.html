@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOAL GUIDE | Pro Live Scores</title>
+    <title>GOAL GUIDE | Pro Scores</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Modern Dark UI */
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Inter',sans-serif;background:#0b0f14;color:#fff;}
         header{padding:16px;background:#111827;display:flex;justify-content:center;position:sticky;top:0;z-index:100;border-bottom:1px solid #1f2937;}
@@ -49,7 +48,6 @@
 <div id="matches"></div>
 
 <script>
-    // သင့်ရဲ့ Backend URL ဖြစ်သည်
     const API_BASE = "https://goalguide-api-1.onrender.com"; 
     const matchesEl = document.getElementById("matches");
     const dateInput = document.getElementById("matchDate");
@@ -80,21 +78,19 @@
     }
 
     async function loadMatches() {
-        matchesEl.innerHTML = "<p class='status-msg'>Loading matches...</p>";
+        matchesEl.innerHTML = "<p class='status-msg'>Loading...</p>";
         
-        // URL Path များကို Backend အတိုင်း အမှန်ပြင်ထားပါသည်
         const url = (currentTab === "LIVE") 
             ? `${API_BASE}/api/live` 
             : `${API_BASE}/api/fixtures/date/${selectedDate}`;
 
         try {
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Backend Offline');
+            if (!res.ok) throw new Error('Offline');
             const data = await res.json();
             renderMatches(data);
         } catch (e) {
-            console.error("Fetch error:", e);
-            matchesEl.innerHTML = "<p class='status-msg' style='color:#ef4444;'>Backend Not Responding. Please check Render Logs.</p>";
+            matchesEl.innerHTML = "<p class='status-msg' style='color:#ef4444;'>Backend is starting up. Refresh in 1 min.</p>";
         }
     }
 
@@ -108,11 +104,7 @@
         data.forEach(m => {
             const status = m.fixture.status.short;
             const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
-            
-            // Goals display
-            const homeGoals = m.goals.home ?? 0;
-            const awayGoals = m.goals.away ?? 0;
-            const score = (status === "NS") ? "vs" : `${homeGoals} - ${awayGoals}`;
+            const score = (status === "NS") ? "vs" : `${m.goals.home ?? 0} - ${m.goals.away ?? 0}`;
             
             html += `
             <div class="league">

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOAL GUIDE | Pro Live</title>
+<title>GOAL GUIDE | Official</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -28,7 +28,6 @@
   .league-header{padding:10px 14px;font-size:11px;font-weight:700;background:#1b2230;color:#8b949e;text-transform:uppercase;}
   
   .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;}
-  .match:hover{background:rgba(255,255,255,0.03);}
   .match.live-match{border-left:3px solid #ef4444;background:rgba(239,68,68,0.03);}
   .time-status{font-size:11px;font-weight:800;}
   .live-dot{color:#ef4444;animation:blink 1.5s infinite;}
@@ -39,25 +38,25 @@
   .team span{font-size:12px;font-weight:500;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* Modal */
-  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;}
-  .modal-content{background:#111827;width:100%;max-width:500px;border-radius:20px;position:relative;border:1px solid #30363d;height:85vh;display:flex;flex-direction:column;overflow:hidden;}
-  .close-modal{position:absolute;top:15px;right:20px;color:#fff;font-size:24px;cursor:pointer;z-index:100;}
+  /* Footmob Style Popup */
+  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:10px;}
+  .modal-content{background:#111827;width:100%;max-width:480px;border-radius:24px;position:relative;border:1px solid #30363d;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;}
+  .close-modal{position:absolute;top:15px;right:20px;color:#8b949e;font-size:24px;cursor:pointer;z-index:100;}
   
-  .detail-top{padding:25px 20px;background:#1b2230;text-align:center;border-bottom:1px solid #30363d;}
-  .detail-score-row{display:flex;justify-content:space-between;align-items:center;margin-top:15px;}
-  .detail-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;}
-  .detail-team img{width:45px;height:45px;}
-  .detail-team span{font-size:13px;font-weight:700;}
-  .detail-score{font-size:32px;font-weight:900;color:#facc15;}
+  .detail-top{padding:30px 20px;background:#1b2230;text-align:center;}
+  .score-row{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px;}
+  .score-val{font-size:36px;font-weight:900;color:#facc15;}
+  .detail-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .detail-team img{width:50px;height:50px;}
+  .detail-team span{font-size:14px;font-weight:700;}
 
-  .timeline-container{flex:1;overflow-y:auto;padding:20px;}
-  .timeline-item{display:flex;align-items:center;margin-bottom:12px;}
-  .timeline-min{width:45px;text-align:center;font-size:11px;font-weight:800;color:#facc15;background:#0b0f14;padding:4px;border-radius:5px;}
-  .timeline-content{flex:1;display:flex;align-items:center;gap:10px;padding:0 15px;}
-  .event-home{justify-content:flex-start;}
-  .event-away{justify-content:flex-end;flex-direction:row-reverse;}
-  .event-info{font-size:13px;}
+  .timeline{flex:1;overflow-y:auto;padding:20px;background:#0b0f14;}
+  .tl-item{display:flex;align-items:center;margin-bottom:15px;position:relative;}
+  .tl-min{width:45px;font-size:11px;font-weight:800;color:#facc15;text-align:center;background:#1f2937;padding:4px;border-radius:6px;}
+  .tl-content{flex:1;display:flex;align-items:center;gap:12px;padding:0 15px;}
+  .home-ev{justify-content:flex-start;}
+  .away-ev{justify-content:flex-end;flex-direction:row-reverse;}
+  .ev-text{font-size:13px;font-weight:500;}
 
   .highlights-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;padding:16px;}
   .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
@@ -124,32 +123,32 @@ function switchTab(tab) {
 }
 
 async function loadMatches() {
-  const matchesList = document.getElementById("matches-list");
-  matchesList.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating scores...</p>";
+  const list = document.getElementById("matches-list");
+  list.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
-  } catch (e) { matchesList.innerHTML = "<p style='text-align:center;color:#ef4444;'>Error. Please check internet.</p>"; }
+  } catch (e) { list.innerHTML = "<p style='text-align:center;color:#ef4444;'>Sync Error.</p>"; }
 }
 
 function renderMatches(matches) {
-  const matchesList = document.getElementById("matches-list");
-  matchesList.innerHTML = "";
+  const list = document.getElementById("matches-list");
+  list.innerHTML = "";
   if(!matches || !matches.length) {
-    matchesList.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>No matches found.</p>";
+    list.innerHTML = "<p style='text-align:center;padding:50px;color:#8b949e;'>No matches found.</p>";
     return;
   }
   
   const grouped = matches.reduce((acc, m) => {
-    const lName = m.league?.name || "Other Leagues";
+    const lName = m.league?.name || "Other";
     if(!acc[lName]) acc[lName] = [];
     acc[lName].push(m);
     return acc;
   }, {});
 
   for(const lName in grouped) {
-    let leagueHtml = `<section class="league"><div class="league-header">${lName}</div>`;
+    let html = `<section class="league"><div class="league-header">${lName}</div>`;
     grouped[lName].forEach(m => {
       const home = m.participants?.find(p => p.meta?.location === 'home');
       const away = m.participants?.find(p => p.meta?.location === 'away');
@@ -168,7 +167,7 @@ function renderMatches(matches) {
       else if(isLive) timeText = `<span class="live-dot">● LIVE</span> ${m.state?.minute || ""}'`;
       else if(isFT) timeText = "FT";
 
-      leagueHtml += `
+      html += `
         <div class="match ${isLive ? 'live-match' : ''}" onclick="showMatchDetail(${m.id})">
           <div class="time-status">${timeText}</div>
           <div class="team"><img src="${home?.image_path}"><span>${home?.name}</span></div>
@@ -176,71 +175,73 @@ function renderMatches(matches) {
           <div class="team"><img src="${away?.image_path}"><span>${away?.name}</span></div>
         </div>`;
     });
-    leagueHtml += `</section>`;
-    matchesList.innerHTML += leagueHtml;
+    list.innerHTML += html + `</section>`;
   }
 }
 
 async function showMatchDetail(id) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = "<div style='height:100%; display:flex; align-items:center; justify-content:center; color:#8b949e;'>Loading...</div>";
+  body.innerHTML = "<div style='height:200px; display:flex; align-items:center; justify-content:center;'>Loading...</div>";
   modal.style.display = "flex";
 
   try {
     const res = await fetch(`${API_BASE}/api/match/${id}`);
     const data = await res.json();
     
-    if(!data || !data.participants) throw new Error("Invalid Data");
+    // API က ဒေတာမပေးရင် Error ပြမယ်
+    if(!data || !data.participants) {
+        body.innerHTML = "<p style='padding:40px; text-align:center; color:#8b949e;'>Match data unavailable yet.</p>";
+        return;
+    }
 
     const home = data.participants.find(p => p.meta.location === 'home');
     const away = data.participants.find(p => p.meta.location === 'away');
     const hScore = data.scores.find(s => s.description === "CURRENT" && s.participant_id === home.id)?.score?.goals ?? 0;
     const aScore = data.scores.find(s => s.description === "CURRENT" && s.participant_id === away.id)?.score?.goals ?? 0;
 
-    let eventsHtml = "";
-    if(!data.events || data.events.length === 0) {
-      eventsHtml = "<p style='text-align:center;color:#8b949e;padding:40px;'>No timeline events yet.</p>";
-    } else {
-      eventsHtml = data.events.sort((a,b) => a.minute - b.minute).map(ev => {
+    let eventsHtml = (data.events || []).sort((a,b) => a.minute - b.minute).map(ev => {
         const isHome = ev.participant_id === home.id;
         const icon = ev.type?.name === "Goal" ? "⚽" : (ev.type?.name.includes("Yellow") ? "🟨" : "🟥");
         return `
-          <div class="timeline-item">
-            <div class="timeline-min">${ev.minute}'</div>
-            <div class="timeline-content ${isHome ? 'event-home' : 'event-away'}">
+          <div class="tl-item">
+            <div class="tl-min">${ev.minute}'</div>
+            <div class="tl-content ${isHome ? 'home-ev' : 'away-ev'}">
               <span style="font-size:16px;">${icon}</span>
-              <span class="event-info">${ev.player_name || 'Player'}</span>
+              <span class="ev-text">${ev.player_name || 'Player'}</span>
             </div>
           </div>`;
-      }).join('');
-    }
+    }).join('');
+
+    if(!eventsHtml) eventsHtml = "<p style='text-align:center;color:#8b949e;padding:30px;'>No major events recorded.</p>";
 
     body.innerHTML = `
       <div class="detail-top">
-        <div style="font-size:11px; color:#8b949e;">${data.league.name}</div>
-        <div class="detail-score-row">
+        <div style="font-size:11px; color:#facc15; font-weight:700;">${data.league.name}</div>
+        <div class="score-row">
           <div class="detail-team"><img src="${home.image_path}"><span>${home.name}</span></div>
-          <div class="detail-score">${hScore} - ${aScore}</div>
+          <div class="score-val">${hScore} - ${aScore}</div>
           <div class="detail-team"><img src="${away.image_path}"><span>${away.name}</span></div>
         </div>
       </div>
-      <div class="timeline-container">${eventsHtml}</div>`;
-  } catch (e) { body.innerHTML = "<p style='padding:50px; text-align:center;'>Match data unavailable.</p>"; }
+      <div class="timeline">${eventsHtml}</div>`;
+  } catch (e) { 
+    body.innerHTML = "<p style='padding:40px; text-align:center;'>Error loading data.</p>";
+  }
 }
 
 async function loadHighlights() {
-  const highlightsList = document.getElementById("highlights-list");
-  highlightsList.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Loading...</p>";
+  const list = document.getElementById("highlights-list");
+  list.innerHTML = "<p style='grid-column:1/-1;text-align:center;padding:50px;'>Loading...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
-    highlightsList.innerHTML = data.slice(0, 20).map(item => `
+    list.innerHTML = data.slice(0, 20).map(item => `
       <div class="hl-card" onclick="openVideo('${item.matchviewUrl}')">
         <div class="thumb-wrap"><img src="${item.thumbnail}"><div class="play-btn">▶</div></div>
-        <div class="hl-info" style="padding:12px;"><div style="font-size:14px; font-weight:600;">${item.title}</div></div>
+        <div style="padding:12px; font-size:14px; font-weight:600;">${item.title}</div>
       </div>`).join('');
-  } catch (e) { highlightsList.innerHTML = "<p>Error.</p>"; }
+  } catch (e) { list.innerHTML = "<p>Error.</p>"; }
 }
 
 function openVideo(url) {
@@ -250,11 +251,17 @@ function openVideo(url) {
   modal.style.display = "flex";
 }
 
-function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
+function closeModal() { 
+    document.getElementById("mainModal").style.display = "none"; 
+    document.getElementById("modalBody").innerHTML = ""; // အရေးကြီး - Popup ပိတ်ရင် အချက်အလက်အဟောင်းတွေကို လုံးဝဖျက်ပစ်မယ်
+}
+
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { 
   let d = new Date(selectedDate); d.setDate(d.getDate()+n); 
-  selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); 
+  selectedDate = d.toLocaleDateString('en-CA'); 
+  document.getElementById("matchDate").value = selectedDate; 
+  loadMatches(); 
 }
 
 loadMatches();

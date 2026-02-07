@@ -239,9 +239,11 @@ async function loadMatches() {
     list.innerHTML = "<p style='text-align:center;padding:40px;'>ပွဲစဉ်များ ဆွဲယူနေပါသည်...</p>";
 
     try {
-        // Backend ရှိ /api/fixtures/date/:date endpoint ကို လှမ်းခေါ်ရန် ပြင်ဆင်ထားသည်
         const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
-        const events = await response.json();
+        const result = await response.json();
+
+        // Backend က data ပုံစံပေါ်မူတည်ပြီး data ထုတ်ယူခြင်း (result.data သို့မဟုတ် result)
+        const events = result.data || result;
 
         if (!events || events.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;'>ယနေ့အတွက် ပွဲစဉ်များ မရှိပါ။</p>";
@@ -287,9 +289,9 @@ async function loadMatches() {
                     statusHtml = `<span class="status-live">● LIVE</span>`;
                 }
 
-                // Logo ပြဿနာဖြေရှင်းရန် SofaScore URL ကို အသုံးပြုထားသည်
-                const hLogo = `https://api.sofascore.app/api/v1/team/${homeTeam.id}/image`;
-                const aLogo = `https://api.sofascore.app/api/v1/team/${awayTeam.id}/image`;
+                // Logo link ကို Sportmonks ရဲ့ image_path အတိုင်း ပြန်သုံးထားပါတယ်
+                const hLogo = homeTeam.image_path || `https://api.sofascore.app/api/v1/team/${homeTeam.id}/image`;
+                const aLogo = awayTeam.image_path || `https://api.sofascore.app/api/v1/team/${awayTeam.id}/image`;
 
                 html += `
                 <div class="match" onclick="showLineup(${m.id}, '${homeTeam.name.replace(/'/g, "\\'")}', '${awayTeam.name.replace(/'/g, "\\'")}')">
@@ -321,7 +323,9 @@ async function showLineup(id, home, away) {
 
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/${id}`);
-    const data = await res.json();
+    const result = await res.json();
+    const data = result.data || result;
+
     if (!data || !data.lineups || data.lineups.length === 0) {
         body.innerHTML = `<div style='padding:40px;text-align:center;'>Lineup Not Available for this match yet.</div>`;
         return;
@@ -365,7 +369,9 @@ async function loadStandings() {
   list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings ဆွဲယူနေပါသည်...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/standings`);
-    const data = await res.json();
+    const result = await res.json();
+    const data = result.data || result;
+
     if(!data || data.length === 0) { list.innerHTML = "Unavailable"; return; }
     
     list.innerHTML = data.map(l => `

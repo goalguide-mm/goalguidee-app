@@ -20,40 +20,38 @@
   .content-section{display:none;}
   .content-section.active{display:block;}
 
-  /* --- Matches Section (Updated with Golden Borders & Hover Effect) --- */
+  /* --- Matches Section (Outer Golden Border Added) --- */
   .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;}
   .date-bar button, .date-bar input{background:#1f2937;border:none;color:#fff;padding:8px;border-radius:8px;}
   
-  /* League Card Border */
+  /* League Card Outer Golden Border */
   .league-card{
     margin:12px;
     background:#151a21;
     border-radius:12px;
-    border: 1px solid #30363d; 
+    border: 2px solid #facc15; /* အပြင်ဘောင်ကို ရွှေရောင်ကွတ်လိုက်သည် */
     overflow:hidden;
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.1);
   }
   .league-header{padding:10px 14px;font-size:12px;font-weight:700;background:#1b2230;color:#8b949e;display:flex;align-items:center;gap:10px;}
   .league-header img{width:20px;height:20px;}
 
-  /* Match Row with Golden Border & Hover */
   .match {
     display:grid;
     grid-template-columns:85px 1fr 65px 1fr;
     align-items:center;
     padding:16px 14px;
-    border-top:1px solid #30363d; /* အလယ်က လိုင်းများ */
+    border-top:1px solid #30363d;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     background: #151a21;
   }
 
-  /* မျှားထောက်လိုက်ရင် ရွှေရောင်ဘောင်ကွတ်ပြီး ဖောင်းကြွလာမည့် အပိုင်း */
+  /* Hover Effect on Match Rows */
   .match:hover {
-    transform: scale(1.02);
-    border: 1px solid #facc15; /* ရွှေရောင်ဘောင် */
+    transform: scale(1.01);
+    background: #1c232d;
     z-index: 10;
-    box-shadow: 0 5px 15px rgba(250, 204, 21, 0.2);
-    border-radius: 8px;
   }
 
   .time-status{font-size:11px;font-weight:800;color:#8b949e;}
@@ -64,7 +62,7 @@
   .team-row img{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* --- Highlights Style (Keep same) --- */
+  /* --- Highlights Style (No Changes) --- */
   .grid-layout{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;padding:16px;}
   .video-card {
     background: #151a21;
@@ -82,13 +80,6 @@
   }
   .video-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
   .video-card .title-box {padding:12px; font-weight:600; font-size:13px; color:#fff;}
-
-  /* General UI */
-  .search-container{padding:15px 12px;}
-  .league-search{width:100%;padding:12px;background:#1f2937;border:1px solid #30363d;border-radius:10px;color:#fff;outline:none;}
-  .table-container{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th, td{padding:12px 8px;text-align:left;border-bottom:1px solid #222833;}
 
   /* Modal Style */
   .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;z-index:2000;}
@@ -126,9 +117,6 @@
 </div>
 
 <div id="section-standings" class="content-section">
-  <div class="search-container">
-    <input type="text" id="leagueSearch" class="league-search" placeholder="Search League..." onkeyup="filterStandings()">
-  </div>
   <div id="standings-list"></div>
 </div>
 
@@ -202,21 +190,14 @@ async function loadStandings() {
     const res = await fetch(`${API_BASE}/api/standings`);
     const data = await res.json();
     list.innerHTML = data.map(l => `
-      <div class="league-card league-item" data-name="${l.name.toLowerCase()}">
+      <div class="league-card">
         <div class="league-header">${l.name}</div>
-        <div class="table-container"><table>
+        <div style="overflow-x:auto;"><table>
           <tr><th>#</th><th>Team</th><th>PL</th><th>PTS</th></tr>
           ${l.standings.map(s => `<tr><td>${s.position}</td><td>${s.team_name}</td><td>${s.played}</td><td style="color:#facc15">${s.pts}</td></tr>`).join('')}
         </table></div>
       </div>`).join('');
   } catch(e) { list.innerHTML = "Unavailable"; }
-}
-
-function filterStandings() {
-  let q = document.getElementById("leagueSearch").value.toLowerCase();
-  document.querySelectorAll(".league-item").forEach(i => {
-    i.style.display = i.getAttribute("data-name").includes(q) ? "block" : "none";
-  });
 }
 
 async function loadLive() {

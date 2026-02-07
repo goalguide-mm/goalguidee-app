@@ -168,17 +168,21 @@ async function loadMatches() {
             scoreClass = "score-pp";
         }
 
-        // ရလဒ်များကို မှန်ကန်စွာ ပြသရန် စစ်ဆေးခြင်း
-        let homeScore = m.scores?.find(s => s.description === "CURRENT")?.score?.goals ?? 0;
-        let awayScore = m.scores?.find(s => s.description === "CURRENT")?.score?.goals ?? 0;
-        
-        // အကယ်၍ scores array က ပုံစံအဟောင်းဆိုလျှင်
-        if(m.scores && m.scores.length >= 2 && !m.scores[0].description) {
-            homeScore = m.scores[0].score.goals;
-            awayScore = m.scores[1].score.goals;
+        // --- ရလဒ်အမှန်ရရှိရန် ပြင်ဆင်ထားသော Logic ---
+        let scoreText = "vs";
+        if (state !== "NS" && m.scores && m.scores.length > 0) {
+            // Home Team နဲ့ Away Team ရဲ့ ID အလိုက် ဂိုးတွေကို တိကျစွာ ဆွဲထုတ်ခြင်း
+            const homeId = m.participants[0].id;
+            const awayId = m.participants[1].id;
+            
+            const homeScoreObj = m.scores.find(s => s.participant_id === homeId && s.description === "CURRENT");
+            const awayScoreObj = m.scores.find(s => s.participant_id === awayId && s.description === "CURRENT");
+            
+            const homeGoals = homeScoreObj ? homeScoreObj.score.goals : (m.scores[0]?.score?.goals ?? 0);
+            const awayGoals = awayScoreObj ? awayScoreObj.score.goals : (m.scores[1]?.score?.goals ?? 0);
+            
+            scoreText = `${homeGoals} - ${awayGoals}`;
         }
-
-        let scoreText = (state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
 
         html += `<div class="match" onclick="showLineup(${m.id}, '${m.participants[0].name.replace(/'/g, "\\'")}', '${m.participants[1].name.replace(/'/g, "\\'")}')">
           <div class="time-status">${status}</div>
@@ -192,6 +196,7 @@ async function loadMatches() {
     list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No Matches</p>";
   } catch(e) { list.innerHTML = "Error"; }
 }
+ 
 async function showLineup(id, home, away) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");

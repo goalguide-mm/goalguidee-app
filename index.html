@@ -132,6 +132,8 @@
   .match:hover {background: #1c232d;}
 
   .time-status{font-size: 13px; font-weight: 800; color: #8b949e;}
+  .status-pp{color:#ef4444; font-weight: 800;}
+  .score-pp{text-decoration: line-through; color: #4b5563 !important;}
   .status-live{color:#ef4444;animation:blink 1.5s infinite;}
   @keyframes blink{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}
   
@@ -218,8 +220,6 @@
 
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
-// ScoreBat Token - Forbidden Error ကင်းဝေးစေရန် အသစ်လဲလှယ်ထားသည်
-const SB_TOKEN = "MTc5MDU0XzE3Mzg5MTM1ODZfNGU5YjA3ZGE1YjU1MmFkYjQ5ZTkzZjc0N2U2YmFmYjBkYmNmMDdhYg=="; 
 let selectedDate = new Date().toLocaleDateString('en-CA');
 document.getElementById("matchDate").value = selectedDate;
 
@@ -235,51 +235,58 @@ function switchTab(tab) {
 }
 
 async function loadMatches() {
-    const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Matches...</p>";
-    const API_KEY = "4e8538ba27a14e60a063277b1bcc2253"; 
-
-    try {
-        const response = await fetch(`https://api.football-data.org/v4/matches?dateFrom=${selectedDate}&dateTo=${selectedDate}`, {
-            headers: { 'X-Auth-Token': API_KEY }
-        });
-        const data = await response.json();
-
-        if (!data.matches || data.matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No Matches Found.</p>";
-            return;
+  const list = document.getElementById("matches-list");
+  list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading...</p>";
+  try {
+    const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
+    const data = await res.json();
+    let html = "";
+    const grouped = data.reduce((acc, m) => {
+      const l = m.league?.name || "Other";
+      if(!acc[l]) acc[l] = {logo: m.league?.image_path, matches: []};
+      acc[l].matches.push(m);
+      return acc;
+    }, {});
+    
+    for(let l in grouped){
+      html += `<div class="league-card"><div class="league-header"><img src="${grouped[l].logo}">${l}</div>`;
+      grouped[l].matches.forEach(m => {
+        let state = m.state?.state;
+        let time = new Date(m.starting_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        let status = `<span>${time}</span>`;
+        let scoreClass = "";
+        
+        if(["INPLAY","HT"].includes(state)) status = `<span class="status-live">● LIVE ${m.state?.minute}'</span>`;
+        if(state === "FT") status = "<span>FT</span>";
+        if(["PP","POSTPONED"].includes(state)) {
+            status = `<span>${time}</span><span class='status-pp'>PP</span>`;
+            scoreClass = "score-pp";
         }
 
-        let html = "";
-        data.matches.forEach(match => {
-            const time = new Date(match.utcDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            const statusLabel = match.status === "IN_PLAY" ? "LIVE" : (match.status === "FINISHED" ? "FT" : time);
-            const score = match.score.fullTime.home !== null ? `${match.score.fullTime.home} - ${match.score.fullTime.away}` : statusLabel;
+        let scoreText = "vs";
+        if (state !== "NS" && m.scores && m.scores.length > 0) {
+            const homeId = m.participants[0].id;
+            const awayId = m.participants[1].id;
+            const homeScoreObj = m.scores.find(s => s.participant_id === homeId && s.description === "CURRENT");
+            const awayScoreObj = m.scores.find(s => s.participant_id === awayId && s.description === "CURRENT");
+            const homeGoals = homeScoreObj ? homeScoreObj.score.goals : (m.scores[0]?.score?.goals ?? 0);
+            const awayGoals = awayScoreObj ? awayScoreObj.score.goals : (m.scores[1]?.score?.goals ?? 0);
+            scoreText = `${homeGoals} - ${awayGoals}`;
+        }
 
-            html += `
-            <div class="match-card" style="display:flex; align-items:center; justify-content:space-between; background:#151a21; margin-bottom:10px; padding:15px; border-radius:12px; border:2px solid #30363d;" onclick="showLineup(${match.id}, '${match.homeTeam.name.replace(/'/g, "\\'")}', '${match.awayTeam.name.replace(/'/g, "\\'")}')">
-                <div style="flex:1; text-align:right; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
-                    <span style="font-size:13px; font-weight:600;">${match.homeTeam.shortName || match.homeTeam.name}</span>
-                    <img src="${match.homeTeam.crest}" width="28" height="28" onerror="this.src='https://via.placeholder.com/28'">
-                </div>
-                
-                <div style="width:100px; text-align:center; background:#0b0f14; padding:6px; border-radius:6px; margin:0 15px; border:1px solid #facc15;">
-                    <div style="color:#facc15; font-weight:800; font-size:15px;">${score}</div>
-                    <div style="font-size:9px; color:#8b949e; margin-top:2px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${match.competition.name}</div>
-                </div>
-
-                <div style="flex:1; text-align:left; display:flex; align-items:center; justify-content:flex-start; gap:10px;">
-                    <img src="${match.awayTeam.crest}" width="28" height="28" onerror="this.src='https://via.placeholder.com/28'">
-                    <span style="font-size:13px; font-weight:600;">${match.awayTeam.shortName || match.awayTeam.name}</span>
-                </div>
-            </div>`;
-        });
-        list.innerHTML = html;
-    } catch (error) {
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>API Limit. Please wait.</p>";
+        html += `<div class="match" onclick="showLineup(${m.id}, '${m.participants[0].name.replace(/'/g, "\\'")}', '${m.participants[1].name.replace(/'/g, "\\'")}')">
+          <div class="time-status">${status}</div>
+          <div class="team-row"><img src="${m.participants[0].image_path}"><span>${m.participants[0].name}</span></div>
+          <div class="score-box ${scoreClass}">${scoreText}</div>
+          <div class="team-row"><img src="${m.participants[1].image_path}"><span>${m.participants[1].name}</span></div>
+        </div>`;
+      });
+      html += `</div>`;
     }
+    list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No Matches</p>";
+  } catch(e) { list.innerHTML = "Error"; }
 }
-
+ 
 async function showLineup(id, home, away) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
@@ -344,7 +351,7 @@ async function loadLive() {
   let hasContent = false;
 
   try {
-    // ၁။ Manual Live Links (GitHub)
+    // ၁။ GitHub မှ ဒေတာဖတ်ခြင်း
     try {
       const JSON_URL = "https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/live.json"; 
       const res = await fetch(JSON_URL, { cache: "no-store" });
@@ -352,32 +359,42 @@ async function loadLive() {
         const manualData = await res.json();
         if (Array.isArray(manualData) && manualData.length > 0) {
           manualData.forEach(item => {
+            if (item.url && item.url.includes("http")) {
               hasContent = true;
+              // ခင်ဗျားတောင်းဆိုထားတဲ့ ဖောင်းကြွနဲ့ ရွှေရောင်ဘောင် Style ထည့်ထားပါတယ်
               html += `
-                <div class="video-card" onclick="openPlayer('${item.url}')">
+                <div class="video-card" onclick="openPlayer('${item.url}')" style="border: 2px solid #30363d; transition: 0.3s;">
                   <div style="position:relative;">
                     <img src="${item.img}" onerror="this.src='https://via.placeholder.com/300x170?text=Live+Match'">
                     <span style="position:absolute; top:10px; left:10px; background:#facc15; color:#000; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold;">MYANMAR LIVE</span>
                   </div>
                   <div class="title-box">${item.title}</div>
                 </div>`;
+            }
           });
         }
       }
-    } catch (e) {}
+    } catch (manualError) { console.log("Manual JSON error bypassed."); }
 
-    // ၂။ Auto Live Links (ScoreBat)
+    // ၂။ ScoreBat API မှ ဒေတာဖတ်ခြင်း
     try {
-      const scoreBatRes = await fetch(`https://www.scorebat.com/video-api/v3/feed/?token=${SB_TOKEN}`);
+      const TOKEN = "MTc5MDU0XzE3Mzg5MTM1ODZfNGU5YjA3ZGE1YjU1MmFkYjQ5ZTkzZjc0N2U2YmFmYjBkYmNmMDdhYg==";
+      const scoreBatRes = await fetch(`https://www.scorebat.com/video-api/v3/feed/?token=${TOKEN}`);
+      
       if (scoreBatRes.ok) {
         const sbData = await scoreBatRes.json();
-        const autoLive = sbData.response.filter(m => m.videos && m.videos.some(v => v.title.toLowerCase().includes('live')));
-        autoLive.forEach(item => {
+        if (sbData && sbData.response) {
+          const autoLive = sbData.response.filter(m => 
+            m.videos && m.videos.some(v => v.title.toLowerCase().includes('live'))
+          );
+
+          autoLive.forEach(item => {
             hasContent = true;
+            // Highlights တွေလိုပဲ Hover လုပ်ရင် ရွှေရောင်ပြောင်းသွားမယ့် Video-card style ပါ
             html += `
-              <div class="video-card" onclick="openPlayer('${item.matchviewUrl}')">
+              <div class="video-card" onclick="openPlayer('${item.matchviewUrl}')" style="border: 2px solid #30363d; transition: 0.3s;">
                 <div style="position:relative;">
-                  <img src="${item.thumbnail}">
+                  <img src="${item.thumbnail}" onerror="this.src='https://via.placeholder.com/300x170?text=Live+Match'">
                   <span style="position:absolute; top:10px; left:10px; background:red; color:white; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; animation:blink 1.5s infinite;">LIVE</span>
                 </div>
                 <div class="title-box">
@@ -385,48 +402,47 @@ async function loadLive() {
                   ${item.title}
                 </div>
               </div>`;
-        });
+          });
+        }
       }
-    } catch (e) {}
+    } catch (sbError) { console.log("ScoreBat API error bypassed."); }
 
-    list.innerHTML = hasContent ? html : "<p style='text-align:center;width:100%;padding:40px;'>ပွဲစဉ်မရှိသေးပါ။</p>";
-  } catch (e) { list.innerHTML = "Error"; }
-}
-
-async function loadHighlights() {
-  const list = document.getElementById("highlights-list");
-  list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Highlights များ ရှာဖွေနေပါသည်...</p>";
-  try {
-    // Render API စိတ်မချရတဲ့အတွက် ScoreBat ကို တိုက်ရိုက်သုံးလိုက်သည်
-    const res = await fetch(`https://www.scorebat.com/video-api/v3/feed/?token=${SB_TOKEN}`);
-    const data = await res.json();
-    
-    // Highlight video ပါသော ပွဲများကိုသာ စစ်ထုတ်ယူခြင်း
-    const highlights = data.response.filter(m => m.videos && m.videos.length > 0);
-    
-    if (highlights.length === 0) {
-      list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>ယနေ့အတွက် Highlights မရှိသေးပါ။</p>";
-      return;
+    if (!hasContent) {
+      list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>လောလောဆယ် Live ပြနေသည့် ပွဲစဉ်မရှိသေးပါ။</p>";
+    } else {
+      list.innerHTML = html;
     }
 
-    list.innerHTML = highlights.map(h => `
-      <div class="video-card" onclick="openPlayer('${h.matchviewUrl}')">
-        <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x170?text=Highlight'">
-        <div class="title-box">
-           <div style="color:#facc15; font-size:11px; margin-bottom:4px;">${h.competition}</div>
-           ${h.title}
-        </div>
-      </div>`).join('');
-  } catch(e) { 
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>ဒေတာ ဆွဲယူ၍ မရနိုင်ပါ။ ခဏနေမှ ထပ်စမ်းကြည့်ပါ။</p>"; 
+  } catch (globalError) {
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>လောလောဆယ် Live ပြနေသည့် ပွဲစဉ်မရှိသေးပါ။</p>";
   }
 }
-
-function openPlayer(url) {
-  document.getElementById("mainModal").style.display = "flex";
-  document.getElementById("modalBody").innerHTML = `<div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:#000;"><iframe src="${url}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" allowfullscreen allow='autoplay; fullscreen'></iframe></div>`;
+ 
+async function loadHighlights() {
+  const list = document.getElementById("highlights-list");
+  try {
+    const res = await fetch(`${API_BASE}/api/highlights`);
+    const data = await res.json();
+    list.innerHTML = data.map(h => `<div class="video-card" onclick="openVideo('${h.matchviewUrl}')"><img src="${h.thumbnail}"><div class="title-box">${h.title}</div></div>`).join('');
+  } catch(e) { list.innerHTML = "Error"; }
 }
 
+function openVideo(url) {
+  document.getElementById("mainModal").style.display = "flex";
+  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
+}
+
+ function openPlayer(url) {
+  document.getElementById("mainModal").style.display = "flex";
+  document.getElementById("modalBody").innerHTML = `
+    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:#000;">
+      <iframe src="${url}" 
+        style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" 
+        allowfullscreen allow='autoplay; fullscreen'>
+      </iframe>
+    </div>`;
+}
+ 
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }

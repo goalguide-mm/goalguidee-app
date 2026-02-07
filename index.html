@@ -8,55 +8,171 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background-color: #0b0f14; color: #fff; padding-bottom: 80px; }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0b0f14;
+    background-image: linear-gradient(rgba(11, 15, 20, 0.9), rgba(11, 15, 20, 0.9)), 
+                      url('https://www.transparenttextures.com/patterns/football-no-fill.png'); 
+    background-size: 300px;
+    background-attachment: fixed;
+    color: #fff;
+    padding-bottom: 80px;
+  }
 
   header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 15px 20px; background: #111827; position: sticky; top: 0; z-index: 1050; border-bottom: 1px solid #facc15;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    border-bottom: 1px solid rgba(250, 204, 21, 0.3);
   }
-  .logo-text { font-weight: 800; color: #facc15; font-size: 22px; }
-  .refresh-btn { background: #facc15; border: none; color: #000; padding: 8px 15px; border-radius: 5px; font-weight: 800; cursor: pointer; }
+  .logo-text { font-weight: 800; color: #facc15; font-size: 22px; letter-spacing: -1px; }
+  .refresh-btn {
+    background: #facc15;
+    border: none;
+    color: #000;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);
+  }
 
-  .nav-tabs { display: flex; background: #111827; padding: 10px; gap: 10px; overflow-x: auto; }
-  .tab-btn { background: #1f2937; border: none; color: #9ca3af; padding: 10px 20px; border-radius: 5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .tab-btn.active { background: #facc15; color: #000; }
-
-  .date-bar { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px 10px; }
-  .date-bar button { background: #1f2937; border: 1px solid #374151; color: #facc15; width: 35px; height: 35px; border-radius: 5px; cursor: pointer; }
-  .date-bar input { background: #1f2937; border: 1px solid #facc15; color: #fff; padding: 8px; border-radius: 5px; outline: none; }
-
+  .date-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 10px 5px 10px;
+  }
+  
   /* League Filter Style */
-  .filter-container { display: flex; justify-content: center; padding: 0 20px 20px 20px; }
-  #leagueFilter { width: 100%; max-width: 400px; background: #1f2937; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 8px; outline: none; font-weight: 600; }
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    padding: 10px 20px;
+  }
+  #leagueFilter {
+    width: 100%;
+    max-width: 300px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+  }
 
-  .league-card { margin: 15px; background: #151a21; border-radius: 10px; border: 1px solid #facc15; overflow: hidden; }
-  .league-header { padding: 10px 15px; background: #1f2937; color: #facc15; font-weight: 800; font-size: 14px; border-bottom: 1px solid #374151; }
+  .date-bar button {
+    background: #1f2937;
+    border: 1px solid #374151;
+    color: #facc15;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .date-bar input {
+    background: #1f2937;
+    border: 1px solid #facc15;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-weight: 600;
+    outline: none;
+  }
 
-  .match { display: grid; grid-template-columns: 80px 1fr 60px 1fr; align-items: center; padding: 15px 10px; border-bottom: 1px solid #1f2937; cursor: pointer; }
+  .league-card {
+    margin: 15px;
+    background: rgba(21, 26, 33, 0.6);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+  }
+  .league-header {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    background: rgba(242, 201, 76, 0.1);
+    color: #facc15;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(250, 204, 21, 0.1);
+  }
+
+  .match {
+    display: grid;
+    grid-template-columns: 80px 1fr 50px 1fr;
+    align-items: center;
+    padding: 18px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.2s;
+  }
   .match:last-child { border-bottom: none; }
-  .time-status { font-size: 12px; font-weight: 700; color: #9ca3af; text-align: center; }
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; }
+  .match:active { background: rgba(255,255,255,0.05); }
+
+  .time-status { font-size: 11px; font-weight: 700; color: #9ca3af; text-align: center; }
+  .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
   @keyframes blink { 50% { opacity: 0.5; } }
 
-  .team-row { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-  .team-row img { width: 35px; height: 35px; object-fit: contain; }
-  .team-name { font-size: 11px; font-weight: 600; text-align: center; }
-  .score-box { font-size: 18px; font-weight: 900; text-align: center; }
-  .vs-box { font-size: 12px; font-weight: 800; color: #4b5563; text-align: center; }
+  .team-row { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .team-row img { width: 32px; height: 32px; object-fit: contain; }
+  .team-name { font-size: 11px; font-weight: 600; text-align: center; color: #e5e7eb; }
+  .score-box { font-size: 20px; font-weight: 900; text-align: center; color: #fff; }
+  .vs-box { font-size: 12px; font-weight: 800; color: #4b5563; }
 
-  .content-section { display: none; }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: #111827;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 2000;
+    border-top: 1px solid #1f2937;
+    padding-bottom: 5px;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: 0.3s;
+    flex: 1;
+  }
+  .nav-item span { font-size: 10px; font-weight: 700; }
+  .nav-item.active { color: #facc15; }
+
+  .content-section { display: none; animation: fadeIn 0.4s ease; }
   .content-section.active { display: block; }
-  
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 15px; }
-  .video-card { background: #151a21; border-radius: 10px; overflow: hidden; border: 1px solid #1f2937; }
+  .video-card { background: #151a21; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
   .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  .video-title { padding: 10px; font-size: 12px; font-weight: 600; height: 50px; overflow: hidden; }
+  .title-box { padding: 10px; font-size: 11px; font-weight: 600; line-height: 1.4; height: 45px; overflow: hidden; }
 
-  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; align-items: center; justify-content: center; }
-  .modal-content { width: 95%; max-width: 800px; background: #000; position: relative; }
-  .close-modal { position: absolute; top: -35px; right: 0; color: #fff; font-size: 30px; cursor: pointer; }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
+  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; }
+  .close-modal { position: absolute; top: -40px; right: 10px; color: #fff; font-size: 30px; cursor: pointer; }
 
-  footer { text-align: center; padding: 20px; color: #4b5563; font-size: 12px; }
+  footer { text-align: center; padding: 20px; color: #4b5563; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -66,13 +182,6 @@
   <button class="refresh-btn" onclick="location.reload()">REFRESH</button>
 </header>
 
-<nav class="nav-tabs">
-  <button class="tab-btn active" onclick="switchTab('matches', this)">MATCHES</button>
-  <button class="tab-btn" onclick="switchTab('live', this)">LIVE STREAMING</button>
-  <button class="tab-btn" onclick="switchTab('standings', this)">STANDINGS</button>
-  <button class="tab-btn" onclick="switchTab('highlights', this)">HIGHLIGHTS</button>
-</nav>
-
 <div id="section-matches" class="content-section active">
   <div class="date-bar">
     <button onclick="changeDate(-1)">◀</button>
@@ -80,8 +189,8 @@
     <button onclick="changeDate(1)">▶</button>
   </div>
   
-  <div class="filter-container">
-    <select id="leagueFilter" onchange="filterMatches(this.value)">
+  <div class="filter-bar">
+    <select id="leagueFilter" onchange="filterLeagues(this.value)">
       <option value="all">All Leagues</option>
     </select>
   </div>
@@ -89,144 +198,131 @@
   <div id="matches-list"></div>
 </div>
 
-<div id="section-live" class="content-section">
-  <div id="live-list" class="grid-layout"></div>
-</div>
+<div id="section-live" class="content-section"><div id="live-list" class="grid-layout"></div></div>
+<div id="section-standings" class="content-section"><div id="standings-list"></div></div>
+<div id="section-highlights" class="content-section"><div id="highlights-list" class="grid-layout"></div></div>
 
-<div id="section-standings" class="content-section">
-  <div id="standings-list" style="padding: 20px; text-align: center;">Standings table coming soon...</div>
-</div>
-
-<div id="section-highlights" class="content-section">
-  <div id="highlights-list" class="grid-layout"></div>
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-matches" onclick="switchTab('matches')"><span>MATCHES</span></div>
+  <div class="nav-item" id="nav-live" onclick="switchTab('live')"><span>LIVE</span></div>
+  <div class="nav-item" id="nav-standings" onclick="switchTab('standings')"><span>TABLE</span></div>
+  <div class="nav-item" id="nav-highlights" onclick="switchTab('highlights')"><span>GOALS</span></div>
 </div>
 
 <div id="mainModal" class="modal" onclick="closeModal()">
+  <span class="close-modal">&times;</span>
   <div class="modal-content" onclick="event.stopPropagation()">
-    <span class="close-modal" onclick="closeModal()">&times;</span>
     <div id="modalBody"></div>
   </div>
 </div>
 
-<footer>GOAL GUIDE &copy; 2026</footer>
-
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
 let selectedDate = new Date().toLocaleDateString('en-CA');
-let allMatchesData = {};
+let allMatchesData = {}; 
 document.getElementById("matchDate").value = selectedDate;
 
-function switchTab(tabId, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('section-' + tabId).classList.add('active');
-  if(tabId === 'live') loadLive();
-  if(tabId === 'highlights') loadHighlights();
+  document.getElementById('nav-' + tab).classList.add('active');
+  document.getElementById('section-' + tab).classList.add('active');
+  if(tab === 'matches') loadMatches();
+  if(tab === 'live') loadLive();
+  if(tab === 'standings') loadStandings();
+  if(tab === 'highlights') loadHighlights();
 }
 
 async function loadMatches() {
-  const list = document.getElementById("matches-list");
-  const filter = document.getElementById("leagueFilter");
-  list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading matches...</p>";
-  
-  try {
-    const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
-    const data = await res.json();
-    
-    if (!data || data.length === 0) {
-      list.innerHTML = "<p style='text-align:center;padding:40px;'>ယနေ့အတွက် ပွဲစဉ်များ မရှိပါ။</p>";
-      filter.innerHTML = '<option value="all">All Leagues</option>';
-      return;
-    }
+    const list = document.getElementById("matches-list");
+    const filter = document.getElementById("leagueFilter");
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
 
-    allMatchesData = data.reduce((acc, match) => {
-      const leagueName = match.tournament?.name || "Other";
-      if (!acc[leagueName]) acc[leagueName] = [];
-      acc[leagueName].push(match);
-      return;
-    }, {});
+    try {
+        const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
+        const events = await response.json();
 
-    let filterHtml = '<option value="all">All Leagues</option>';
-    Object.keys(allMatchesData).sort().forEach(league => {
-      filterHtml += `<option value="${league}">${league}</option>`;
-    });
-    filter.innerHTML = filterHtml;
+        if (!events || events.length === 0) {
+            list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
+            filter.innerHTML = '<option value="all">All Leagues</option>';
+            return;
+        }
 
-    renderMatches('all');
-  } catch (e) {
-    list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: ဒေတာယူ၍မရပါ။</p>";
-  }
+        const seenIds = new Set();
+        allMatchesData = events.reduce((acc, ev) => {
+            if (!seenIds.has(ev.id)) {
+                seenIds.add(ev.id);
+                const leagueName = ev.tournament?.name || "Other Competitions";
+                if (!acc[leagueName]) acc[leagueName] = [];
+                acc[leagueName].push(ev);
+            }
+            return acc;
+        }, {});
+
+        // Update Filter Options
+        let filterHtml = '<option value="all">All Leagues</option>';
+        Object.keys(allMatchesData).sort().forEach(l => {
+            filterHtml += `<option value="${l}">${l}</option>`;
+        });
+        filter.innerHTML = filterHtml;
+
+        renderMatches('all');
+    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; }
 }
 
 function renderMatches(selectedLeague) {
-  const list = document.getElementById("matches-list");
-  let html = "";
-  for (let league in allMatchesData) {
-    if (selectedLeague !== 'all' && league !== selectedLeague) continue;
+    const list = document.getElementById("matches-list");
+    let html = "";
     
-    html += `<div class="league-card"><div class="league-header">⚽ ${league}</div>`;
-    allMatchesData[league].forEach(m => {
-      const status = m.status?.description || "";
-      const isLive = m.status?.type === "inprogress";
-      const isNS = status === "Not started";
-      const time = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false}) : "";
+    for (let league in allMatchesData) {
+        if (selectedLeague !== 'all' && league !== selectedLeague) continue;
 
-      html += `
-        <div class="match">
-          <div class="time-status ${isLive ? 'status-live' : ''}">${isLive ? 'LIVE' : (isNS ? time : status)}</div>
-          <div class="team-row">
-            <img src="https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-            <span class="team-name">${m.homeTeam.name}</span>
-          </div>
-          <div class="score-container">
-            ${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}
-          </div>
-          <div class="team-row">
-            <img src="https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-            <span class="team-name">${m.awayTeam.name}</span>
-          </div>
-        </div>`;
-    });
-    html += `</div>`;
-  }
-  list.innerHTML = html;
+        html += `<div class="league-card"><div class="league-header">${league}</div>`;
+        allMatchesData[league].forEach(m => {
+            const status = m.status?.description || "";
+            const isLive = m.status?.type === "inprogress" || status.toLowerCase().includes("live");
+            const isNS = status === "Not started";
+            let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
+
+            const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
+            const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
+
+            html += `
+            <div class="match" onclick="showLineup(${m.id}, '${m.homeTeam.name.replace(/'/g, "")}', '${m.awayTeam.name.replace(/'/g, "")}')">
+                <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>
+                <div class="team-row"><img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span></div>
+                <div style="text-align:center;">${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}</div>
+                <div class="team-row"><img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span></div>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    list.innerHTML = html;
 }
 
-function filterMatches(val) { renderMatches(val); }
+function filterLeagues(val) { renderMatches(val); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 
+async function loadStandings() { document.getElementById("standings-list").innerHTML = "<p style='text-align:center;padding:40px;'>Coming Soon...</p>"; }
 async function loadLive() {
-  const list = document.getElementById("live-list");
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/live.json");
-    const data = await res.json();
-    list.innerHTML = data.map(item => `
-      <div class="video-card" onclick="openStream('${item.url}')">
-        <img src="${item.img}">
-        <div class="video-title">${item.title}</div>
-      </div>`).join('');
-  } catch (e) { list.innerHTML = "<p style='padding:20px;'>No live streams available.</p>"; }
+    const list = document.getElementById("live-list");
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/live.json", { cache: "no-store" });
+        const data = await res.json();
+        list.innerHTML = data.map(item => `<div class="video-card" onclick="openPlayer('${item.url}')"><img src="${item.img}"><div class="title-box">${item.title}</div></div>`).join('');
+    } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>"; }
 }
-
 async function loadHighlights() {
-  const list = document.getElementById("highlights-list");
-  try {
-    const res = await fetch(`${API_BASE}/api/highlights`);
-    const data = await res.json();
-    list.innerHTML = data.map(h => `
-      <div class="video-card" onclick="openStream('${h.matchviewUrl}')">
-        <img src="${h.thumbnail}">
-        <div class="video-title">${h.title}</div>
-      </div>`).join('');
-  } catch (e) { list.innerHTML = "<p style='padding:20px;'>No highlights available.</p>"; }
+    try {
+        const res = await fetch(`${API_BASE}/api/highlights`);
+        const data = await res.json();
+        document.getElementById("highlights-list").innerHTML = data.map(h => `<div class="video-card" onclick="openVideo('${h.matchviewUrl}')"><img src="${h.thumbnail}"><div class="title-box">${h.title}</div></div>`).join('');
+    } catch(e) { }
 }
 
-function openStream(url) {
-  document.getElementById("mainModal").style.display = "flex";
-  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
-}
+function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
+function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
 loadMatches();

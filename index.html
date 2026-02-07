@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 <title>GOAL GUIDE</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -247,7 +248,6 @@ async function loadMatches() {
             return;
         }
 
-        // RapidAPI Structure အတိုင်း ပြင်ဆင်ခြင်း
         const grouped = events.reduce((acc, ev) => {
             const l = ev.tournament?.name || "Other League";
             if (!acc[l]) acc[l] = { matches: [] };
@@ -287,12 +287,9 @@ async function loadMatches() {
                     statusHtml = `<span class="status-live">● LIVE</span>`;
                 }
 
-                // RapidAPI Team Images
-                // Logo link ကို ဒီအတိုင်း ပြင်ရေးပါ (RapidAPI အတွက်)
-               // index.html ထဲက ဒီအပိုင်းကို ရှာပြီး အစားထိုးပါ
-               const hLogo = `https://www.sofascore.com/api/v1/team/${homeTeam.id}/image`;
-               const aLogo = `https://www.sofascore.com/api/v1/team/${awayTeam.id}/image`;
-               
+                // RapidAPI Team Logos from Sofascore Official CDN
+                const hLogo = `https://www.sofascore.com/api/v1/team/${homeTeam.id}/image`;
+                const aLogo = `https://www.sofascore.com/api/v1/team/${awayTeam.id}/image`;
 
                 html += `
                 <div class="match" onclick="showLineup(${m.id}, '${homeTeam.name.replace(/'/g, "\\'")}', '${awayTeam.name.replace(/'/g, "\\'")}')">
@@ -326,7 +323,6 @@ async function showLineup(id, home, away) {
     const res = await fetch(`${API_BASE}/api/fixtures/${id}`);
     const data = await res.json();
 
-    // RapidAPI lineup check (Note: Some events might not have lineups field directly)
     if (!data) {
         body.innerHTML = `<div style='padding:40px;text-align:center;'>Match info not available.</div>`;
         return;
@@ -356,10 +352,7 @@ async function loadStandings() {
   try {
     const res = await fetch(`${API_BASE}/api/standings`);
     const data = await res.json();
-
     if(!data || data.length === 0) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Unavailable</p>"; return; }
-    
-    // RapidAPI standings logic goes here if needed
     list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings logic updated to backend league 8.</p>";
   } catch(e) { list.innerHTML = "Unavailable"; }
 }
@@ -367,10 +360,8 @@ async function loadStandings() {
 async function loadLive() {
   const list = document.getElementById("live-list");
   list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
-
   let html = "";
   let hasContent = false;
-
   try {
     const JSON_URL = "https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/live.json"; 
     const res = await fetch(JSON_URL, { cache: "no-store" });
@@ -388,7 +379,6 @@ async function loadLive() {
             </div>`;
       });
     }
-
     if (!hasContent) {
       list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>လောလောဆယ် Live ပြနေသည့် ပွဲစဉ်မရှိသေးပါ။</p>";
     } else {

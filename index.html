@@ -152,6 +152,7 @@ async function loadMatches() {
       acc[l].matches.push(m);
       return acc;
     }, {});
+    
     for(let l in grouped){
       html += `<div class="league-card"><div class="league-header"><img src="${grouped[l].logo}">${l}</div>`;
       grouped[l].matches.forEach(m => {
@@ -159,14 +160,30 @@ async function loadMatches() {
         let time = new Date(m.starting_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         let status = `<span>${time}</span>`;
         let scoreClass = "";
+        
         if(["INPLAY","HT"].includes(state)) status = `<span class="status-live">● LIVE ${m.state?.minute}'</span>`;
         if(state === "FT") status = "<span>FT</span>";
-        if(["PP","POSTPONED"].includes(state)) { status = `<span>${time}</span><span class='status-pp'>PP</span>`; scoreClass = "score-pp"; }
+        if(["PP","POSTPONED"].includes(state)) {
+            status = `<span>${time}</span><span class='status-pp'>PP</span>`;
+            scoreClass = "score-pp";
+        }
 
-        html += `<div class="match" onclick="showLineup(${m.id}, '${m.participants[0].name}', '${m.participants[1].name}')">
+        // ရလဒ်များကို မှန်ကန်စွာ ပြသရန် စစ်ဆေးခြင်း
+        let homeScore = m.scores?.find(s => s.description === "CURRENT")?.score?.goals ?? 0;
+        let awayScore = m.scores?.find(s => s.description === "CURRENT")?.score?.goals ?? 0;
+        
+        // အကယ်၍ scores array က ပုံစံအဟောင်းဆိုလျှင်
+        if(m.scores && m.scores.length >= 2 && !m.scores[0].description) {
+            homeScore = m.scores[0].score.goals;
+            awayScore = m.scores[1].score.goals;
+        }
+
+        let scoreText = (state === "NS") ? "vs" : `${homeScore} - ${awayScore}`;
+
+        html += `<div class="match" onclick="showLineup(${m.id}, '${m.participants[0].name.replace(/'/g, "\\'")}', '${m.participants[1].name.replace(/'/g, "\\'")}')">
           <div class="time-status">${status}</div>
           <div class="team-row"><img src="${m.participants[0].image_path}"><span>${m.participants[0].name}</span></div>
-          <div class="score-box ${scoreClass}">${state==="NS"?"vs":(m.scores[0].score.goals+" - "+m.scores[1].score.goals)}</div>
+          <div class="score-box ${scoreClass}">${scoreText}</div>
           <div class="team-row"><img src="${m.participants[1].image_path}"><span>${m.participants[1].name}</span></div>
         </div>`;
       });
@@ -175,7 +192,6 @@ async function loadMatches() {
     list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No Matches</p>";
   } catch(e) { list.innerHTML = "Error"; }
 }
-
 async function showLineup(id, home, away) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");

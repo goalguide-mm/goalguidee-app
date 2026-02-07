@@ -295,8 +295,8 @@ async function loadMatches() {
                 }
 
                 // ၃။ Logo URL များ (SportAPI အတွက် တိုက်ရိုက် Image Link များ သုံးထားသည်)
-                const hLogo = `https://sportapi7.p.rapidapi.com/api/v1/team/${m.homeTeam.id}/image`;
-                const aLogo = `https://sportapi7.p.rapidapi.com/api/v1/team/${m.awayTeam.id}/image`;
+                const hLogo = `https://api.sofascore.app/api/v1/team/${m.homeTeam.id}/image`;
+                const aLogo = `https://api.sofascore.app/api/v1/team/${m.awayTeam.id}/image`;
 
                 html += `
                 <div class="match" onclick="showLineup(${m.id}, '${m.homeTeam.name.replace(/'/g, "\\'")}', '${m.awayTeam.name.replace(/'/g, "\\'")}')">

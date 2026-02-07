@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOAL GUIDE | Ultra Pro</title>
+<title>GOAL GUIDE | Official</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -29,31 +29,29 @@
   .league-header{padding:10px 14px;font-size:11px;font-weight:700;background:#1b2230;color:#8b949e;text-transform:uppercase;}
   
   .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;}
-  .time-status{font-size:11px;font-weight:800;}
-  .live-dot{color:#ef4444;animation:blink 1.5s infinite;}
-  @keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
   .team-row{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
   .team-row img{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;}
   .team-row span{font-size:12px;font-weight:500;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
   /* Standings UI */
-  .search-container{padding:15px 12px;background:#0b0f14;position:sticky;top:110px;z-index:900;}
+  .search-container{padding:15px 12px;background:#0b0f14;}
   .league-search{width:100%;padding:12px 15px;background:#1f2937;border:1px solid #30363d;border-radius:10px;color:#fff;outline:none;font-size:14px;}
-  .table-container{margin:0 12px 20px 12px;overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;background:#151a21;border-radius:12px;overflow:hidden;font-size:13px;}
-  th{background:#1b2230;color:#8b949e;text-align:left;padding:12px 8px;font-size:11px;text-transform:uppercase;}
+  .table-container{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;background:#151a21;font-size:13px;}
+  th{background:#1b2230;color:#8b949e;text-align:left;padding:12px 8px;font-size:11px;}
   td{padding:12px 8px;border-bottom:1px solid #222833;}
-  .pos{font-weight:800;color:#facc15;width:30px;}
-  .team-cell{display:flex;align-items:center;gap:10px;min-width:150px;}
-  .team-cell img{width:24px;height:24px;background:#fff;padding:2px;border-radius:4px;}
   .pts{font-weight:800;color:#facc15;}
+
+  /* Highlights UI */
+  .hl-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;padding:16px;}
+  .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
+  .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
 
   /* Modal */
   .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:10px;}
   .modal-content{background:#111827;width:100%;max-width:480px;border-radius:24px;position:relative;border:1px solid #30363d;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;}
   .close-modal{position:absolute;top:15px;right:20px;color:#8b949e;font-size:24px;cursor:pointer;z-index:100;}
-  .timeline{flex:1;overflow-y:auto;padding:20px;background:#0b0f14;}
   
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
@@ -82,13 +80,13 @@
 
 <div id="section-standings" class="content-section">
   <div class="search-container">
-    <input type="text" id="leagueSearch" class="league-search" placeholder="Search League (e.g. Premier League)..." onkeyup="filterLeagues()">
+    <input type="text" id="leagueSearch" class="league-search" placeholder="Search League (e.g. Premier League)..." onkeyup="filterStandings()">
   </div>
   <div id="standings-list"></div>
 </div>
 
 <div id="section-highlights" class="content-section">
-  <div id="highlights-list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;padding:16px;"></div>
+  <div id="highlights-list" class="hl-grid"></div>
 </div>
 
 <div id="mainModal" class="modal" onclick="closeModal()">
@@ -115,6 +113,7 @@ function switchTab(tab) {
   if(tab === 'highlights') loadHighlights();
 }
 
+// MATCHES LOGIC
 async function loadMatches() {
   const list = document.getElementById("matches-list");
   list.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating Scores...</p>";
@@ -122,44 +121,30 @@ async function loadMatches() {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
-  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Data unavailable.</p>"; }
+  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>"; }
 }
 
 function renderMatches(matches) {
   const list = document.getElementById("matches-list");
   list.innerHTML = "";
-  if(!matches?.length) { list.innerHTML = "<p style='text-align:center;padding:50px;'>No matches found.</p>"; return; }
-  
+  if(!matches?.length) { list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches.</p>"; return; }
   const grouped = matches.reduce((acc, m) => {
     const lName = m.league?.name || "Other";
     if(!acc[lName]) acc[lName] = [];
     acc[lName].push(m);
     return acc;
   }, {});
-
   for(const lName in grouped) {
     let html = `<section class="league-card"><div class="league-header">${lName}</div>`;
     grouped[lName].forEach(m => {
-      const home = m.participants?.find(p => p.meta?.location === 'home');
-      const away = m.participants?.find(p => p.meta?.location === 'away');
-      const state = m.state?.state;
-      const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
-      const isFT = ["FT", "AET"].includes(state);
-      const isPP = ["POSTPONED", "PP"].includes(state);
-      
-      const hScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === home?.id)?.score?.goals ?? 0;
-      const aScore = m.scores?.find(s => s.description === "CURRENT" && s.participant_id === away?.id)?.score?.goals ?? 0;
-
-      let tText = new Date(m.starting_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-      if(isPP) tText = "<span style='color:#ef4444;'>PP</span>";
-      else if(isLive) tText = `<span class="live-dot">● LIVE</span> ${m.state?.minute || ""}'`;
-      else if(isFT) tText = "FT";
-
+      const home = m.participants?.[0], away = m.participants?.[1];
+      const isLive = ["INPLAY", "HT"].includes(m.state?.state);
+      const isFT = ["FT", "AET"].includes(m.state?.state);
       html += `
         <div class="match" onclick="showMatchDetail(${m.id})">
-          <div class="time-status">${tText}</div>
+          <div style="font-size:11px;font-weight:800;">${isLive?'LIVE':(isFT?'FT':'VS')}</div>
           <div class="team-row"><img src="${home?.image_path}"><span>${home?.name}</span></div>
-          <div class="score-box">${isLive || isFT ? hScore+' - '+aScore : 'vs'}</div>
+          <div class="score-box">${isLive||isFT ? (m.scores?.[0]?.score?.goals||0)+' - '+(m.scores?.[1]?.score?.goals||0) : 'vs'}</div>
           <div class="team-row"><img src="${away?.image_path}"><span>${away?.name}</span></div>
         </div>`;
     });
@@ -167,87 +152,92 @@ function renderMatches(matches) {
   }
 }
 
+// STANDINGS LOGIC
 async function loadStandings() {
   const list = document.getElementById("standings-list");
-  list.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Loading Standings...</p>";
+  list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Table...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/standings`);
     const data = await res.json();
-    window.allStandings = data; // Save for filtering
     renderStandings(data);
   } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings unavailable.</p>"; }
 }
 
 function renderStandings(data) {
   const list = document.getElementById("standings-list");
-  list.innerHTML = "";
-  data.forEach(league => {
-    let html = `
-      <div class="league-card league-item" data-name="${league.name.toLowerCase()}">
-        <div class="league-header">${league.name}</div>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>#</th><th>Team</th><th>PL</th><th>GD</th><th>PTS</th></tr></thead>
-            <tbody>`;
-    
-    league.standings.forEach(s => {
-      html += `
-        <tr>
-          <td class="pos">${s.position}</td>
-          <td class="team-cell"><img src="${s.team_logo}"><span>${s.team_name}</span></td>
-          <td>${s.played}</td>
-          <td>${s.gd}</td>
-          <td class="pts">${s.pts}</td>
-        </tr>`;
-    });
-    html += `</tbody></table></div></div>`;
-    list.innerHTML += html;
+  list.innerHTML = data.map(league => `
+    <div class="league-card league-item" data-name="${league.name.toLowerCase()}">
+      <div class="league-header">${league.name}</div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>#</th><th>Team</th><th>PL</th><th>GD</th><th>PTS</th></tr></thead>
+          <tbody>
+            ${league.standings.map(s => `
+              <tr>
+                <td>${s.position}</td>
+                <td style="display:flex;align-items:center;gap:8px;"><img src="${s.team_logo}" width="20"> ${s.team_name}</td>
+                <td>${s.played}</td>
+                <td>${s.gd}</td>
+                <td class="pts">${s.pts}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterStandings() {
+  const q = document.getElementById("leagueSearch").value.toLowerCase();
+  document.querySelectorAll(".league-item").forEach(el => {
+    el.style.display = el.dataset.name.includes(q) ? "block" : "none";
   });
 }
 
-function filterLeagues() {
-  const query = document.getElementById("leagueSearch").value.toLowerCase();
-  document.querySelectorAll(".league-item").forEach(item => {
-    item.style.display = item.getAttribute("data-name").includes(query) ? "block" : "none";
-  });
+// HIGHLIGHTS LOGIC
+async function loadHighlights() {
+  const list = document.getElementById("highlights-list");
+  list.innerHTML = "<p style='text-align:center;grid-column:1/-1;'>Loading Highlights...</p>";
+  try {
+    const res = await fetch(`${API_BASE}/api/highlights`);
+    const data = await res.json();
+    list.innerHTML = data.map(h => `
+      <div class="hl-card" onclick="window.open('${h.matchviewUrl}', '_blank')">
+        <img class="thumb" src="${h.thumbnail}">
+        <div style="padding:10px;font-size:13px;font-weight:600;">${h.title}</div>
+      </div>
+    `).join('');
+  } catch (e) { list.innerHTML = "<p>Failed to load videos.</p>"; }
 }
 
 async function showMatchDetail(id) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
-  body.innerHTML = "<div style='padding:50px;text-align:center;'>Loading...</div>";
   modal.style.display = "flex";
+  body.innerHTML = "<p style='padding:40px;text-align:center;'>Loading Details...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/match/${id}`);
     const data = await res.json();
-    const home = data.participants.find(p => p.meta.location === 'home');
-    const away = data.participants.find(p => p.meta.location === 'away');
-    let evs = (data.events || []).sort((a,b) => a.minute - b.minute).map(ev => {
-      const isH = ev.participant_id === home.id;
-      return `<div style="display:flex; justify-content:${isH?'flex-start':'flex-end'}; margin-bottom:10px; font-size:13px;">
-                <span style="color:#facc15; width:30px;">${ev.minute}'</span>
-                <span style="background:#1f2937; padding:5px 10px; border-radius:5px;">${ev.player_name}</span>
-              </div>`;
-    }).join('');
-    body.innerHTML = `<div style="padding:20px; text-align:center; background:#1b2230;">
-                        <h4 style="color:#8b949e; font-size:11px;">${data.league.name}</h4>
-                        <div style="display:flex; justify-content:space-around; align-items:center; margin-top:15px;">
-                          <div><img src="${home.image_path}" width="40"><div>${home.name}</div></div>
-                          <div style="font-size:24px; font-weight:800;">${data.scores[0]?.score?.goals || 0} - ${data.scores[1]?.score?.goals || 0}</div>
-                          <div><img src="${away.image_path}" width="40"><div>${away.name}</div></div>
-                        </div>
-                      </div>
-                      <div class="timeline">${evs || '<p style="text-align:center; padding:20px;">No events.</p>'}</div>`;
-  } catch (e) { body.innerHTML = "<p style='padding:40px; text-align:center;'>Details unavailable.</p>"; }
+    body.innerHTML = `<div style="padding:20px;text-align:center;">
+      <h3>${data.league?.name}</h3>
+      <div style="display:flex;justify-content:space-around;margin:20px 0;">
+        <img src="${data.participants?.[0]?.image_path}" width="50">
+        <span style="font-size:30px;font-weight:900;">${data.scores?.[0]?.score?.goals||0} - ${data.scores?.[1]?.score?.goals||0}</span>
+        <img src="${data.participants?.[1]?.image_path}" width="50">
+      </div>
+      <div style="max-height:300px;overflow-y:auto;background:#0b0f14;padding:15px;border-radius:10px;">
+        ${(data.events||[]).map(e=>`<div style="margin-bottom:8px;">${e.minute}' - ${e.player_name} (${e.type?.name})</div>`).join('') || 'No major events.'}
+      </div>
+    </div>`;
+  } catch (e) { body.innerHTML = "<p style='padding:40px;text-align:center;'>Details unavailable.</p>"; }
 }
 
 function closeModal() { document.getElementById("mainModal").style.display = "none"; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { 
   let d = new Date(selectedDate); d.setDate(d.getDate()+n); 
-  selectedDate = d.toLocaleDateString('en-CA'); 
-  document.getElementById("matchDate").value = selectedDate; 
-  loadMatches(); 
+  selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); 
 }
 
 loadMatches();

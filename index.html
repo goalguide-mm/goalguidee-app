@@ -35,25 +35,22 @@
   .team-row img{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* Highlights Modern Hover & Golden Border */
+  /* Highlights Hover & Golden Border */
   .grid-layout{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;padding:16px;}
   .video-card {
     background: #151a21;
     border-radius: 12px;
     overflow: hidden;
-    border: 2px solid #30363d; /* ဘောင်ကို ၂ ပစ်ဇယ် ထားထားတယ် */
+    border: 2px solid #30363d;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
   }
-  
-  /* မျှားထောက်လိုက်ရင် ဖြစ်မယ့် Effect */
   .video-card:hover {
-    transform: translateY(-10px) scale(1.02); /* ပိုပြီး ဖောင်းကြွလာမယ် */
-    border-color: #facc15; /* ဘောင်တစ်ခုလုံး ရွှေရောင်ကွတ်မယ် */
-    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.2); /* ရွှေရောင် အရိပ်လေးပါမယ် */
+    transform: translateY(-10px) scale(1.02);
+    border-color: #facc15;
+    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.2);
   }
-
   .video-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
   .video-card .title-box {padding:12px; font-weight:600; font-size:13px; color:#fff;}
 
@@ -63,9 +60,10 @@
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th, td{padding:12px 8px;text-align:left;border-bottom:1px solid #222833;}
 
+  /* Modal Style */
   .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;z-index:2000;}
-  .modal-content{width:95%;max-width:800px;position:relative;}
-  .close-modal{position:absolute;top:-40px;right:0;color:#fff;font-size:30px;cursor:pointer;}
+  .modal-content{width:95%;max-width:900px;position:relative;background:#000;border-radius:15px;overflow:hidden;}
+  .close-modal{position:absolute;top:10px;right:15px;color:#fff;font-size:35px;cursor:pointer;z-index:2001;text-shadow: 0 0 10px #000;}
 
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
@@ -109,8 +107,8 @@
 </div>
 
 <div id="mainModal" class="modal" onclick="closeModal()">
+  <span class="close-modal" onclick="closeModal()">&times;</span>
   <div class="modal-content" onclick="event.stopPropagation()">
-    <span class="close-modal" onclick="closeModal()">&times;</span>
     <div id="modalBody"></div>
   </div>
 </div>
@@ -200,23 +198,44 @@ async function loadLive() {
   } catch(e) { list.innerHTML = "<p style='grid-column:1/-1;text-align:center;'>No Live Matches</p>"; }
 }
 
+// Highlights Section Logic (Website အတွင်းမှာပဲပြရန် ပြင်ထားသည်)
 async function loadHighlights() {
   const list = document.getElementById("highlights-list");
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
-    list.innerHTML = data.map(h => `<div class="video-card" onclick="window.open('${h.matchviewUrl}')"><img src="${h.thumbnail}"><div class="title-box">${h.title}</div></div>`).join('');
+    list.innerHTML = data.map(h => `
+      <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
+        <img src="${h.thumbnail}">
+        <div class="title-box">${h.title}</div>
+      </div>`).join('');
   } catch(e) { list.innerHTML = "Error"; }
 }
 
 function openVideo(url) {
   document.getElementById("mainModal").style.display = "flex";
-  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
+  // Iframe သုံးပြီး Website အတွင်းမှာပဲ ဗီဒီယိုဖွင့်ပေးသည်
+  document.getElementById("modalBody").innerHTML = `
+    <iframe src="${url}" 
+            style="width:100%;aspect-ratio:16/9;border:none;" 
+            allow="autoplay; fullscreen" 
+            allowfullscreen>
+    </iframe>`;
 }
 
-function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
+function closeModal() { 
+  document.getElementById("mainModal").style.display = "none"; 
+  document.getElementById("modalBody").innerHTML = ""; 
+}
+
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
-function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
+function changeDate(n) { 
+  let d = new Date(selectedDate); 
+  d.setDate(d.getDate()+n); 
+  selectedDate = d.toLocaleDateString('en-CA'); 
+  document.getElementById("matchDate").value = selectedDate; 
+  loadMatches(); 
+}
 
 loadMatches();
 </script>

@@ -20,7 +20,6 @@
   .content-section{display:none;}
   .content-section.active{display:block;}
 
-  /* --- Matches Section (Outer Golden Border Added) --- */
   .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;}
   .date-bar button, .date-bar input{background:#1f2937;border:none;color:#fff;padding:8px;border-radius:8px;}
   
@@ -29,7 +28,7 @@
     margin:12px;
     background:#151a21;
     border-radius:12px;
-    border: 2px solid #facc15; /* အပြင်ဘောင်ကို ရွှေရောင်ကွတ်လိုက်သည် */
+    border: 2px solid #facc15;
     overflow:hidden;
     box-shadow: 0 4px 15px rgba(250, 204, 21, 0.1);
   }
@@ -38,7 +37,7 @@
 
   .match {
     display:grid;
-    grid-template-columns:85px 1fr 65px 1fr;
+    grid-template-columns:95px 1fr 65px 1fr;
     align-items:center;
     padding:16px 14px;
     border-top:1px solid #30363d;
@@ -47,22 +46,33 @@
     background: #151a21;
   }
 
-  /* Hover Effect on Match Rows */
   .match:hover {
     transform: scale(1.01);
     background: #1c232d;
     z-index: 10;
   }
 
-  .time-status{font-size:11px;font-weight:800;color:#8b949e;}
-  .status-pp{color:#ef4444;}
+  /* ပွဲချိန် Time Font Size ကြီးပြီး Bold တင်ခြင်း */
+  .time-status{
+    font-size: 13px; 
+    font-weight: 800; 
+    color: #8b949e;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-pp{color:#ef4444; font-weight: 800;}
+  /* PP ရလဒ်ကို မျဉ်းတားခြင်း */
+  .score-pp{text-decoration: line-through; color: #4b5563 !important;}
+
   .status-live{color:#ef4444;animation:blink 1.5s infinite;}
   @keyframes blink{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}
+  
   .team-row{display:flex;flex-direction:column;align-items:center;gap:6px;}
   .team-row img{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* --- Highlights Style (No Changes) --- */
+  /* Highlights Style (No Changes) */
   .grid-layout{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;padding:16px;}
   .video-card {
     background: #151a21;
@@ -168,13 +178,21 @@ async function loadMatches() {
         let state = m.state?.state;
         let time = new Date(m.starting_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         let status = `<span>${time}</span>`;
+        let scoreClass = "";
+        
         if(["INPLAY","HT"].includes(state)) status = `<span class="status-live">● LIVE ${m.state?.minute}'</span>`;
         if(state === "FT") status = "<span>FT</span>";
-        if(["PP","POSTPONED"].includes(state)) status = "<span class='status-pp'>PP</span>";
+        if(["PP","POSTPONED"].includes(state)) {
+            status = `<span>${time}</span><span class='status-pp'>PP</span>`;
+            scoreClass = "score-pp"; // PP ပွဲများအတွက် score-pp class ထည့်သည်
+        }
+
+        let scoreText = state==="NS"?"vs":(m.scores[0].score.goals+" - "+m.scores[1].score.goals);
+
         html += `<div class="match">
           <div class="time-status">${status}</div>
           <div class="team-row"><img src="${m.participants[0].image_path}"><span>${m.participants[0].name}</span></div>
-          <div class="score-box">${state==="NS"?"vs":(m.scores[0].score.goals+"-"+m.scores[1].score.goals)}</div>
+          <div class="score-box ${scoreClass}">${scoreText}</div>
           <div class="team-row"><img src="${m.participants[1].image_path}"><span>${m.participants[1].name}</span></div>
         </div>`;
       });

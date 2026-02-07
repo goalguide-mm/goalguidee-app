@@ -276,21 +276,38 @@ async function loadMatches() {
                 const homeScore = m.homeScore.display ?? 0;
                 const awayScore = m.awayScore.display ?? 0;
                 
+                // ၁။ အချိန် format ပြုပြင်ခြင်း
+                let matchTime = "TBA";
+                if(m.startTimestamp) {
+                   const dateObj = new Date(m.startTimestamp * 1000);
+                   matchTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                }
+
+                // ၂။ ပွဲအခြေအနေအရ Score သို့မဟုတ် VS ပြသခြင်း
+                let centerDisplay = `<div class="score-box">${homeScore} - ${awayScore}</div>`;
                 let statusHtml = `<span>${status}</span>`;
-                if (status.toLowerCase().includes("live") || m.status.type === "inprogress") {
+
+                if (status.toLowerCase().includes("not started") || m.status.type === "notstarted") {
+                    centerDisplay = `<div class="score-box" style="font-size:14px; color:#8b949e;">VS</div>`;
+                    statusHtml = `<span>${matchTime}</span>`; // မကန်ရသေးရင် အချိန်ပြ
+                } else if (status.toLowerCase().includes("live") || m.status.type === "inprogress") {
                     statusHtml = `<span class="status-live">● LIVE</span>`;
                 }
+
+                // ၃။ Logo URL များ (SportAPI အတွက် default logo သုံးထားသည်)
+                const hLogo = `https://api.sofascore.app/api/v1/team/${m.homeTeam.id}/image`;
+                const aLogo = `https://api.sofascore.app/api/v1/team/${m.awayTeam.id}/image`;
 
                 html += `
                 <div class="match" onclick="showLineup(${m.id}, '${m.homeTeam.name.replace(/'/g, "\\'")}', '${m.awayTeam.name.replace(/'/g, "\\'")}')">
                     <div class="time-status">${statusHtml}</div>
                     <div class="team-row">
-                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+                        <img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
                         <span>${m.homeTeam.name}</span>
                     </div>
-                    <div class="score-box">${homeScore} - ${awayScore}</div>
+                    ${centerDisplay}
                     <div class="team-row">
-                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+                        <img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
                         <span>${m.awayTeam.name}</span>
                     </div>
                 </div>`;

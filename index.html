@@ -304,30 +304,6 @@ async function loadMatches() {
         list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: ဒေတာယူ၍မရပါ။</p>";
     }
 }
-
-        let scoreText = "vs";
-        if (state !== "NS" && m.scores && m.scores.length > 0) {
-            const homeId = m.participants[0].id;
-            const awayId = m.participants[1].id;
-            const homeScoreObj = m.scores.find(s => s.participant_id === homeId && s.description === "CURRENT");
-            const awayScoreObj = m.scores.find(s => s.participant_id === awayId && s.description === "CURRENT");
-            const homeGoals = homeScoreObj ? homeScoreObj.score.goals : (m.scores[0]?.score?.goals ?? 0);
-            const awayGoals = awayScoreObj ? awayScoreObj.score.goals : (m.scores[1]?.score?.goals ?? 0);
-            scoreText = `${homeGoals} - ${awayGoals}`;
-        }
-
-        html += `<div class="match" onclick="showLineup(${m.id}, '${m.participants[0].name.replace(/'/g, "\\'")}', '${m.participants[1].name.replace(/'/g, "\\'")}')">
-          <div class="time-status">${status}</div>
-          <div class="team-row"><img src="${m.participants[0].image_path}"><span>${m.participants[0].name}</span></div>
-          <div class="score-box ${scoreClass}">${scoreText}</div>
-          <div class="team-row"><img src="${m.participants[1].image_path}"><span>${m.participants[1].name}</span></div>
-        </div>`;
-      });
-      html += `</div>`;
-    }
-    list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No Matches</p>";
-  } catch(e) { list.innerHTML = "Error"; }
-}
  
 async function showLineup(id, home, away) {
   const modal = document.getElementById("mainModal");
@@ -403,7 +379,6 @@ async function loadLive() {
           manualData.forEach(item => {
             if (item.url && item.url.includes("http")) {
               hasContent = true;
-              // ခင်ဗျားတောင်းဆိုထားတဲ့ ဖောင်းကြွနဲ့ ရွှေရောင်ဘောင် Style ထည့်ထားပါတယ်
               html += `
                 <div class="video-card" onclick="openPlayer('${item.url}')" style="border: 2px solid #30363d; transition: 0.3s;">
                   <div style="position:relative;">
@@ -432,7 +407,6 @@ async function loadLive() {
 
           autoLive.forEach(item => {
             hasContent = true;
-            // Highlights တွေလိုပဲ Hover လုပ်ရင် ရွှေရောင်ပြောင်းသွားမယ့် Video-card style ပါ
             html += `
               <div class="video-card" onclick="openPlayer('${item.matchviewUrl}')" style="border: 2px solid #30363d; transition: 0.3s;">
                 <div style="position:relative;">

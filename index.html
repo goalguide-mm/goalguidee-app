@@ -289,8 +289,10 @@ async function loadMatches() {
 
                 // RapidAPI Team Images
                 // Logo link ကို ဒီအတိုင်း ပြင်ရေးပါ (RapidAPI အတွက်)
+               // index.html ထဲက ဒီအပိုင်းကို ရှာပြီး အစားထိုးပါ
                const hLogo = `https://www.sofascore.com/api/v1/team/${homeTeam.id}/image`;
                const aLogo = `https://www.sofascore.com/api/v1/team/${awayTeam.id}/image`;
+               
 
                 html += `
                 <div class="match" onclick="showLineup(${m.id}, '${homeTeam.name.replace(/'/g, "\\'")}', '${awayTeam.name.replace(/'/g, "\\'")}')">

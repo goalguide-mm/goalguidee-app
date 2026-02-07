@@ -155,27 +155,46 @@ function renderMatches(matches) {
 // STANDINGS LOGIC
 async function loadStandings() {
   const list = document.getElementById("standings-list");
-  list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Table...</p>";
+  list.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Loading All Leagues Standings...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/standings`);
     const data = await res.json();
-    renderStandings(data);
-  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings unavailable.</p>"; }
+    window.allStandingsData = data; // ဒေတာအားလုံးကို သိမ်းထားမည်
+    renderStandings(data); // Default အနေဖြင့် အကုန်ပြမည်
+  } catch (e) { 
+    list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings unavailable.</p>"; 
+  }
 }
 
 function renderStandings(data) {
   const list = document.getElementById("standings-list");
+  if (!data || data.length === 0) {
+    list.innerHTML = "<p style='text-align:center;padding:40px;'>No results found.</p>";
+    return;
+  }
+
   list.innerHTML = data.map(league => `
     <div class="league-card league-item" data-name="${league.name.toLowerCase()}">
       <div class="league-header">${league.name}</div>
       <div class="table-container">
         <table>
-          <thead><tr><th>#</th><th>Team</th><th>PL</th><th>GD</th><th>PTS</th></tr></thead>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th>PL</th>
+              <th>GD</th>
+              <th>PTS</th>
+            </tr>
+          </thead>
           <tbody>
             ${league.standings.map(s => `
               <tr>
-                <td>${s.position}</td>
-                <td style="display:flex;align-items:center;gap:8px;"><img src="${s.team_logo}" width="20"> ${s.team_name}</td>
+                <td class="pos">${s.position}</td>
+                <td style="display:flex;align-items:center;gap:10px;">
+                  <img src="${s.team_logo}" width="20" height="20" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"> 
+                  ${s.team_name}
+                </td>
                 <td>${s.played}</td>
                 <td>${s.gd}</td>
                 <td class="pts">${s.pts}</td>
@@ -189,12 +208,19 @@ function renderStandings(data) {
 }
 
 function filterStandings() {
-  const q = document.getElementById("leagueSearch").value.toLowerCase();
-  document.querySelectorAll(".league-item").forEach(el => {
-    el.style.display = el.dataset.name.includes(q) ? "block" : "none";
+  const query = document.getElementById("leagueSearch").value.toLowerCase();
+  const items = document.querySelectorAll(".league-item");
+  
+  items.forEach(item => {
+    const leagueName = item.getAttribute("data-name");
+    // Search box ဗလာဖြစ်နေလျှင် (All) အကုန်ပြမည်၊ ရိုက်ထားလျှင် ကိုက်ညီသည်ကိုသာပြမည်
+    if (leagueName.includes(query)) {
+      item.style.display = "block";
+    } else {
+      item.style.display = "none";
+    }
   });
 }
-
 // HIGHLIGHTS LOGIC
 async function loadHighlights() {
   const list = document.getElementById("highlights-list");

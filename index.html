@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOAL GUIDE | Ultra Stable</title>
+<title>GOAL GUIDE | Live Sports</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -12,49 +12,42 @@
   .logo-img{width:40px;height:40px;border-radius:8px;}
   .logo-text{font-weight:800;color:#facc15;font-size:20px;}
 
-  .nav-tabs{display:flex;background:#111827;padding:0 16px;gap:20px;position:sticky;top:64px;z-index:999;border-bottom:1px solid #1f2937;}
-  .tab-btn{padding:14px 0;background:none;border:none;color:#8b949e;font-weight:700;font-size:13px;cursor:pointer;position:relative;text-transform:uppercase;}
+  .nav-tabs{display:flex;background:#111827;padding:0 16px;gap:20px;position:sticky;top:64px;z-index:999;border-bottom:1px solid #1f2937;overflow-x:auto;}
+  .tab-btn{padding:14px 0;background:none;border:none;color:#8b949e;font-weight:700;font-size:13px;cursor:pointer;position:relative;text-transform:uppercase;white-space:nowrap;}
   .tab-btn.active{color:#facc15;}
   .tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:#facc15;}
 
   .content-section{display:none;}
   .content-section.active{display:block;}
 
-  .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;background:#0b0f14;}
-  .date-bar button{background:#1f2937;border:none;color:#fff;width:35px;height:35px;border-radius:10px;cursor:pointer;}
-  .date-bar input[type="date"]{background:#1f2937;border:none;color:#fff;padding:8px 12px;border-radius:8px;outline:none;color-scheme:dark;}
-  
-  .league-card{margin:0 12px 16px 12px;background:#151a21;border-radius:12px;border:1px solid #30363d;overflow:hidden;}
+  /* Live Stream UI */
+  .live-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:15px;padding:15px;}
+  .live-card{background:#151a21;border-radius:15px;overflow:hidden;border:1px solid #ef4444;position:relative;}
+  .live-badge{position:absolute;top:10px;left:10px;background:#ef4444;color:#fff;padding:4px 10px;border-radius:5px;font-size:10px;font-weight:800;z-index:10;}
+  .stream-thumb{width:100%;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;}
+  .play-btn{width:50px;height:50px;background:rgba(250,204,21,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+  /* Existing Styles */
+  .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;}
+  .date-bar button, .date-bar input{background:#1f2937;border:none;color:#fff;padding:8px;border-radius:8px;outline:none;}
+  .league-card{margin:12px;background:#151a21;border-radius:12px;border:1px solid #30363d;overflow:hidden;}
   .league-header{padding:10px 14px;font-size:11px;font-weight:700;background:#1b2230;color:#8b949e;display:flex;align-items:center;gap:8px;}
-  .league-header img{width:18px;height:18px;object-fit:contain;}
-
   .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;cursor:pointer;}
-  .time-status{font-size:11px;font-weight:800;color:#8b949e;}
-  .status-pp{color:#ef4444;}
-  .status-live{color:#ef4444;animation:blink 1.5s infinite;}
-  @keyframes blink{0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}}
-
-  .team-row{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
-  .team-row img{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;}
-  .team-row span{font-size:12px;font-weight:500;}
+  .team-row{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .team-row img{width:30px;height:30px;object-fit:contain;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  .search-container{padding:15px 12px;background:#0b0f14;position:sticky;top:110px;z-index:900;}
-  .league-search{width:100%;padding:12px 15px;background:#1f2937;border:1px solid #30363d;border-radius:10px;color:#fff;outline:none;}
-
+  .search-container{padding:15px 12px;}
+  .league-search{width:100%;padding:12px;background:#1f2937;border:1px solid #30363d;border-radius:10px;color:#fff;}
   .table-container{overflow-x:auto;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
-  th{background:#1b2230;color:#8b949e;padding:12px 8px;text-align:left;font-size:11px;}
-  td{padding:12px 8px;border-bottom:1px solid #222833;}
-  .pts{font-weight:800;color:#facc15;}
+  th, td{padding:12px 8px;text-align:left;border-bottom:1px solid #222833;}
 
-  .hl-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;padding:16px;}
-  .hl-card{background:#151a21;border-radius:12px;overflow:hidden;border:1px solid #30363d;cursor:pointer;}
-  .hl-card img{width:100%;aspect-ratio:16/9;object-fit:cover;}
-
-  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;}
-  .modal-content{background:#111827;width:95%;max-width:480px;border-radius:24px;position:relative;border:1px solid #30363d;max-height:85vh;overflow-y:auto;}
-  .close-modal{position:absolute;top:15px;right:20px;color:#8b949e;font-size:24px;cursor:pointer;}
+  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;}
+  .modal-content{background:#111827;width:100%;max-width:800px;border-radius:15px;position:relative;overflow:hidden;}
+  .close-modal{position:absolute;top:10px;right:15px;color:#fff;font-size:30px;cursor:pointer;z-index:100;}
+  .video-container{width:100%;aspect-ratio:16/9;}
+  iframe{width:100%;height:100%;border:none;}
 
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
@@ -68,6 +61,7 @@
 
 <nav class="nav-tabs">
   <button id="tab-matches" class="tab-btn active" onclick="switchTab('matches')">Matches</button>
+  <button id="tab-live" class="tab-btn" onclick="switchTab('live')">LIVE Streaming</button>
   <button id="tab-standings" class="tab-btn" onclick="switchTab('standings')">Standings</button>
   <button id="tab-highlights" class="tab-btn" onclick="switchTab('highlights')">Highlights</button>
 </nav>
@@ -81,15 +75,21 @@
   <div id="matches-list"></div>
 </div>
 
+<div id="section-live" class="content-section">
+  <div class="live-grid" id="live-streams">
+    <p style="text-align:center;grid-column:1/-1;padding:40px;color:#8b949e;">Searching for live matches...</p>
+  </div>
+</div>
+
 <div id="section-standings" class="content-section">
   <div class="search-container">
-    <input type="text" id="leagueSearch" class="league-search" placeholder="Search League (All Leagues)..." onkeyup="filterStandings()">
+    <input type="text" id="leagueSearch" class="league-search" placeholder="Search League..." onkeyup="filterStandings()">
   </div>
   <div id="standings-list"></div>
 </div>
 
 <div id="section-highlights" class="content-section">
-  <div id="highlights-list" class="hl-grid"></div>
+  <div id="highlights-list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;padding:16px;"></div>
 </div>
 
 <div id="mainModal" class="modal" onclick="closeModal()">
@@ -112,10 +112,44 @@ function switchTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
   document.getElementById('section-' + tab).classList.add('active');
   if(tab === 'matches') loadMatches();
+  if(tab === 'live') loadLiveStreams();
   if(tab === 'standings') loadStandings();
   if(tab === 'highlights') loadHighlights();
 }
 
+// LIVE STREAM LOGIC
+async function loadLiveStreams() {
+  const list = document.getElementById("live-streams");
+  try {
+    const res = await fetch(`${API_BASE}/api/live-streams`); // API မှ Live Data ယူမည်
+    const data = await res.json();
+    if(!data.length) throw new Error();
+    
+    list.innerHTML = data.map(stream => `
+      <div class="live-card" onclick="openPlayer('${stream.embedUrl}')">
+        <div class="live-badge">LIVE</div>
+        <div class="stream-thumb">
+          <div class="play-btn">▶</div>
+        </div>
+        <div style="padding:15px;">
+          <div style="font-weight:700;font-size:14px;color:#facc15;">${stream.league}</div>
+          <div style="font-size:13px;margin-top:5px;">${stream.homeTeam} vs ${stream.awayTeam}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = "<p style='text-align:center;grid-column:1/-1;padding:40px;color:#8b949e;'>No live matches streaming right now.</p>";
+  }
+}
+
+function openPlayer(url) {
+  const modal = document.getElementById("mainModal");
+  const body = document.getElementById("modalBody");
+  modal.style.display = "flex";
+  body.innerHTML = `<div class="video-container"><iframe src="${url}" allowfullscreen></iframe></div>`;
+}
+
+// REST OF THE FUNCTIONS (Matches, Standings, Highlights)
 async function loadMatches() {
   const list = document.getElementById("matches-list");
   list.innerHTML = "<p style='text-align:center;padding:40px;color:#8b949e;'>Updating Scores...</p>";
@@ -123,49 +157,29 @@ async function loadMatches() {
     const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
     const data = await res.json();
     renderMatches(data);
-  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Data unavailable.</p>"; }
+  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>"; }
 }
 
 function renderMatches(matches) {
   const list = document.getElementById("matches-list");
   list.innerHTML = "";
-  if(!matches?.length) { list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>"; return; }
-  
   const grouped = matches.reduce((acc, m) => {
-    const lKey = m.league?.id || 'other';
-    if(!acc[lKey]) acc[lKey] = { name: m.league?.name, logo: m.league?.image_path, matches: [] };
-    acc[lKey].matches.push(m);
+    const lName = m.league?.name || "Other";
+    if(!acc[lName]) acc[lName] = [];
+    acc[lName].push(m);
     return acc;
   }, {});
-
-  for(const key in grouped) {
-    const league = grouped[key];
-    let html = `<section class="league-card">
-      <div class="league-header">
-        <img src="${league.logo}" onerror="this.style.display='none'">
-        ${league.name}
-      </div>`;
-    
-    league.matches.forEach(m => {
-      const home = m.participants?.[0], away = m.participants?.[1];
+  for(const lName in grouped) {
+    let html = `<section class="league-card"><div class="league-header">${lName}</div>`;
+    grouped[lName].forEach(m => {
       const state = m.state?.state;
-      let timeText = new Date(m.starting_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      
-      let statusClass = "";
-      if(["INPLAY", "HT", "LIVE"].includes(state)) {
-        timeText = `<span class="status-live">● LIVE ${m.state?.minute || ""}'</span>`;
-      } else if(["FT", "AET"].includes(state)) {
-        timeText = "FT";
-      } else if(["POSTPONED", "PP", "CANCELLED"].includes(state)) {
-        timeText = `<span class="status-pp">PP</span>`;
-      }
-
+      const isLive = ["INPLAY", "HT", "LIVE"].includes(state);
       html += `
-        <div class="match" onclick="showMatchDetail(${m.id})">
-          <div class="time-status">${timeText}</div>
-          <div class="team-row"><img src="${home?.image_path}"><span>${home?.name}</span></div>
-          <div class="score-box">${state === 'NS' ? 'vs' : (m.scores?.[0]?.score?.goals || 0) + ' - ' + (m.scores?.[1]?.score?.goals || 0)}</div>
-          <div class="team-row"><img src="${away?.image_path}"><span>${away?.name}</span></div>
+        <div class="match">
+          <div style="font-size:11px;font-weight:800;color:${isLive?'#ef4444':'#8b949e'}">${isLive?'LIVE':(state==='FT'?'FT':'VS')}</div>
+          <div class="team-row"><img src="${m.participants?.[0]?.image_path}"><span>${m.participants?.[0]?.name}</span></div>
+          <div class="score-box">${state==='NS'?'vs':(m.scores?.[0]?.score?.goals||0)+' - '+(m.scores?.[1]?.score?.goals||0)}</div>
+          <div class="team-row"><img src="${m.participants?.[1]?.image_path}"><span>${m.participants?.[1]?.name}</span></div>
         </div>`;
     });
     list.innerHTML += html + `</section>`;
@@ -174,62 +188,42 @@ function renderMatches(matches) {
 
 async function loadStandings() {
   const list = document.getElementById("standings-list");
-  list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading All Standings...</p>";
+  list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Table...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/standings`);
     const data = await res.json();
-    renderStandings(data);
-  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings unavailable.</p>"; }
-}
-
-function renderStandings(data) {
-  const list = document.getElementById("standings-list");
-  list.innerHTML = data.map(league => `
-    <div class="league-card league-item" data-name="${league.name.toLowerCase()}">
-      <div class="league-header">${league.name}</div>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>#</th><th>Team</th><th>PL</th><th>GD</th><th>PTS</th></tr></thead>
-          <tbody>
-            ${league.standings.map(s => `
-              <tr>
-                <td>${s.position}</td>
-                <td style="display:flex;align-items:center;gap:8px;"><img src="${s.team_logo}" width="20"> ${s.team_name}</td>
-                <td>${s.played}</td>
-                <td>${s.gd}</td>
-                <td class="pts">${s.pts}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+    list.innerHTML = data.map(league => `
+      <div class="league-card league-item" data-name="${league.name.toLowerCase()}">
+        <div class="league-header">${league.name}</div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>#</th><th>Team</th><th>PL</th><th>GD</th><th>PTS</th></tr></thead>
+            <tbody>
+              ${league.standings.map(s => `<tr><td>${s.position}</td><td>${s.team_name}</td><td>${s.played}</td><td>${s.gd}</td><td style="color:#facc15;font-weight:800">${s.pts}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `).join('');
+  } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Standings unavailable.</p>"; }
 }
 
 function filterStandings() {
   const q = document.getElementById("leagueSearch").value.toLowerCase();
-  document.querySelectorAll(".league-item").forEach(el => {
-    el.style.display = el.getAttribute("data-name").includes(q) ? "block" : "none";
-  });
+  document.querySelectorAll(".league-item").forEach(el => el.style.display = el.dataset.name.includes(q) ? "block" : "none");
 }
 
 async function loadHighlights() {
   const list = document.getElementById("highlights-list");
-  list.innerHTML = "<p style='text-align:center;grid-column:1/-1;'>Loading Highlights...</p>";
+  list.innerHTML = "<p style='text-align:center;grid-column:1/-1;'>Loading Videos...</p>";
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
-    list.innerHTML = data.map(h => `
-      <div class="hl-card" onclick="window.open('${h.matchviewUrl}', '_blank')">
-        <img src="${h.thumbnail}">
-        <div style="padding:10px;font-size:13px;font-weight:600;">${h.title}</div>
-      </div>
-    `).join('');
-  } catch (e) { list.innerHTML = "<p>Highlights unavailable.</p>"; }
+    list.innerHTML = data.map(h => `<div class="live-card" onclick="window.open('${h.matchviewUrl}', '_blank')"><img src="${h.thumbnail}" style="width:100%"><div style="padding:10px;font-size:13px;">${h.title}</div></div>`).join('');
+  } catch (e) { list.innerHTML = "<p>No highlights.</p>"; }
 }
 
-function closeModal() { document.getElementById("mainModal").style.display = "none"; }
+function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { 
   let d = new Date(selectedDate); d.setDate(d.getDate()+n); 

@@ -185,44 +185,51 @@ async function showLineup(id, home, away) {
   try {
     const res = await fetch(`${API_BASE}/api/fixtures/${id}`);
     const data = await res.json();
-    const lineups = data.lineups || [];
     
-    // API မှာ Lineup မရှိရင် Sample အနေနဲ့ ပြပေးမယ့် UI
-    if(lineups.length === 0) {
+    // Lineup data ရှိမရှိ သေချာစစ်ဆေးခြင်း (Error မတက်အောင်)
+    if (!data || !data.lineups || data.lineups.length === 0) {
         body.innerHTML = `<div style='padding:40px;text-align:center;'>Lineup Not Available for this match yet.</div>`;
         return;
     }
 
-    const homeLineup = lineups.filter(l => l.team_id === data.participants[0].id);
-    const awayLineup = lineups.filter(l => l.team_id === data.participants[1].id);
+    // Home နဲ့ Away အသင်း ID များ
+    const homeId = data.participants[0].id;
+    const awayId = data.participants[1].id;
+
+    // အသင်းအလိုက် လူစာရင်းခွဲထုတ်ခြင်း
+    const homeLineup = data.lineups.filter(l => l.team_id === homeId);
+    const awayLineup = data.lineups.filter(l => l.team_id === awayId);
 
     let html = `
       <div class="lineup-header">
-        <div class="team-info">${home} <span class="formation-label">${data.formations?.[0] || '4-3-3'}</span></div>
+        <div class="team-info">${home} <span class="formation-label">${data.formations?.[0] || ''}</span></div>
         <div style="font-weight:800; font-size:12px; color:#facc15;">Predicted Lineup</div>
-        <div class="team-info"><span class="formation-label">${data.formations?.[1] || '4-3-3'}</span> ${away}</div>
+        <div class="team-info"><span class="formation-label">${data.formations?.[1] || ''}</span> ${away}</div>
       </div>
       <div class="pitch-container">
         <div class="pitch-divider"></div>
         <div class="home-side" style="display:flex; flex-wrap:wrap; justify-content:center; align-content:center; gap:10px;">
            ${homeLineup.map(p => `
              <div class="player-node">
-               <img class="player-img" src="${p.player.image_path}">
-               <div class="player-name"><span class="player-num">${p.number}</span>${p.player.name}</div>
+               <img class="player-img" src="${p.player?.image_path || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+               <div class="player-name"><span class="player-num">${p.number || ''}</span>${p.player?.name || 'Unknown'}</div>
              </div>
            `).join('')}
         </div>
         <div class="away-side" style="display:flex; flex-wrap:wrap; justify-content:center; align-content:center; gap:10px;">
            ${awayLineup.map(p => `
              <div class="player-node">
-               <img class="player-img" src="${p.player.image_path}">
-               <div class="player-name"><span class="player-num">${p.number}</span>${p.player.name}</div>
+               <img class="player-img" src="${p.player?.image_path || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+               <div class="player-name"><span class="player-num">${p.number || ''}</span>${p.player?.name || 'Unknown'}</div>
              </div>
            `).join('')}
         </div>
       </div>`;
     body.innerHTML = html;
-  } catch(e) { body.innerHTML = "Error loading lineup."; }
+  } catch(e) { 
+    console.error(e);
+    body.innerHTML = "<div style='padding:40px;text-align:center;'>Lineup Not Available.</div>"; 
+  }
 }
 
 async function loadStandings() {

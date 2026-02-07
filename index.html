@@ -276,11 +276,11 @@ async function loadMatches() {
                 const homeScore = m.homeScore.display ?? 0;
                 const awayScore = m.awayScore.display ?? 0;
                 
-                // ၁။ အချိန် format ပြုပြင်ခြင်း
+                // ၁။ အချိန် format ပြုပြင်ခြင်း (Local Time ပြောင်းရန်)
                 let matchTime = "TBA";
                 if(m.startTimestamp) {
                    const dateObj = new Date(m.startTimestamp * 1000);
-                   matchTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                   matchTime = dateObj.getHours().toString().padStart(2, '0') + ":" + dateObj.getMinutes().toString().padStart(2, '0');
                 }
 
                 // ၂။ ပွဲအခြေအနေအရ Score သို့မဟုတ် VS ပြသခြင်း
@@ -294,9 +294,9 @@ async function loadMatches() {
                     statusHtml = `<span class="status-live">● LIVE</span>`;
                 }
 
-                // ၃။ Logo URL များ (SportAPI အတွက် default logo သုံးထားသည်)
-                const hLogo = `https://api.sofascore.app/api/v1/team/${m.homeTeam.id}/image`;
-                const aLogo = `https://api.sofascore.app/api/v1/team/${m.awayTeam.id}/image`;
+                // ၃။ Logo URL များ (SportAPI အတွက် တိုက်ရိုက် Image Link များ သုံးထားသည်)
+                const hLogo = `https://sportapi7.p.rapidapi.com/api/v1/team/${m.homeTeam.id}/image`;
+                const aLogo = `https://sportapi7.p.rapidapi.com/api/v1/team/${m.awayTeam.id}/image`;
 
                 html += `
                 <div class="match" onclick="showLineup(${m.id}, '${m.homeTeam.name.replace(/'/g, "\\'")}', '${m.awayTeam.name.replace(/'/g, "\\'")}')">
@@ -319,7 +319,7 @@ async function loadMatches() {
         list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: ဒေတာယူ၍မရပါ။</p>";
     }
 }
- 
+
 async function showLineup(id, home, away) {
   const modal = document.getElementById("mainModal");
   const body = document.getElementById("modalBody");
@@ -446,7 +446,7 @@ async function loadLive() {
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>လောလောဆယ် Live ပြနေသည့် ပွဲစဉ်မရှိသေးပါ။</p>";
   }
 }
- 
+
 async function loadHighlights() {
   const list = document.getElementById("highlights-list");
   try {
@@ -461,7 +461,7 @@ function openVideo(url) {
   document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
 }
 
- function openPlayer(url) {
+function openPlayer(url) {
   document.getElementById("mainModal").style.display = "flex";
   document.getElementById("modalBody").innerHTML = `
     <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:#000;">
@@ -471,7 +471,7 @@ function openVideo(url) {
       </iframe>
     </div>`;
 }
- 
+
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }

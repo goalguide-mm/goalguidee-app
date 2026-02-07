@@ -345,28 +345,38 @@ async function loadStandings() {
 
 async function loadLive() {
   const list = document.getElementById("live-list");
-  list.innerHTML = "<p style='text-align:center;width:100%;'>Loading Live Links...</p>";
+  list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Checking for Live Matches...</p>";
 
   try {
-    // ဒီနေရာမှာ အခုနက ကူးလာတဲ့ Raw Link ကို ထည့်ရမှာပါ
-    const JSON_URL = "https://raw.githubusercontent.com/goalguide-mm/goalguide-api/refs/heads/main/live.json"; 
-    
-    const res = await fetch(JSON_URL);
-    const data = await res.json();
+    // ScoreBat API Token ကို ဒီနေရာမှာ ထည့်ပါ
+    const TOKEN = "MTc5MDU0XzE3Mzg5MTM1ODZfNGU5YjA3ZGE1YjU1MmFkYjQ5ZTkzZjc0N2U2YmFmYjBkYmNmMDdhYg=="; 
+    const response = await fetch(`https://www.scorebat.com/video-api/v3/feed/?token=${TOKEN}`);
+    const data = await response.json();
 
-    if (data.length === 0) {
-      list.innerHTML = "<p style='text-align:center;width:100%;'>No Live Matches Right Now.</p>";
+    // Live ပွဲစဉ် (Video title ထဲမှာ 'live' ပါတာ) တွေကိုပဲ Filter လုပ်မယ်
+    const liveMatches = data.response.filter(match => 
+      match.videos && match.videos.some(v => v.title.toLowerCase().includes('live'))
+    );
+
+    if (liveMatches.length === 0) {
+      list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>လောလောဆယ် Live ပြနေသည့် ပွဲစဉ်မရှိသေးပါ။</p>";
       return;
     }
 
-    list.innerHTML = data.map(item => `
-      <div class="video-card" onclick="openPlayer('${item.url}')">
-        <img src="${item.img}" onerror="this.src='https://via.placeholder.com/300x170?text=Live+Streaming'">
-        <div class="title-box">${item.title}</div>
+    list.innerHTML = liveMatches.map(item => `
+      <div class="video-card" onclick="openPlayer('${item.matchviewUrl}')">
+        <div style="position:relative;">
+          <img src="${item.thumbnail}" onerror="this.src='https://via.placeholder.com/300x170?text=Live+Match'">
+          <span style="position:absolute; top:10px; left:10px; background:red; color:white; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; animation:blink 1.5s infinite;">LIVE</span>
+        </div>
+        <div class="title-box">
+          <div style="color:#facc15; font-size:11px; margin-bottom:4px;">${item.competition}</div>
+          ${item.title}
+        </div>
       </div>
     `).join('');
   } catch (e) {
-    list.innerHTML = "<p style='text-align:center;width:100%;'>Updating. Please refresh in a moment.</p>";
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Updating. Please refresh in a moment.</p>";
   }
 }
 
@@ -384,6 +394,17 @@ function openVideo(url) {
   document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
 }
 
+ function openPlayer(url) {
+  document.getElementById("mainModal").style.display = "flex";
+  document.getElementById("modalBody").innerHTML = `
+    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; background:#000;">
+      <iframe src="${url}" 
+        style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" 
+        allowfullscreen allow='autoplay; fullscreen'>
+      </iframe>
+    </div>`;
+}
+ 
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }

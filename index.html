@@ -20,13 +20,42 @@
   .content-section{display:none;}
   .content-section.active{display:block;}
 
-  /* Matches UI */
+  /* --- Matches Section (Updated with Golden Borders & Hover Effect) --- */
   .date-bar{display:flex;justify-content:center;align-items:center;gap:10px;padding:15px;}
   .date-bar button, .date-bar input{background:#1f2937;border:none;color:#fff;padding:8px;border-radius:8px;}
-  .league-card{margin:12px;background:#151a21;border-radius:12px;border:1px solid #30363d;overflow:hidden;}
+  
+  /* League Card Border */
+  .league-card{
+    margin:12px;
+    background:#151a21;
+    border-radius:12px;
+    border: 1px solid #30363d; 
+    overflow:hidden;
+  }
   .league-header{padding:10px 14px;font-size:12px;font-weight:700;background:#1b2230;color:#8b949e;display:flex;align-items:center;gap:10px;}
   .league-header img{width:20px;height:20px;}
-  .match{display:grid;grid-template-columns:85px 1fr 65px 1fr;align-items:center;padding:16px 14px;border-top:1px solid #222833;}
+
+  /* Match Row with Golden Border & Hover */
+  .match {
+    display:grid;
+    grid-template-columns:85px 1fr 65px 1fr;
+    align-items:center;
+    padding:16px 14px;
+    border-top:1px solid #30363d; /* အလယ်က လိုင်းများ */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    background: #151a21;
+  }
+
+  /* မျှားထောက်လိုက်ရင် ရွှေရောင်ဘောင်ကွတ်ပြီး ဖောင်းကြွလာမည့် အပိုင်း */
+  .match:hover {
+    transform: scale(1.02);
+    border: 1px solid #facc15; /* ရွှေရောင်ဘောင် */
+    z-index: 10;
+    box-shadow: 0 5px 15px rgba(250, 204, 21, 0.2);
+    border-radius: 8px;
+  }
+
   .time-status{font-size:11px;font-weight:800;color:#8b949e;}
   .status-pp{color:#ef4444;}
   .status-live{color:#ef4444;animation:blink 1.5s infinite;}
@@ -35,7 +64,7 @@
   .team-row img{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;}
   .score-box{font-size:18px;font-weight:800;text-align:center;color:#facc15;}
 
-  /* Highlights Hover & Golden Border */
+  /* --- Highlights Style (Keep same) --- */
   .grid-layout{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;padding:16px;}
   .video-card {
     background: #151a21;
@@ -54,6 +83,7 @@
   .video-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
   .video-card .title-box {padding:12px; font-weight:600; font-size:13px; color:#fff;}
 
+  /* General UI */
   .search-container{padding:15px 12px;}
   .league-search{width:100%;padding:12px;background:#1f2937;border:1px solid #30363d;border-radius:10px;color:#fff;outline:none;}
   .table-container{overflow-x:auto;}
@@ -63,7 +93,7 @@
   /* Modal Style */
   .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;z-index:2000;}
   .modal-content{width:95%;max-width:900px;position:relative;background:#000;border-radius:15px;overflow:hidden;}
-  .close-modal{position:absolute;top:10px;right:15px;color:#fff;font-size:35px;cursor:pointer;z-index:2001;text-shadow: 0 0 10px #000;}
+  .close-modal{position:absolute;top:10px;right:15px;color:#fff;font-size:35px;cursor:pointer;z-index:2001;}
 
   footer{text-align:center;padding:30px;color:#6b7280;font-size:11px;}
 </style>
@@ -198,44 +228,23 @@ async function loadLive() {
   } catch(e) { list.innerHTML = "<p style='grid-column:1/-1;text-align:center;'>No Live Matches</p>"; }
 }
 
-// Highlights Section Logic (Website အတွင်းမှာပဲပြရန် ပြင်ထားသည်)
 async function loadHighlights() {
   const list = document.getElementById("highlights-list");
   try {
     const res = await fetch(`${API_BASE}/api/highlights`);
     const data = await res.json();
-    list.innerHTML = data.map(h => `
-      <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
-        <img src="${h.thumbnail}">
-        <div class="title-box">${h.title}</div>
-      </div>`).join('');
+    list.innerHTML = data.map(h => `<div class="video-card" onclick="openVideo('${h.matchviewUrl}')"><img src="${h.thumbnail}"><div class="title-box">${h.title}</div></div>`).join('');
   } catch(e) { list.innerHTML = "Error"; }
 }
 
 function openVideo(url) {
   document.getElementById("mainModal").style.display = "flex";
-  // Iframe သုံးပြီး Website အတွင်းမှာပဲ ဗီဒီယိုဖွင့်ပေးသည်
-  document.getElementById("modalBody").innerHTML = `
-    <iframe src="${url}" 
-            style="width:100%;aspect-ratio:16/9;border:none;" 
-            allow="autoplay; fullscreen" 
-            allowfullscreen>
-    </iframe>`;
+  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
 }
 
-function closeModal() { 
-  document.getElementById("mainModal").style.display = "none"; 
-  document.getElementById("modalBody").innerHTML = ""; 
-}
-
+function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
-function changeDate(n) { 
-  let d = new Date(selectedDate); 
-  d.setDate(d.getDate()+n); 
-  selectedDate = d.toLocaleDateString('en-CA'); 
-  document.getElementById("matchDate").value = selectedDate; 
-  loadMatches(); 
-}
+function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 
 loadMatches();
 </script>

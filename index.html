@@ -345,11 +345,29 @@ async function loadStandings() {
 
 async function loadLive() {
   const list = document.getElementById("live-list");
+  list.innerHTML = "<p style='text-align:center;width:100%;'>Loading Live Links...</p>";
+
   try {
-    const res = await fetch(`${API_BASE}/api/live-streams`);
+    // ဒီနေရာမှာ အခုနက ကူးလာတဲ့ Raw Link ကို ထည့်ရမှာပါ
+    const JSON_URL = "https://raw.githubusercontent.com/goalguide-mm/goalguide-api/refs/heads/main/live.json"; 
+    
+    const res = await fetch(JSON_URL);
     const data = await res.json();
-    list.innerHTML = data.map(s => `<div class="video-card" onclick="openVideo('${s.embedUrl}')"><div style="padding:20px;text-align:center;color:#ef4444;font-weight:800;">LIVE</div><div style="padding:10px;text-align:center;">${s.homeTeam} vs ${s.awayTeam}</div></div>`).join('');
-  } catch(e) { list.innerHTML = "<p style='grid-column:1/-1;text-align:center;'>No Live Matches</p>"; }
+
+    if (data.length === 0) {
+      list.innerHTML = "<p style='text-align:center;width:100%;'>No Live Matches Right Now.</p>";
+      return;
+    }
+
+    list.innerHTML = data.map(item => `
+      <div class="video-card" onclick="openPlayer('${item.url}')">
+        <img src="${item.img}" onerror="this.src='https://via.placeholder.com/300x170?text=Live+Streaming'">
+        <div class="title-box">${item.title}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = "<p style='text-align:center;width:100%;'>Updating. Please refresh in a moment.</p>";
+  }
 }
 
 async function loadHighlights() {

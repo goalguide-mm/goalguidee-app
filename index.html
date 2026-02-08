@@ -233,14 +233,12 @@
     padding: 6px 10px;
     border: 2px solid #facc15;
     border-radius: 8px;
-    background: #1f2937; /* အောက်ခံအရောင်ထည့်ခြင်း */
+    background: #1f2937;
     display: inline-block;
     transition: all 0.2s ease-in-out;
-    /* 3D ဖောင်းကြွ အခြေခံ shadow */
     box-shadow: 0 4px 0px #9a7d0a, 0 5px 10px rgba(0,0,0,0.4);
   }
   
-  /* မျှားထောက်လိုက်ချိန် 3D ကြွလာပုံစံ */
   .nav-item:hover span {
     transform: translateY(-3px);
     box-shadow: 0 7px 0px #9a7d0a, 0 10px 15px rgba(0,0,0,0.5);
@@ -250,13 +248,23 @@
 
   .nav-item.active { color: #facc15; }
 
-  /* Active ဖြစ်နေချိန် နှိပ်ထားသလို 3D ဖိကျသွားပုံစံ */
   .nav-item.active span { 
     background: rgba(250, 204, 21, 0.2); 
     transform: translateY(2px);
     box-shadow: 0 2px 0px #9a7d0a, 0 2px 5px rgba(0,0,0,0.3);
     border-color: #facc15;
   }
+
+  /* Standings Table Styles */
+  .standings-container { padding: 10px; }
+  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .standings-table th { background: #252a32; color: #facc15; padding: 12px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
+  .standings-table td { padding: 12px 8px; border-bottom: 1px solid #2a2f38; font-size: 13px; color: #e5e7eb; }
+  .standings-table tr:hover { background: rgba(255,255,255,0.02); }
+  .rank { font-weight: 800; width: 30px; text-align: center; }
+  .team-info { display: flex; align-items: center; gap: 8px; }
+  .team-info img { width: 22px; height: 22px; object-fit: contain; }
+  .pts-col { font-weight: 800; color: #facc15; }
 
   .content-section { display: none; animation: fadeIn 0.4s ease; }
   .content-section.active { display: block; }
@@ -309,7 +317,7 @@
 </div>
 
 <div id="section-live" class="content-section"><div id="live-list" class="grid-layout"></div></div>
-<div id="section-standings" class="content-section"><div id="standings-list"></div></div>
+<div id="section-standings" class="content-section"><div id="standings-list" class="standings-container"></div></div>
 <div id="section-highlights" class="content-section"><div id="highlights-list" class="grid-layout"></div></div>
 
 <div class="bottom-nav">
@@ -436,7 +444,62 @@ function filterBySearch(val) { renderMatches(val); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 
-async function loadStandings() { document.getElementById("standings-list").innerHTML = "<p style='text-align:center;padding:40px;'>Coming Soon...</p>"; }
+async function loadStandings() {
+    const list = document.getElementById("standings-list");
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Standings...</p>";
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/standings`);
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No standing data available.</p>";
+            return;
+        }
+
+        let html = "";
+        data.forEach(league => {
+            html += `
+            <div class="league-card">
+                <div class="league-header">
+                    <span>${league.name}</span>
+                </div>
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Team</th>
+                            <th>PL</th>
+                            <th>GD</th>
+                            <th>PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            league.rows.forEach(row => {
+                html += `
+                <tr>
+                    <td class="rank">${row.position}</td>
+                    <td>
+                        <div class="team-info">
+                            <img src="https://www.sofascore.com/api/v1/team/${row.team.id}/image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                            <span>${row.team.shortName || row.team.name}</span>
+                        </div>
+                    </td>
+                    <td>${row.matches}</td>
+                    <td>${row.goalDiff}</td>
+                    <td class="pts-col">${row.points}</td>
+                </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+        });
+        list.innerHTML = html;
+    } catch (e) { 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings. Please try again.</p>"; 
+    }
+}
+
 async function loadLive() {
     const list = document.getElementById("live-list");
     try {

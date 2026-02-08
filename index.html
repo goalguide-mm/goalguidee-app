@@ -465,8 +465,10 @@ async function loadStandings() {
         const response = await fetch(`${API_BASE}/api/standings`);
         const league = await response.json();
         
-        // League ထဲမှာ rows ပါမပါ စစ်ဆေးခြင်း
-        if (!league || !league.rows || league.rows.length === 0) {
+        // Backend က data ပို့မယ့် ပုံစံကို row တွေအထိ ရောက်အောင် သေချာဖတ်ခြင်း
+        const tableRows = league.rows || (league.standings && league.standings[0]?.rows) || [];
+
+        if (tableRows.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No standing data available.</p>";
             return;
         }
@@ -489,7 +491,7 @@ async function loadStandings() {
                     </thead>
                     <tbody>`;
         
-        league.rows.forEach(row => {
+        tableRows.forEach(row => {
             const team = row.team || {};
             const teamLogo = `https://www.sofascore.com/api/v1/team/${team.id}/image`;
             
@@ -513,7 +515,7 @@ async function loadStandings() {
 
     } catch (e) { 
         console.error("Error:", e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>API Error: Please check server logs.</p>"; 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>API Error: Connection failed.</p>"; 
     }
 }
  

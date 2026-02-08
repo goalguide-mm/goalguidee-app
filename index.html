@@ -130,14 +130,15 @@
     align-items: center;
     padding: 20px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease; /* Transition ထည့်ခြင်း */
+    transition: all 0.3s ease; /* Transition ထည့်ထားသည် */
+    cursor: pointer;
   }
-  /* Match Row Hover Effect */
+  /* Match Row ကိုထောက်ရင် ဖောင်းကြွလာစေရန် */
   .match:hover {
     transform: scale(1.02);
     background: rgba(250, 204, 21, 0.1);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    z-index: 1;
+    border-radius: 8px;
   }
 
   .time-status { font-size: 12px; font-weight: 700; color: #9ca3af; text-align: center; }
@@ -195,7 +196,7 @@
     background: rgba(250, 204, 21, 0.05);
   }
 
-  /* Live Video Card Hover Added */
+  /* Live Video Card ကိုထောက်ရင် ဖောင်းကြွလာစေရန် */
   #live-list .video-card { 
     background: #151a21; 
     border-radius: 12px; 
@@ -203,11 +204,12 @@
     border: 1px solid #1f2937; 
     box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
     transition: all 0.3s ease; 
+    cursor: pointer;
   }
   #live-list .video-card:hover {
-    transform: translateY(-8px) scale(1.03);
+    transform: translateY(-8px) scale(1.05);
     border: 1px solid #facc15;
-    box-shadow: 0 12px 25px rgba(250, 204, 21, 0.3);
+    box-shadow: 0 15px 30px rgba(250, 204, 21, 0.3);
   }
   #live-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
   #live-list .title-box { padding: 10px; font-size: 13px; font-weight: 600; line-height: 1.4; height: 50px; overflow: hidden; }

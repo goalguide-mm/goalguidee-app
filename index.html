@@ -402,8 +402,8 @@ function renderMatches(searchTerm) {
     for (let league in allMatchesData) {
         const filteredMatches = allMatchesData[league].filter(m => 
             league.toLowerCase().includes(term) || 
-            m.home.toLowerCase().includes(term) || 
-            m.away.toLowerCase().includes(term)
+            (m.home && m.home.toLowerCase().includes(term)) || 
+            (m.away && m.away.toLowerCase().includes(term))
         );
 
         if (filteredMatches.length > 0) {
@@ -416,9 +416,9 @@ function renderMatches(searchTerm) {
                 }
                 html += `
                 <div class="match">
-                    <div class="time-status">${m.status === 'Live' ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
+                    <div class="time-status">${(m.status === 'Live' || m.status === '1' || m.status === '2') ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
                     <div class="team-row"><span class="team-name">${m.home}</span><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
-                    <div class="score-box">${m.score}</div>
+                    <div class="score-box">${m.score || '0 - 0'}</div>
                     <div class="team-row"><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"><span class="team-name">${m.away}</span></div>
                 </div>`;
             });
@@ -435,7 +435,7 @@ async function loadLive() {
     try {
         const res = await fetch(`${WORKER_URL}/live`);
         const data = await res.json();
-        if(data.length === 0) {
+        if(!data || data.length === 0) {
             list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
             return;
         }
@@ -453,31 +453,36 @@ async function loadStandings() {
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading League Tables...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/table`);
-        const leagues = await response.json(); // Array of leagues expected
+        const leagues = await response.json(); 
         
         let html = "";
-        leagues.forEach(league => {
-            const tableRows = league.rows || [];
-            html += `
-            <div class="league-card">
-                <div class="league-header"><span>${league.name}</span></div>
-                <div style="overflow-x: auto;">
-                    <table class="standings-table">
-                        <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
-                        <tbody>`;
-            tableRows.forEach(row => {
+        // API ဒေတာက array ဖြစ်ရပါမယ်။ မဟုတ်ရင် array ထဲထည့်ပါမယ်။
+        const leaguesArray = Array.isArray(leagues) ? leagues : [leagues];
+
+        leaguesArray.forEach(league => {
+            const tableRows = league.rows || league.standings || [];
+            if(tableRows.length > 0) {
                 html += `
-                <tr>
-                    <td class="rank">${row.position}</td>
-                    <td><div class="team-info"><img src="${row.logo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span>${row.team}</span></div></td>
-                    <td style="text-align:center;">${row.played}</td>
-                    <td style="text-align:center;">${row.gd}</td>
-                    <td class="pts-col" style="text-align:center;">${row.pts}</td>
-                </tr>`;
-            });
-            html += `</tbody></table></div></div>`;
+                <div class="league-card">
+                    <div class="league-header"><span>${league.name || 'League Standing'}</span></div>
+                    <div style="overflow-x: auto;">
+                        <table class="standings-table">
+                            <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
+                            <tbody>`;
+                tableRows.forEach(row => {
+                    html += `
+                    <tr>
+                        <td class="rank">${row.position || row.rank || '-'}</td>
+                        <td><div class="team-info"><img src="${row.logo || row.teamLogo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span>${row.team || row.teamName || 'Unknown'}</span></div></td>
+                        <td style="text-align:center;">${row.played || row.matches || 0}</td>
+                        <td style="text-align:center;">${row.gd || row.goalDiff || 0}</td>
+                        <td class="pts-col" style="text-align:center;">${row.pts || row.points || 0}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table></div></div>`;
+            }
         });
-        list.innerHTML = html;
+        list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No table data available.</p>";
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Tables.</p>"; }
 }
 

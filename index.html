@@ -8,12 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   body {
     font-family: 'Inter', sans-serif;
     background-color: #0b0f14;
-    background-image: linear-gradient(rgba(11, 15, 20, 0.9), rgba(11, 15, 20, 0.9)), 
-                      url('https://www.transparenttextures.com/patterns/football-no-fill.png'); 
+    background-image: linear-gradient(rgba(11, 15, 20, 0.9), rgba(11, 15, 20, 0.9)),
+                      url('https://www.transparenttextures.com/patterns/football-no-fill.png');
     background-size: 300px;
     background-attachment: fixed;
     color: #fff;
@@ -42,8 +42,8 @@
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .logo-wrapper:hover { transform: scale(1.05); }
-  .logo-img { height: 45px; width: auto; object-fit: contain; }
-  .logo-text { font-weight: 800; color: #facc15; font-size: 24px; letter-spacing: -1px; }
+  .logo-img { height: 45px; }
+  .logo-text { font-weight: 800; color: #facc15; font-size: 24px; }
 
   .refresh-btn {
     background: #facc15;
@@ -62,7 +62,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 15px 20px 5px 20px;
+    padding: 15px 20px 5px;
   }
 
   #leagueFilter {
@@ -75,8 +75,6 @@
     border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
-    outline: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .date-bar { display: flex; align-items: center; gap: 5px; }
@@ -88,7 +86,6 @@
     height: 36px;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   }
   .date-bar input {
     background: #1f2937;
@@ -98,58 +95,71 @@
     border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
-    outline: none;
     width: 130px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .league-card {
     margin: 15px;
     background: rgba(31, 41, 55, 0.8);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
   }
+
   .league-header {
     padding: 14px 16px;
     font-size: 15px;
     font-weight: 800;
     background: rgba(242, 201, 76, 0.15);
     color: #facc15;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid rgba(250, 204, 21, 0.2);
   }
 
+  /* ===============================
+     MATCH CARD (3D HOVER ONLY)
+     =============================== */
   .match {
     display: grid;
     grid-template-columns: 80px 1fr 60px 1fr;
     align-items: center;
     padding: 20px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease; /* Transition ထည့်ထားသည် */
-    cursor: pointer;
-  }
-  /* Match Row ကိုထောက်ရင် ဖောင်းကြွလာစေရန် */
-  .match:hover {
-    transform: scale(1.02);
-    background: rgba(250, 204, 21, 0.1);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    border-radius: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: transform .3s ease, box-shadow .3s ease, background .3s ease;
   }
 
-  .time-status { font-size: 12px; font-weight: 700; color: #9ca3af; text-align: center; }
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
+  .match:hover {
+    transform: translateY(-6px);
+    background: rgba(250, 204, 21, 0.08);
+    box-shadow:
+      0 14px 30px rgba(0,0,0,0.55),
+      0 0 18px rgba(250,204,21,0.35);
+    border-radius: 12px;
+  }
+
+  .time-status {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-align: center;
+  }
+
+  .status-live {
+    color: #ff4d4d;
+    animation: blink 1s infinite;
+    font-weight: 800;
+  }
+
   @keyframes blink { 50% { opacity: 0.5; } }
 
-  .team-row { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .team-row img { width: 38px; height: 38px; object-fit: contain; }
-  .team-name { font-size: 13px; font-weight: 600; text-align: center; color: #e5e7eb; }
-  .score-box { font-size: 22px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-  .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; }
+  .team-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .team-row img { width: 38px; height: 38px; }
+  .team-name { font-size: 13px; font-weight: 600; text-align: center; }
+  .score-box { font-size: 22px; font-weight: 900; text-align: center; }
+  .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; text-align: center; }
 
   .bottom-nav {
     position: fixed;
@@ -159,71 +169,29 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 2000;
     border-top: 1px solid #1f2937;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
   }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #6b7280; flex: 1; cursor: pointer; }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #6b7280;
+    cursor: pointer;
+  }
   .nav-item span { font-size: 12px; font-weight: 700; }
   .nav-item.active { color: #facc15; }
 
-  .content-section { display: none; animation: fadeIn 0.4s ease; }
+  .content-section { display: none; }
   .content-section.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-  .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
-
-  /* Highlight Card */
-  #highlights-list .video-card {
-    background: #151a21;
-    border-radius: 15px;
-    overflow: hidden;
-    border: 2px solid #facc15; 
-    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2), 0 5px 10px rgba(0,0,0,0.5); 
-    transition: transform 0.3s ease;
-  }
-  #highlights-list .video-card:hover {
-    transform: translateY(-5px); 
-    box-shadow: 0 15px 35px rgba(250, 204, 21, 0.4);
-  }
-  #highlights-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  #highlights-list .title-box { 
-    padding: 12px; 
-    font-size: 14px; 
-    font-weight: 800; 
-    color: #facc15; 
-    text-align: center;
-    background: rgba(250, 204, 21, 0.05);
-  }
-
-  /* Live Video Card ကိုထောက်ရင် ဖောင်းကြွလာစေရန် */
-  #live-list .video-card { 
-    background: #151a21; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    border: 1px solid #1f2937; 
-    box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
-    transition: all 0.3s ease; 
-    cursor: pointer;
-  }
-  #live-list .video-card:hover {
-    transform: translateY(-8px) scale(1.05);
-    border: 1px solid #facc15;
-    box-shadow: 0 15px 30px rgba(250, 204, 21, 0.3);
-  }
-  #live-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  #live-list .title-box { padding: 10px; font-size: 13px; font-weight: 600; line-height: 1.4; height: 50px; overflow: hidden; }
-
-  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
-  .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 </style>
 </head>
+
 <body>
 
 <header>
   <div class="logo-wrapper" onclick="location.reload()">
-    <img src="https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/IMG_20260123_104505_958.jpg" alt="Logo" class="logo-img">
+    <img src="https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/IMG_20260123_104505_958.jpg" class="logo-img">
     <div class="logo-text">GOAL GUIDE</div>
   </div>
   <button class="refresh-btn" onclick="location.reload()">REFRESH</button>
@@ -233,13 +201,6 @@
   <div class="controls-wrapper">
     <select id="leagueFilter" onchange="filterLeagues(this.value)">
       <option value="all">All Leagues</option>
-      <option value="Premier League">Premier League</option>
-      <option value="LaLiga">La Liga</option>
-      <option value="Serie A">Serie A</option>
-      <option value="Bundesliga">Bundesliga</option>
-      <option value="Ligue 1">Ligue 1</option>
-      <option value="UEFA Champions League">Champions League</option>
-      <option value="UEFA Europa League">Europa League</option>
     </select>
     <div class="date-bar">
       <button onclick="changeDate(-1)">◀</button>
@@ -250,117 +211,36 @@
   <div id="matches-list"></div>
 </div>
 
-<div id="section-live" class="content-section"><div id="live-list" class="grid-layout"></div></div>
-<div id="section-standings" class="content-section"><div id="standings-list"></div></div>
-<div id="section-highlights" class="content-section"><div id="highlights-list" class="grid-layout"></div></div>
-
 <div class="bottom-nav">
-  <div class="nav-item active" id="nav-matches" onclick="switchTab('matches')"><span>MATCHES</span></div>
-  <div class="nav-item" id="nav-live" onclick="switchTab('live')"><span>LIVE</span></div>
-  <div class="nav-item" id="nav-standings" onclick="switchTab('standings')"><span>TABLE</span></div>
-  <div class="nav-item" id="nav-highlights" onclick="switchTab('highlights')"><span>GOALS</span></div>
-</div>
-
-<div id="mainModal" class="modal" onclick="closeModal()">
-  <span class="close-modal">&times;</span>
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div id="modalBody"></div>
-  </div>
+  <div class="nav-item active"><span>MATCHES</span></div>
 </div>
 
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
 let selectedDate = new Date().toLocaleDateString('en-CA');
-let allMatchesData = {}; 
 document.getElementById("matchDate").value = selectedDate;
 
-function switchTab(tab) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-  document.getElementById('nav-' + tab).classList.add('active');
-  document.getElementById('section-' + tab).classList.add('active');
-  if(tab === 'matches') loadMatches();
-  if(tab === 'live') loadLive();
-  if(tab === 'standings') loadStandings();
-  if(tab === 'highlights') loadHighlights();
-}
-
 async function loadMatches() {
-    const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
-    try {
-        const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
-        const events = await response.json();
-        if (!events || events.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
-            return;
-        }
-        const seenIds = new Set();
-        allMatchesData = events.reduce((acc, ev) => {
-            if (!seenIds.has(ev.id)) {
-                seenIds.add(ev.id);
-                const leagueName = ev.tournament?.name || "Other Competitions";
-                if (!acc[leagueName]) acc[leagueName] = [];
-                acc[leagueName].push(ev);
-            }
-            return acc;
-        }, {});
-        renderMatches('all');
-    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; }
+  const list = document.getElementById("matches-list");
+  const res = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
+  const events = await res.json();
+
+  let html = "";
+  events.forEach(m => {
+    html += `
+    <div class="league-card">
+      <div class="match">
+        <div class="time-status">LIVE</div>
+        <div class="team-row"><span class="team-name">${m.homeTeam.name}</span></div>
+        <div class="score-box">${m.homeScore.current} - ${m.awayScore.current}</div>
+        <div class="team-row"><span class="team-name">${m.awayTeam.name}</span></div>
+      </div>
+    </div>`;
+  });
+  list.innerHTML = html;
 }
-
-function renderMatches(selectedLeague) {
-    const list = document.getElementById("matches-list");
-    let html = "";
-    for (let league in allMatchesData) {
-        if (selectedLeague !== 'all' && !league.includes(selectedLeague)) continue;
-        html += `<div class="league-card"><div class="league-header">${league}</div>`;
-        allMatchesData[league].forEach(m => {
-            const status = m.status?.description || "";
-            const isLive = m.status?.type === "inprogress" || status.toLowerCase().includes("live");
-            const isNS = status === "Not started";
-            let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
-            const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
-            const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
-            html += `
-            <div class="match">
-                <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>
-                <div class="team-row"><img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span></div>
-                <div style="text-align:center;">${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}</div>
-                <div class="team-row"><img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span></div>
-            </div>`;
-        });
-        html += `</div>`;
-    }
-    list.innerHTML = html;
-}
-
-function filterLeagues(val) { renderMatches(val); }
-function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
-function handleDateChange(v) { selectedDate = v; loadMatches(); }
-
-async function loadStandings() { document.getElementById("standings-list").innerHTML = "<p style='text-align:center;padding:40px;'>Coming Soon...</p>"; }
-async function loadLive() {
-    const list = document.getElementById("live-list");
-    try {
-        const res = await fetch("https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/live.json", { cache: "no-store" });
-        const data = await res.json();
-        list.innerHTML = data.map(item => `<div class="video-card" onclick="openPlayer('${item.url}')"><img src="${item.img}"><div class="title-box">${item.title}</div></div>`).join('');
-    } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>"; }
-}
-async function loadHighlights() {
-    try {
-        const res = await fetch(`${API_BASE}/api/highlights`);
-        const data = await res.json();
-        document.getElementById("highlights-list").innerHTML = data.map(h => `<div class="video-card" onclick="openVideo('${h.matchviewUrl}')"><img src="${h.thumbnail}"><div class="title-box">${h.title}</div></div>`).join('');
-    } catch(e) { }
-}
-
-function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
-function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
-function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
-
 loadMatches();
 </script>
+
 </body>
 </html>

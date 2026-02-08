@@ -291,6 +291,18 @@
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
   .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
+
+        .standings-container { padding-bottom: 20px; }
+        .standings-table th, .standings-table td { 
+            white-space: nowrap; 
+            padding: 10px 5px; 
+        }
+        .standings-table .team-info span {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+ 
 </style>
 </head>
 <body>
@@ -452,22 +464,33 @@ async function loadStandings() {
         const response = await fetch(`${API_BASE}/api/standings`);
         const data = await response.json();
         
-        // Data မရှိရင် သို့မဟုတ် rows မပါရင် error ပြမယ်
-        if (!data || data.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No standing data available.</p>";
+        // Data structure ကို စစ်ဆေးခြင်း (Array သို့မဟုတ် Object)
+        let leagues = [];
+        if (Array.isArray(data)) {
+            leagues = data;
+        } else if (data && typeof data === 'object') {
+            // အကယ်၍ object တစ်ခုတည်း ပို့လာရင် array ပြောင်းပေးခြင်း
+            leagues = [data];
+        }
+
+        if (leagues.length === 0) {
+            list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No standing data available.</p>";
             return;
         }
 
         let html = "";
-        data.forEach(league => {
-            // League တစ်ခုချင်းစီမှာ rows ရှိမရှိ စစ်ဆေးခြင်း
-            if (league.rows && league.rows.length > 0) {
+        leagues.forEach(league => {
+            // rows, standings, သို့မဟုတ် table ဆိုတဲ့ နာမည်တွေနဲ့ data လာနိုင်လို့ အကုန်စစ်ခြင်း
+            const tableData = league.rows || league.standings || league.table || [];
+            
+            if (tableData.length > 0) {
                 html += `
                 <div class="league-card">
                     <div class="league-header">
-                        <span>${league.name}</span>
+                        <span>${league.name || 'League Table'}</span>
                     </div>
-                    <div style="overflow-x: auto;"> <table class="standings-table">
+                    <div style="overflow-x: auto;">
+                        <table class="standings-table">
                             <thead>
                                 <tr>
                                     <th class="rank">#</th>
@@ -479,18 +502,21 @@ async function loadStandings() {
                             </thead>
                             <tbody>`;
                 
-                league.rows.forEach(row => {
-                    const teamLogo = row.team?.id ? `https://www.sofascore.com/api/v1/team/${row.team.id}/image` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                tableData.forEach(row => {
+                    const teamId = row.team?.id;
+                    const teamLogo = teamId ? `https://www.sofascore.com/api/v1/team/${teamId}/image` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                    const teamName = row.team?.shortName || row.team?.name || 'Unknown';
+                    
                     html += `
                     <tr>
                         <td class="rank">${row.position || '-'}</td>
                         <td>
                             <div class="team-info">
                                 <img src="${teamLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                                <span>${row.team?.shortName || row.team?.name || 'Unknown'}</span>
+                                <span>${teamName}</span>
                             </div>
                         </td>
-                        <td style="text-align:center;">${row.matches ?? 0}</td>
+                        <td style="text-align:center;">${row.matches ?? row.played ?? 0}</td>
                         <td style="text-align:center;">${row.goalDiff ?? 0}</td>
                         <td class="pts-col" style="text-align:center;">${row.points ?? 0}</td>
                     </tr>`;
@@ -499,13 +525,13 @@ async function loadStandings() {
                 html += `</tbody></table></div></div>`;
             }
         });
-        list.innerHTML = html || "<p style='text-align:center;padding:40px;'>Data formatting error.</p>";
+
+        list.innerHTML = html || "<p style='text-align:center;padding:40px;color:#6b7280;'>Data structure error. Please check API.</p>";
     } catch (e) { 
-        console.error("Standings Error:", e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings. Please check connection.</p>"; 
+        console.error("Standings Loading Error:", e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>API is not responding correctly.</p>"; 
     }
 }
-
 async function loadLive() {
     const list = document.getElementById("live-list");
     try {

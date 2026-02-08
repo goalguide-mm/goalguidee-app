@@ -43,7 +43,6 @@
   }
   .logo-wrapper:hover { transform: scale(1.05); }
   
-  /* Logo Image အား ရွှေရောင်ဘောင် ခတ်ပေးထားသည့်နေရာ */
   .logo-img { 
     height: 45px; 
     width: auto; 
@@ -70,45 +69,50 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 15px;
     padding: 15px 20px 5px 20px;
   }
 
-  #leagueFilter {
-    flex: 1;
-    max-width: 180px;
+  /* Search Box နှင့် Date Box ကို Size သေးပြီး အလျားရှည်အောင် ညှိထားခြင်း */
+  #teamSearch {
+    flex: 2;
     background: #1f2937;
     border: 1px solid #374151;
     color: #fff;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 600;
     outline: none;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    min-width: 150px;
   }
 
-  .date-bar { display: flex; align-items: center; gap: 5px; }
+  .date-bar { display: flex; align-items: center; gap: 5px; flex: 1.5; justify-content: flex-end; }
   .date-bar button {
     background: #1f2937;
     border: 1px solid #374151;
     color: #facc15;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
   }
   .date-bar input {
     background: #1f2937;
     border: 1px solid #facc15;
     color: #fff;
-    padding: 10px;
-    border-radius: 12px;
-    font-size: 14px;
+    padding: 7px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 600;
     outline: none;
-    width: 130px;
+    width: 140px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
@@ -159,7 +163,6 @@
   .score-box { font-size: 22px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; }
 
-  /* Bottom Nav Styling - 3D and Gold Border */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -190,12 +193,11 @@
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   
-  /* ခေါင်းစဉ်များကို size ကြီးပေးပြီး ရွှေရောင်ဘောင် ခတ်ပေးခြင်း */
   .nav-item span { 
-    font-size: 13px; /* Size ကို 11px မှ 13px သို့ တိုးမြှင့်ထားသည် */
+    font-size: 13px;
     font-weight: 800; 
-    padding: 6px 12px; /* Padding ကို ပိုကျယ်ပေးထားသည် */
-    border: 2px solid #facc15; /* ဘောင်ကို ပိုထင်ရှားအောင် 2px လုပ်ထားသည် */
+    padding: 6px 12px;
+    border: 2px solid #facc15;
     border-radius: 8px;
     background: rgba(250, 204, 21, 0.05);
     display: inline-block;
@@ -204,15 +206,10 @@
   .nav-item.active { color: #facc15; }
   .nav-item.active span { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
 
-  /* ထောက်လိုက်တာနဲ့ ဖောင်းကြွလာတဲ့ 3D Style */
   .nav-item:hover {
     transform: translateY(-8px) scale(1.1);
     color: #facc15;
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-  }
-  .nav-item:hover span {
-    box-shadow: 0 6px 15px rgba(250, 204, 21, 0.4);
-    background: rgba(250, 204, 21, 0.15);
   }
 
   .content-section { display: none; animation: fadeIn 0.4s ease; }
@@ -269,9 +266,7 @@
 
 <header>
   <div class="logo-wrapper" onclick="location.reload()">
-    <img src="./IMG_20260123_104505_958.jpg"
-     alt="Logo"
-     class="logo-img">
+    <img src="./IMG_20260123_104505_958.jpg" alt="Logo" class="logo-img">
     <div class="logo-text">GOAL GUIDE</div>
   </div>
   <button class="refresh-btn" onclick="location.reload()">REFRESH</button>
@@ -279,16 +274,8 @@
 
 <div id="section-matches" class="content-section active">
   <div class="controls-wrapper">
-    <select id="leagueFilter" onchange="filterLeagues(this.value)">
-      <option value="all">All Leagues</option>
-      <option value="Premier League">Premier League</option>
-      <option value="LaLiga">La Liga</option>
-      <option value="Serie A">Serie A</option>
-      <option value="Bundesliga">Bundesliga</option>
-      <option value="Ligue 1">Ligue 1</option>
-      <option value="UEFA Champions League">Champions League</option>
-      <option value="UEFA Europa League">Europa League</option>
-    </select>
+    <input type="text" id="teamSearch" placeholder="Search team or league..." oninput="filterBySearch(this.value)">
+    
     <div class="date-bar">
       <button onclick="changeDate(-1)">◀</button>
       <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
@@ -353,37 +340,50 @@ async function loadMatches() {
             }
             return acc;
         }, {});
-        renderMatches('all');
+        renderMatches('');
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; }
 }
 
-function renderMatches(selectedLeague) {
+function renderMatches(searchTerm) {
     const list = document.getElementById("matches-list");
     let html = "";
+    let hasMatches = false;
+    const term = searchTerm.toLowerCase();
+
     for (let league in allMatchesData) {
-        if (selectedLeague !== 'all' && !league.includes(selectedLeague)) continue;
-        html += `<div class="league-card"><div class="league-header">${league}</div>`;
-        allMatchesData[league].forEach(m => {
-            const status = m.status?.description || "";
-            const isLive = m.status?.type === "inprogress" || status.toLowerCase().includes("live");
-            const isNS = status === "Not started";
-            let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
-            const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
-            const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
-            html += `
-            <div class="match">
-                <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>
-                <div class="team-row"><img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span></div>
-                <div style="text-align:center;">${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}</div>
-                <div class="team-row"><img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span></div>
-            </div>`;
-        });
-        html += `</div>`;
+        const filteredMatches = allMatchesData[league].filter(m => 
+            league.toLowerCase().includes(term) || 
+            m.homeTeam.name.toLowerCase().includes(term) || 
+            m.awayTeam.name.toLowerCase().includes(term) ||
+            (m.homeTeam.shortName && m.homeTeam.shortName.toLowerCase().includes(term)) ||
+            (m.awayTeam.shortName && m.awayTeam.shortName.toLowerCase().includes(term))
+        );
+
+        if (filteredMatches.length > 0) {
+            hasMatches = true;
+            html += `<div class="league-card"><div class="league-header">${league}</div>`;
+            filteredMatches.forEach(m => {
+                const status = m.status?.description || "";
+                const isLive = m.status?.type === "inprogress" || status.toLowerCase().includes("live");
+                const isNS = status === "Not started";
+                let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
+                const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
+                const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
+                html += `
+                <div class="match">
+                    <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>
+                    <div class="team-row"><img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span></div>
+                    <div style="text-align:center;">${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}</div>
+                    <div class="team-row"><img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span></div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
     }
-    list.innerHTML = html;
+    list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matching results.</p>";
 }
 
-function filterLeagues(val) { renderMatches(val); }
+function filterBySearch(val) { renderMatches(val); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 

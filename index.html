@@ -292,17 +292,16 @@
   .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 
-        .standings-container { padding-bottom: 20px; }
-        .standings-table th, .standings-table td { 
-            white-space: nowrap; 
-            padding: 10px 5px; 
-        }
-        .standings-table .team-info span {
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
- 
+  .standings-container { padding-bottom: 20px; }
+  .standings-table th, .standings-table td { 
+    white-space: nowrap; 
+    padding: 10px 5px; 
+  }
+  .standings-table .team-info span {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>
 </head>
 <body>
@@ -348,6 +347,9 @@
 
 <script>
 const API_BASE = "https://goalguide-api-1.onrender.com";
+// သင့်ရဲ့ Cloudflare Worker URL
+const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev/matches";
+
 let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = {}; 
 document.getElementById("matchDate").value = selectedDate;
@@ -370,25 +372,28 @@ async function loadMatches() {
     allMatchesData = {};
 
     try {
-      const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
-      const events = await response.json();
-     
-      if (!events || events.length === 0) {
+      // Cloudflare Worker မှ data ကိုယူခြင်း
+      const response = await fetch(WORKER_URL);
+      const matches = await response.json();
+      
+      if (!matches || matches.length === 0) {
           list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
           return;
       }
-      const seenIds = new Set();
-      allMatchesData = events.reduce((acc, ev) => {
-          if (!seenIds.has(ev.id)) {
-              seenIds.add(ev.id);
-              const leagueName = ev.tournament?.name || "Other Competitions";
-              if (!acc[leagueName]) acc[leagueName] = [];
-              acc[leagueName].push(ev);
-          }
+
+      // League အလိုက် data များကို စုစည်းခြင်း
+      allMatchesData = matches.reduce((acc, m) => {
+          const leagueName = m.league || "Other Competitions";
+          if (!acc[leagueName]) acc[leagueName] = [];
+          acc[leagueName].push(m);
           return acc;
       }, {});
+
       renderMatches('');
-    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; }
+    } catch (e) { 
+        console.error(e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error with Worker</p>"; 
+    }
 }
 
 function renderMatches(searchTerm) {
@@ -400,49 +405,40 @@ function renderMatches(searchTerm) {
     for (let league in allMatchesData) {
         const filteredMatches = allMatchesData[league].filter(m => 
             league.toLowerCase().includes(term) || 
-            m.homeTeam.name.toLowerCase().includes(term) || 
-            m.awayTeam.name.toLowerCase().includes(term)
+            m.home.toLowerCase().includes(term) || 
+            m.away.toLowerCase().includes(term)
         );
 
         if (filteredMatches.length > 0) {
             hasMatches = true;
-            const leagueId = filteredMatches[0].tournament?.id;
-            const leagueLogo = `https://www.sofascore.com/api/v1/tournament/${leagueId}/image`;
-
             html += `
             <div class="league-card">
                 <div class="league-header">
-                    <img src="${leagueLogo}" onerror="this.style.display='none'">
                     <span>${league}</span>
                 </div>`;
 
             filteredMatches.forEach(m => {
-                const status = m.status?.description || "";
-                const isLive = m.status?.type === "inprogress";
-                const isFT = status === "Finished" || status === "FT";
-                
-                const isStarted = m.isStarted || (m.status?.type !== "notstarted");
-                
-                let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "TBD";
-                
-                const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
-                const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
+                // အချိန်ကို Format ပြောင်းခြင်း (Timestamp ဖြစ်နေလျှင်)
+                let timeDisplay = m.time;
+                if (!isNaN(m.time)) {
+                    timeDisplay = new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false});
+                }
 
                 html += `
                 <div class="match">
-                    <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isFT ? 'FT' : timeStr)}</div>
+                    <div class="time-status">${m.status === 'Live' ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
                     <div class="team-row">
-                        <span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span>
-                        <img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                        <span class="team-name">${m.home}</span>
+                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
                     </div>
                     
                     <div class="score-box">
-                        ${isStarted ? `${m.homeScore?.current ?? 0} : ${m.awayScore?.current ?? 0}` : 'VS'}
+                        ${m.score}
                     </div>
                     
                     <div class="team-row">
-                        <img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                        <span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span>
+                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+                        <span class="team-name">${m.away}</span>
                     </div>
                 </div>`;
             });
@@ -451,7 +447,7 @@ function renderMatches(searchTerm) {
     }
     list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
 }
- 
+
 function filterBySearch(val) { renderMatches(val); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
@@ -464,8 +460,6 @@ async function loadStandings() {
     try {
         const response = await fetch(`${API_BASE}/api/standings`);
         const league = await response.json();
-        
-        // Backend က data ပို့မယ့် ပုံစံကို row တွေအထိ ရောက်အောင် သေချာဖတ်ခြင်း
         const tableRows = league.rows || (league.standings && league.standings[0]?.rows) || [];
 
         if (tableRows.length === 0) {
@@ -494,7 +488,6 @@ async function loadStandings() {
         tableRows.forEach(row => {
             const team = row.team || {};
             const teamLogo = `https://www.sofascore.com/api/v1/team/${team.id}/image`;
-            
             html += `
             <tr>
                 <td class="rank">${row.position || '-'}</td>
@@ -509,16 +502,11 @@ async function loadStandings() {
                 <td class="pts-col" style="text-align:center;">${row.points || 0}</td>
             </tr>`;
         });
-
         html += `</tbody></table></div></div>`;
         list.innerHTML = html;
-
-    } catch (e) { 
-        console.error("Error:", e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>API Error: Connection failed.</p>"; 
-    }
+    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>API Error</p>"; }
 }
- 
+
 async function loadLive() {
     const list = document.getElementById("live-list");
     try {
@@ -545,8 +533,6 @@ async function loadHighlights() {
         }
     } catch(e) { console.error("Highlight sync failed", e); }
 }
-
-setInterval(loadHighlights, 300000);
 
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }

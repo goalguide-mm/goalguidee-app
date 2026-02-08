@@ -346,9 +346,8 @@
 </div>
 
 <script>
+const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
 const API_BASE = "https://goalguide-api-1.onrender.com";
-// သင့်ရဲ့ Cloudflare Worker URL
-const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev/matches";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = {}; 
@@ -359,21 +358,21 @@ function switchTab(tab) {
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
   document.getElementById('nav-' + tab).classList.add('active');
   document.getElementById('section-' + tab).classList.add('active');
+  
   if(tab === 'matches') loadMatches();
   if(tab === 'live') loadLive();
   if(tab === 'standings') loadStandings();
   if(tab === 'highlights') loadHighlights();
 }
 
+// MATCHES - ပွဲစဉ်ဇယားအားလုံး (Upcoming + Live)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
-  
     allMatchesData = {};
 
     try {
-      // Cloudflare Worker မှ data ကိုယူခြင်း
-      const response = await fetch(WORKER_URL);
+      const response = await fetch(`${WORKER_URL}/matches`);
       const matches = await response.json();
       
       if (!matches || matches.length === 0) {
@@ -381,7 +380,6 @@ async function loadMatches() {
           return;
       }
 
-      // League အလိုက် data များကို စုစည်းခြင်း
       allMatchesData = matches.reduce((acc, m) => {
           const leagueName = m.league || "Other Competitions";
           if (!acc[leagueName]) acc[leagueName] = [];
@@ -391,8 +389,7 @@ async function loadMatches() {
 
       renderMatches('');
     } catch (e) { 
-        console.error(e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error with Worker</p>"; 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; 
     }
 }
 
@@ -411,35 +408,18 @@ function renderMatches(searchTerm) {
 
         if (filteredMatches.length > 0) {
             hasMatches = true;
-            html += `
-            <div class="league-card">
-                <div class="league-header">
-                    <span>${league}</span>
-                </div>`;
-
+            html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
             filteredMatches.forEach(m => {
-                // အချိန်ကို Format ပြောင်းခြင်း (Timestamp ဖြစ်နေလျှင်)
                 let timeDisplay = m.time;
                 if (!isNaN(m.time)) {
                     timeDisplay = new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false});
                 }
-
                 html += `
                 <div class="match">
                     <div class="time-status">${m.status === 'Live' ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
-                    <div class="team-row">
-                        <span class="team-name">${m.home}</span>
-                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                    </div>
-                    
-                    <div class="score-box">
-                        ${m.score}
-                    </div>
-                    
-                    <div class="team-row">
-                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                        <span class="team-name">${m.away}</span>
-                    </div>
+                    <div class="team-row"><span class="team-name">${m.home}</span><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
+                    <div class="score-box">${m.score}</div>
+                    <div class="team-row"><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"><span class="team-name">${m.away}</span></div>
                 </div>`;
             });
             html += `</div>`;
@@ -448,72 +428,57 @@ function renderMatches(searchTerm) {
     list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
 }
 
-function filterBySearch(val) { renderMatches(val); }
-function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
-function handleDateChange(v) { selectedDate = v; loadMatches(); }
-
-async function loadStandings() {
-    const list = document.getElementById("standings-list");
-    if (!list) return;
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Standings...</p>";
-    
-    try {
-        const response = await fetch(`${API_BASE}/api/standings`);
-        const league = await response.json();
-        const tableRows = league.rows || (league.standings && league.standings[0]?.rows) || [];
-
-        if (tableRows.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No standing data available.</p>";
-            return;
-        }
-
-        let html = `
-        <div class="league-card">
-            <div class="league-header">
-                <span>${league.name || 'Premier League'}</span>
-            </div>
-            <div style="overflow-x: auto;">
-                <table class="standings-table">
-                    <thead>
-                        <tr>
-                            <th class="rank">#</th>
-                            <th>Team</th>
-                            <th style="text-align:center;">PL</th>
-                            <th style="text-align:center;">GD</th>
-                            <th class="pts-col" style="text-align:center;">PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-        
-        tableRows.forEach(row => {
-            const team = row.team || {};
-            const teamLogo = `https://www.sofascore.com/api/v1/team/${team.id}/image`;
-            html += `
-            <tr>
-                <td class="rank">${row.position || '-'}</td>
-                <td>
-                    <div class="team-info">
-                        <img src="${teamLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                        <span>${team.shortName || team.name || 'Unknown'}</span>
-                    </div>
-                </td>
-                <td style="text-align:center;">${row.matches || 0}</td>
-                <td style="text-align:center;">${row.goalDiff || 0}</td>
-                <td class="pts-col" style="text-align:center;">${row.points || 0}</td>
-            </tr>`;
-        });
-        html += `</tbody></table></div></div>`;
-        list.innerHTML = html;
-    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>API Error</p>"; }
-}
-
+// LIVE - ခုလက်ရှိလွင့်နေတဲ့ပွဲစဉ်များ
 async function loadLive() {
     const list = document.getElementById("live-list");
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Live Matches...</p>";
     try {
-        const res = await fetch("https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/live.json", { cache: "no-store" });
+        const res = await fetch(`${WORKER_URL}/live`);
         const data = await res.json();
-        list.innerHTML = data.map(item => `<div class="video-card" onclick="openPlayer('${item.url}')"><img src="${item.img}"><div class="title-box">${item.title}</div></div>`).join('');
-    } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>"; }
+        if(data.length === 0) {
+            list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
+            return;
+        }
+        list.innerHTML = data.map(item => `
+            <div class="video-card" onclick="openPlayer('${item.url}')">
+                <img src="${item.img || 'https://via.placeholder.com/300x169/111827/facc15?text=LIVE'}">
+                <div class="title-box">${item.title || (item.home + ' vs ' + item.away)}</div>
+            </div>`).join('');
+    } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Error loading Live.</p>"; }
+}
+
+// TABLE - League အဆင့်ဇယားများ
+async function loadStandings() {
+    const list = document.getElementById("standings-list");
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading League Tables...</p>";
+    try {
+        const response = await fetch(`${WORKER_URL}/table`);
+        const leagues = await response.json(); // Array of leagues expected
+        
+        let html = "";
+        leagues.forEach(league => {
+            const tableRows = league.rows || [];
+            html += `
+            <div class="league-card">
+                <div class="league-header"><span>${league.name}</span></div>
+                <div style="overflow-x: auto;">
+                    <table class="standings-table">
+                        <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
+                        <tbody>`;
+            tableRows.forEach(row => {
+                html += `
+                <tr>
+                    <td class="rank">${row.position}</td>
+                    <td><div class="team-info"><img src="${row.logo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span>${row.team}</span></div></td>
+                    <td style="text-align:center;">${row.played}</td>
+                    <td style="text-align:center;">${row.gd}</td>
+                    <td class="pts-col" style="text-align:center;">${row.pts}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div></div>`;
+        });
+        list.innerHTML = html;
+    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Tables.</p>"; }
 }
 
 async function loadHighlights() {
@@ -522,22 +487,23 @@ async function loadHighlights() {
         const data = await res.json();
         const listContainer = document.getElementById("highlights-list");
         if (listContainer && data) {
-            const html = data.map(h => `
+            listContainer.innerHTML = data.map(h => `
                 <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
                     <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
                     <div class="title-box">${h.title}</div>
                 </div>`).join('');
-            if (listContainer.innerHTML !== html) {
-                listContainer.innerHTML = html;
-            }
         }
     } catch(e) { console.error("Highlight sync failed", e); }
 }
 
+function filterBySearch(val) { renderMatches(val); }
+function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
+function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
+// Initial load
 loadMatches();
 </script>
 </body>

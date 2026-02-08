@@ -130,10 +130,7 @@
     align-items: center;
     padding: 20px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: background 0.2s;
   }
-  .match:last-child { border-bottom: none; }
-  .match:active { background: rgba(255,255,255,0.05); }
 
   .time-status { font-size: 12px; font-weight: 700; color: #9ca3af; text-align: center; }
   .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
@@ -145,12 +142,9 @@
   .score-box { font-size: 22px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; }
 
-  /* Bottom Nav & Items (ဖောင်းကြွပြင်ထားသောအပိုင်း) */
   .bottom-nav {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     height: 75px;
     background: #111827;
     display: flex;
@@ -158,58 +152,49 @@
     align-items: center;
     z-index: 2000;
     border-top: 1px solid #1f2937;
-    padding-bottom: 5px;
-    box-shadow: 0 -10px 25px rgba(0,0,0,0.6);
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
   }
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    color: #6b7280;
-    cursor: pointer;
-    transition: 0.3s;
-    flex: 1;
-    padding: 10px 5px;
-    margin: 0 5px;
-    border-radius: 12px;
-  }
-  .nav-item span { 
-    font-size: 12px; 
-    font-weight: 800; 
-    letter-spacing: 0.5px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* စာသားဖောင်းကြွ */
-  }
-  .nav-item.active { 
-    color: #facc15; 
-    background: rgba(250, 204, 21, 0.05);
-    /* Active ဖြစ်ချိန် ခလုတ်ဖောင်းကြွပုံစံ */
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5), inset -2px -2px 5px rgba(255,255,255,0.05);
-  }
-  .nav-item.active span {
-    text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); /* Active စာသား လင်းစေရန် */
-  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #6b7280; flex: 1; cursor: pointer; }
+  .nav-item span { font-size: 12px; font-weight: 700; }
+  .nav-item.active { color: #facc15; }
 
   .content-section { display: none; animation: fadeIn 0.4s ease; }
   .content-section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 15px; }
-  .video-card { 
-    background: #151a21; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    border: 1px solid #1f2937;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+  .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
+
+  /* Highlight Card ပြင်ဆင်ထားသော အပိုင်း */
+  #highlights-list .video-card {
+    background: #151a21;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid #facc15; /* ရွှေရောင်ဘောင် */
+    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2), 0 5px 10px rgba(0,0,0,0.5); /* ဖောင်းကြွ Shadow */
+    transition: transform 0.3s ease;
   }
-  .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  .title-box { padding: 10px; font-size: 13px; font-weight: 600; line-height: 1.4; height: 50px; overflow: hidden; }
+  #highlights-list .video-card:hover {
+    transform: translateY(-5px); /* ထောင်လိုက်ရင် ပိုဖောင်းလာစေရန် */
+    box-shadow: 0 15px 35px rgba(250, 204, 21, 0.4);
+  }
+  #highlights-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  #highlights-list .title-box { 
+    padding: 12px; 
+    font-size: 14px; 
+    font-weight: 800; 
+    color: #facc15; 
+    text-align: center;
+    background: rgba(250, 204, 21, 0.05);
+  }
+
+  /* Live video card ကိုတော့ မပြောင်းလဲပါ */
+  #live-list .video-card { background: #151a21; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; box-shadow: 0 8px 15px rgba(0,0,0,0.4); }
+  #live-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  #live-list .title-box { padding: 10px; font-size: 13px; font-weight: 600; line-height: 1.4; height: 50px; overflow: hidden; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 0 30px rgba(250,204,21,0.2); }
+  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
-
-  footer { text-align: center; padding: 20px; color: #4b5563; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -234,14 +219,12 @@
       <option value="UEFA Champions League">Champions League</option>
       <option value="UEFA Europa League">Europa League</option>
     </select>
-
     <div class="date-bar">
       <button onclick="changeDate(-1)">◀</button>
       <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
       <button onclick="changeDate(1)">▶</button>
     </div>
   </div>
-
   <div id="matches-list"></div>
 </div>
 
@@ -283,16 +266,13 @@ function switchTab(tab) {
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
-
     try {
         const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
         const events = await response.json();
-
         if (!events || events.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
             return;
         }
-
         const seenIds = new Set();
         allMatchesData = events.reduce((acc, ev) => {
             if (!seenIds.has(ev.id)) {
@@ -303,7 +283,6 @@ async function loadMatches() {
             }
             return acc;
         }, {});
-
         renderMatches('all');
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; }
 }
@@ -311,20 +290,16 @@ async function loadMatches() {
 function renderMatches(selectedLeague) {
     const list = document.getElementById("matches-list");
     let html = "";
-    
     for (let league in allMatchesData) {
         if (selectedLeague !== 'all' && !league.includes(selectedLeague)) continue;
-
         html += `<div class="league-card"><div class="league-header">${league}</div>`;
         allMatchesData[league].forEach(m => {
             const status = m.status?.description || "";
             const isLive = m.status?.type === "inprogress" || status.toLowerCase().includes("live");
             const isNS = status === "Not started";
             let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
-
             const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
             const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
-
             html += `
             <div class="match">
                 <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>

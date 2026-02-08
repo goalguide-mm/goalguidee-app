@@ -130,6 +130,14 @@
     align-items: center;
     padding: 20px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease; /* Transition ထည့်ခြင်း */
+  }
+  /* Match Row Hover Effect */
+  .match:hover {
+    transform: scale(1.02);
+    background: rgba(250, 204, 21, 0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 1;
   }
 
   .time-status { font-size: 12px; font-weight: 700; color: #9ca3af; text-align: center; }
@@ -164,17 +172,17 @@
 
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  /* Highlight Card ပြင်ဆင်ထားသော အပိုင်း */
+  /* Highlight Card */
   #highlights-list .video-card {
     background: #151a21;
     border-radius: 15px;
     overflow: hidden;
-    border: 2px solid #facc15; /* ရွှေရောင်ဘောင် */
-    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2), 0 5px 10px rgba(0,0,0,0.5); /* ဖောင်းကြွ Shadow */
+    border: 2px solid #facc15; 
+    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2), 0 5px 10px rgba(0,0,0,0.5); 
     transition: transform 0.3s ease;
   }
   #highlights-list .video-card:hover {
-    transform: translateY(-5px); /* ထောင်လိုက်ရင် ပိုဖောင်းလာစေရန် */
+    transform: translateY(-5px); 
     box-shadow: 0 15px 35px rgba(250, 204, 21, 0.4);
   }
   #highlights-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
@@ -187,8 +195,20 @@
     background: rgba(250, 204, 21, 0.05);
   }
 
-  /* Live video card ကိုတော့ မပြောင်းလဲပါ */
-  #live-list .video-card { background: #151a21; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; box-shadow: 0 8px 15px rgba(0,0,0,0.4); }
+  /* Live Video Card Hover Added */
+  #live-list .video-card { 
+    background: #151a21; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    border: 1px solid #1f2937; 
+    box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
+    transition: all 0.3s ease; 
+  }
+  #live-list .video-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    border: 1px solid #facc15;
+    box-shadow: 0 12px 25px rgba(250, 204, 21, 0.3);
+  }
   #live-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
   #live-list .title-box { padding: 10px; font-size: 13px; font-weight: 600; line-height: 1.4; height: 50px; overflow: hidden; }
 

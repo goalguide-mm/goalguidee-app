@@ -132,14 +132,17 @@
     background: #252a32;
     color: #ffffff;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* Logo အတွက် ပြောင်းလဲမှု */
     align-items: center;
+    gap: 10px; /* Logo နဲ့ စာကြား အကွာအဝေး */
     border-bottom: 1px solid #333;
   }
+  
+  .league-header img { width: 25px; height: 25px; object-fit: contain; } /* League Logo style */
 
   .match {
     display: grid;
-    grid-template-columns: 60px 1fr 80px 1fr;
+    grid-template-columns: 80px 1fr 80px 1fr; /* Time Column ကို နည်းနည်း ပိုချဲ့လိုက်သည် */
     align-items: center;
     padding: 15px 10px;
     border-bottom: 1px solid #2a2f38;
@@ -152,10 +155,10 @@
   }
 
   .time-status {
-    font-size: 11px;
+    font-size: 14px; /* Size ကို ၁၁ ကနေ ၁၄ ပြောင်း */
     color: #8a8d91;
     text-align: center;
-    font-weight: 700;
+    font-weight: 900; /* Bold ကို ပိုထင်ရှားအောင် လုပ်လိုက်သည် */
   }
 
   .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
@@ -166,19 +169,19 @@
     align-items: center; 
     gap: 8px; 
     overflow: hidden;
+    justify-content: center; /* အလယ်ကို ပို့ရန် */
   }
 
   /* Home team row */
   .match .team-row:nth-child(2) { 
-    justify-content: flex-end; 
-    text-align: right;
+    flex-direction: row; /* အသင်းနာမည်ပြီးမှ logo လာရန် */
+    text-align: center;
   }
   
   /* Away team row */
   .match .team-row:nth-child(4) { 
-    justify-content: flex-start; 
-    text-align: left;
-    flex-direction: row-reverse;
+    flex-direction: row-reverse; /* Logo ပြီးမှ အသင်းနာမည်လာရန် */
+    text-align: center;
   }
 
   .team-row img { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
@@ -361,11 +364,14 @@ function renderMatches(searchTerm) {
 
         if (filteredMatches.length > 0) {
             hasMatches = true;
+            const leagueId = filteredMatches[0].tournament?.id;
+            const leagueLogo = `https://www.sofascore.com/api/v1/tournament/${leagueId}/image`;
+
             html += `
             <div class="league-card">
                 <div class="league-header">
-                    <span>⚽ ${league}</span>
-                    <span style="font-size:10px; opacity:0.6;">${filteredMatches[0].tournament?.category?.name || ""}</span>
+                    <img src="${leagueLogo}" onerror="this.style.display='none'">
+                    <span>${league}</span>
                 </div>`;
 
             filteredMatches.forEach(m => {

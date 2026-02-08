@@ -159,6 +159,7 @@
   .score-box { font-size: 22px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; }
 
+  /* Bottom Nav Styling - 3D and Gold Border */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -170,10 +171,48 @@
     z-index: 2000;
     border-top: 1px solid #1f2937;
     box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+    padding: 0 10px;
   }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #6b7280; flex: 1; cursor: pointer; }
-  .nav-item span { font-size: 12px; font-weight: 700; }
+  
+  .nav-item { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    gap: 5px; 
+    color: #6b7280; 
+    flex: 1; 
+    cursor: pointer; 
+    height: 50px;
+    margin: 0 5px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  /* ခေါင်းစဉ်များကို ရွှေရောင်အနားကွက်ပေးခြင်း */
+  .nav-item span { 
+    font-size: 11px; 
+    font-weight: 800; 
+    padding: 4px 8px;
+    border: 1.5px solid #facc15;
+    border-radius: 6px;
+    background: rgba(250, 204, 21, 0.05);
+  }
+  
   .nav-item.active { color: #facc15; }
+  .nav-item.active span { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 8px rgba(250, 204, 21, 0.4); }
+
+  /* ထောက်လိုက်တာနဲ့ ဖောင်းကြွလာတဲ့ 3D Style */
+  .nav-item:hover {
+    transform: translateY(-8px) scale(1.1);
+    color: #facc15;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+  }
+  .nav-item:hover span {
+    box-shadow: 0 6px 15px rgba(250, 204, 21, 0.4);
+    background: rgba(250, 204, 21, 0.15);
+  }
 
   .content-section { display: none; animation: fadeIn 0.4s ease; }
   .content-section.active { display: block; }

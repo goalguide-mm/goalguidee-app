@@ -396,25 +396,38 @@ async function loadLive() {
     } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>"; }
 }
 
-// Highlights Update (5 Minutes Interval)
+// Highlights API Auto-Updater Logic
 async function loadHighlights() {
     try {
-        const res = await fetch(`${API_BASE}/api/highlights`);
+        // Fetch data without cache to get newest videos
+        const res = await fetch(`${API_BASE}/api/highlights`, { cache: 'no-store' });
         const data = await res.json();
         const listContainer = document.getElementById("highlights-list");
-        if (listContainer) {
-            listContainer.innerHTML = data.map(h => `<div class="video-card" onclick="openVideo('${h.matchviewUrl}')"><img src="${h.thumbnail}"><div class="title-box">${h.title}</div></div>`).join('');
+        
+        if (listContainer && data) {
+            // Mapping the newest API data to the HTML structure
+            const html = data.map(h => `
+                <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
+                    <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
+                    <div class="title-box">${h.title}</div>
+                </div>`).join('');
+            
+            // Auto update UI only if data has changed
+            if (listContainer.innerHTML !== html) {
+                listContainer.innerHTML = html;
+            }
         }
-    } catch(e) { console.error("Update failed", e); }
+    } catch(e) { console.error("Highlight sync failed", e); }
 }
 
-// 5 Minutes (300,000 milliseconds) Auto Update for Highlights
+// Interval set to check for new videos every 5 minutes (300,000 ms)
 setInterval(loadHighlights, 300000);
 
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
+// Initial load
 loadMatches();
 </script>
 </body>

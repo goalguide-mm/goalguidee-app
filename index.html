@@ -42,7 +42,16 @@
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .logo-wrapper:hover { transform: scale(1.05); }
-  .logo-img { height: 45px; width: auto; object-fit: contain; }
+  
+  /* Logo Image အား ရွှေရောင်ဘောင် ခတ်ပေးထားသည့်နေရာ */
+  .logo-img { 
+    height: 45px; 
+    width: auto; 
+    object-fit: contain; 
+    border: 2px solid #facc15; 
+    border-radius: 50%; 
+  }
+  
   .logo-text { font-weight: 800; color: #facc15; font-size: 24px; letter-spacing: -1px; }
 
   .refresh-btn {
@@ -130,10 +139,9 @@
     align-items: center;
     padding: 20px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease; /* Transition ထည့်ထားသည် */
+    transition: all 0.3s ease;
     cursor: pointer;
   }
-  /* Match Row ကိုထောက်ရင် ဖောင်းကြွလာစေရန် */
   .match:hover {
     transform: scale(1.02);
     background: rgba(250, 204, 21, 0.1);
@@ -173,7 +181,6 @@
 
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  /* Highlight Card */
   #highlights-list .video-card {
     background: #151a21;
     border-radius: 15px;
@@ -196,7 +203,6 @@
     background: rgba(250, 204, 21, 0.05);
   }
 
-  /* Live Video Card ကိုထောက်ရင် ဖောင်းကြွလာစေရန် */
   #live-list .video-card { 
     background: #151a21; 
     border-radius: 12px; 

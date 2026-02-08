@@ -115,52 +115,85 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
+  /* Fixture Card Layout Improvements */
   .league-card {
     margin: 15px;
-    background: rgba(31, 41, 55, 0.8);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #1a1d23;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     overflow: hidden;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
   }
+
   .league-header {
-    padding: 14px 16px;
-    font-size: 15px;
-    font-weight: 800;
-    background: rgba(242, 201, 76, 0.15);
-    color: #facc15;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    background: #252a32;
+    color: #ffffff;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid rgba(250, 204, 21, 0.2);
+    border-bottom: 1px solid #333;
   }
 
   .match {
     display: grid;
-    grid-template-columns: 80px 1fr 60px 1fr;
+    grid-template-columns: 60px 1fr 80px 1fr;
     align-items: center;
-    padding: 20px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px 10px;
+    border-bottom: 1px solid #2a2f38;
     transition: all 0.3s ease;
     cursor: pointer;
   }
+
   .match:hover {
-    transform: scale(1.02);
-    background: rgba(250, 204, 21, 0.1);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    border-radius: 8px;
+    background: rgba(250, 204, 21, 0.05);
   }
 
-  .time-status { font-size: 12px; font-weight: 700; color: #9ca3af; text-align: center; }
+  .time-status {
+    font-size: 11px;
+    color: #8a8d91;
+    text-align: center;
+    font-weight: 700;
+  }
+
   .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
   @keyframes blink { 50% { opacity: 0.5; } }
 
-  .team-row { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .team-row img { width: 38px; height: 38px; object-fit: contain; }
-  .team-name { font-size: 13px; font-weight: 600; text-align: center; color: #e5e7eb; }
-  .score-box { font-size: 22px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-  .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; }
+  .team-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    overflow: hidden;
+  }
+
+  /* Home team row */
+  .match .team-row:nth-child(2) { 
+    justify-content: flex-end; 
+    text-align: right;
+  }
+  
+  /* Away team row */
+  .match .team-row:nth-child(4) { 
+    justify-content: flex-start; 
+    text-align: left;
+    flex-direction: row-reverse;
+  }
+
+  .team-row img { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+  .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .score-box { 
+    background: #0b0f14; 
+    padding: 6px 10px; 
+    border-radius: 6px; 
+    font-size: 18px; 
+    font-weight: 900; 
+    color: #facc15; 
+    text-align: center;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  }
 
   .bottom-nav {
     position: fixed;
@@ -188,14 +221,13 @@
     height: 50px;
     margin: 0 5px;
     border-radius: 10px;
-    border: 1px solid transparent;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   
   .nav-item span { 
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800; 
-    padding: 6px 12px;
+    padding: 6px 10px;
     border: 2px solid #facc15;
     border-radius: 8px;
     background: rgba(250, 204, 21, 0.05);
@@ -205,56 +237,27 @@
   .nav-item.active { color: #facc15; }
   .nav-item.active span { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
 
-  .nav-item:hover {
-    transform: translateY(-8px) scale(1.1);
-    color: #facc15;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-  }
-
   .content-section { display: none; animation: fadeIn 0.4s ease; }
   .content-section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  #highlights-list .video-card {
+  #highlights-list .video-card, #live-list .video-card {
     background: #151a21;
-    border-radius: 15px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 2px solid #facc15; 
-    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2), 0 5px 10px rgba(0,0,0,0.5); 
-    transition: transform 0.3s ease;
-  }
-  #highlights-list .video-card:hover {
-    transform: translateY(-5px); 
-    box-shadow: 0 15px 35px rgba(250, 204, 21, 0.4);
-  }
-  #highlights-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  #highlights-list .title-box { 
-    padding: 12px; 
-    font-size: 14px; 
-    font-weight: 800; 
-    color: #facc15; 
-    text-align: center;
-    background: rgba(250, 204, 21, 0.05);
-  }
-
-  #live-list .video-card { 
-    background: #151a21; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    border: 1px solid #1f2937; 
-    box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
-    transition: all 0.3s ease; 
+    border: 1px solid #1f2937;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
     cursor: pointer;
   }
-  #live-list .video-card:hover {
-    transform: translateY(-8px) scale(1.05);
+  #highlights-list .video-card:hover, #live-list .video-card:hover {
+    transform: translateY(-5px);
     border: 1px solid #facc15;
-    box-shadow: 0 15px 30px rgba(250, 204, 21, 0.3);
   }
-  #live-list .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  #live-list .title-box { padding: 10px; font-size: 13px; font-weight: 600; line-height: 1.4; height: 50px; overflow: hidden; }
+  .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .title-box { padding: 10px; font-size: 13px; font-weight: 600; text-align: center; color: #facc15; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
   .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
@@ -353,35 +356,49 @@ function renderMatches(searchTerm) {
         const filteredMatches = allMatchesData[league].filter(m => 
             league.toLowerCase().includes(term) || 
             m.homeTeam.name.toLowerCase().includes(term) || 
-            m.awayTeam.name.toLowerCase().includes(term) ||
-            (m.homeTeam.shortName && m.homeTeam.shortName.toLowerCase().includes(term)) ||
-            (m.awayTeam.shortName && m.awayTeam.shortName.toLowerCase().includes(term))
+            m.awayTeam.name.toLowerCase().includes(term)
         );
 
         if (filteredMatches.length > 0) {
             hasMatches = true;
-            html += `<div class="league-card"><div class="league-header">${league}</div>`;
+            html += `
+            <div class="league-card">
+                <div class="league-header">
+                    <span>⚽ ${league}</span>
+                    <span style="font-size:10px; opacity:0.6;">${filteredMatches[0].tournament?.category?.name || ""}</span>
+                </div>`;
+
             filteredMatches.forEach(m => {
                 const status = m.status?.description || "";
-                const isLive = m.status?.type === "inprogress" || status.toLowerCase().includes("live");
-                const isNS = status === "Not started";
-                let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
+                const isLive = m.status?.type === "inprogress";
+                const isFT = status === "Finished" || status === "FT";
+                let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "TBD";
+                
                 const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
                 const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
+
                 html += `
                 <div class="match">
-                    <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>
-                    <div class="team-row"><img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span></div>
-                    <div style="text-align:center;">${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}</div>
-                    <div class="team-row"><img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span></div>
+                    <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isFT ? 'FT' : timeStr)}</div>
+                    <div class="team-row">
+                        <span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span>
+                        <img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                    </div>
+                    <div class="score-box">
+                        ${m.homeScore?.current ?? 0} : ${m.awayScore?.current ?? 0}
+                    </div>
+                    <div class="team-row">
+                        <img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                        <span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span>
+                    </div>
                 </div>`;
             });
             html += `</div>`;
         }
     }
-    list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matching results.</p>";
+    list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
 }
-
+ 
 function filterBySearch(val) { renderMatches(val); }
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
@@ -396,23 +413,17 @@ async function loadLive() {
     } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>"; }
 }
 
-// Highlights API Auto-Updater Logic
 async function loadHighlights() {
     try {
-        // Fetch data without cache to get newest videos
         const res = await fetch(`${API_BASE}/api/highlights`, { cache: 'no-store' });
         const data = await res.json();
         const listContainer = document.getElementById("highlights-list");
-        
         if (listContainer && data) {
-            // Mapping the newest API data to the HTML structure
             const html = data.map(h => `
                 <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
                     <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
                     <div class="title-box">${h.title}</div>
                 </div>`).join('');
-            
-            // Auto update UI only if data has changed
             if (listContainer.innerHTML !== html) {
                 listContainer.innerHTML = html;
             }
@@ -420,14 +431,12 @@ async function loadHighlights() {
     } catch(e) { console.error("Highlight sync failed", e); }
 }
 
-// Interval set to check for new videos every 5 minutes (300,000 ms)
 setInterval(loadHighlights, 300000);
 
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
-// Initial load
 loadMatches();
 </script>
 </body>

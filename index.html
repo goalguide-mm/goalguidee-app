@@ -452,6 +452,7 @@ async function loadStandings() {
         const response = await fetch(`${API_BASE}/api/standings`);
         const data = await response.json();
         
+        // Data မရှိရင် သို့မဟုတ် rows မပါရင် error ပြမယ်
         if (!data || data.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;'>No standing data available.</p>";
             return;
@@ -459,44 +460,49 @@ async function loadStandings() {
 
         let html = "";
         data.forEach(league => {
-            html += `
-            <div class="league-card">
-                <div class="league-header">
-                    <span>${league.name}</span>
-                </div>
-                <table class="standings-table">
-                    <thead>
-                        <tr>
-                            <th>Pos</th>
-                            <th>Team</th>
-                            <th>PL</th>
-                            <th>GD</th>
-                            <th>PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-            
-            league.rows.forEach(row => {
+            // League တစ်ခုချင်းစီမှာ rows ရှိမရှိ စစ်ဆေးခြင်း
+            if (league.rows && league.rows.length > 0) {
                 html += `
-                <tr>
-                    <td class="rank">${row.position}</td>
-                    <td>
-                        <div class="team-info">
-                            <img src="https://www.sofascore.com/api/v1/team/${row.team.id}/image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                            <span>${row.team.shortName || row.team.name}</span>
-                        </div>
-                    </td>
-                    <td>${row.matches}</td>
-                    <td>${row.goalDiff}</td>
-                    <td class="pts-col">${row.points}</td>
-                </tr>`;
-            });
+                <div class="league-card">
+                    <div class="league-header">
+                        <span>${league.name}</span>
+                    </div>
+                    <div style="overflow-x: auto;"> <table class="standings-table">
+                            <thead>
+                                <tr>
+                                    <th class="rank">#</th>
+                                    <th>Team</th>
+                                    <th style="text-align:center;">PL</th>
+                                    <th style="text-align:center;">GD</th>
+                                    <th class="pts-col" style="text-align:center;">PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                league.rows.forEach(row => {
+                    const teamLogo = row.team?.id ? `https://www.sofascore.com/api/v1/team/${row.team.id}/image` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                    html += `
+                    <tr>
+                        <td class="rank">${row.position || '-'}</td>
+                        <td>
+                            <div class="team-info">
+                                <img src="${teamLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                                <span>${row.team?.shortName || row.team?.name || 'Unknown'}</span>
+                            </div>
+                        </td>
+                        <td style="text-align:center;">${row.matches ?? 0}</td>
+                        <td style="text-align:center;">${row.goalDiff ?? 0}</td>
+                        <td class="pts-col" style="text-align:center;">${row.points ?? 0}</td>
+                    </tr>`;
+                });
 
-            html += `</tbody></table></div>`;
+                html += `</tbody></table></div></div>`;
+            }
         });
-        list.innerHTML = html;
+        list.innerHTML = html || "<p style='text-align:center;padding:40px;'>Data formatting error.</p>";
     } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings. Please try again.</p>"; 
+        console.error("Standings Error:", e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings. Please check connection.</p>"; 
     }
 }
 

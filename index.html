@@ -458,80 +458,65 @@ function handleDateChange(v) { selectedDate = v; loadMatches(); }
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
+    if (!list) return;
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Standings...</p>";
     
     try {
         const response = await fetch(`${API_BASE}/api/standings`);
-        const data = await response.json();
+        const league = await response.json();
         
-        // Data structure ကို စစ်ဆေးခြင်း (Array သို့မဟုတ် Object)
-        let leagues = [];
-        if (Array.isArray(data)) {
-            leagues = data;
-        } else if (data && typeof data === 'object') {
-            // အကယ်၍ object တစ်ခုတည်း ပို့လာရင် array ပြောင်းပေးခြင်း
-            leagues = [data];
-        }
-
-        if (leagues.length === 0) {
+        // League ထဲမှာ rows ပါမပါ စစ်ဆေးခြင်း
+        if (!league || !league.rows || league.rows.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No standing data available.</p>";
             return;
         }
 
-        let html = "";
-        leagues.forEach(league => {
-            // rows, standings, သို့မဟုတ် table ဆိုတဲ့ နာမည်တွေနဲ့ data လာနိုင်လို့ အကုန်စစ်ခြင်း
-            const tableData = league.rows || league.standings || league.table || [];
+        let html = `
+        <div class="league-card">
+            <div class="league-header">
+                <span>${league.name || 'Premier League'}</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th class="rank">#</th>
+                            <th>Team</th>
+                            <th style="text-align:center;">PL</th>
+                            <th style="text-align:center;">GD</th>
+                            <th class="pts-col" style="text-align:center;">PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        league.rows.forEach(row => {
+            const team = row.team || {};
+            const teamLogo = `https://www.sofascore.com/api/v1/team/${team.id}/image`;
             
-            if (tableData.length > 0) {
-                html += `
-                <div class="league-card">
-                    <div class="league-header">
-                        <span>${league.name || 'League Table'}</span>
+            html += `
+            <tr>
+                <td class="rank">${row.position || '-'}</td>
+                <td>
+                    <div class="team-info">
+                        <img src="${teamLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                        <span>${team.shortName || team.name || 'Unknown'}</span>
                     </div>
-                    <div style="overflow-x: auto;">
-                        <table class="standings-table">
-                            <thead>
-                                <tr>
-                                    <th class="rank">#</th>
-                                    <th>Team</th>
-                                    <th style="text-align:center;">PL</th>
-                                    <th style="text-align:center;">GD</th>
-                                    <th class="pts-col" style="text-align:center;">PTS</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-                
-                tableData.forEach(row => {
-                    const teamId = row.team?.id;
-                    const teamLogo = teamId ? `https://www.sofascore.com/api/v1/team/${teamId}/image` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-                    const teamName = row.team?.shortName || row.team?.name || 'Unknown';
-                    
-                    html += `
-                    <tr>
-                        <td class="rank">${row.position || '-'}</td>
-                        <td>
-                            <div class="team-info">
-                                <img src="${teamLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                                <span>${teamName}</span>
-                            </div>
-                        </td>
-                        <td style="text-align:center;">${row.matches ?? row.played ?? 0}</td>
-                        <td style="text-align:center;">${row.goalDiff ?? 0}</td>
-                        <td class="pts-col" style="text-align:center;">${row.points ?? 0}</td>
-                    </tr>`;
-                });
-
-                html += `</tbody></table></div></div>`;
-            }
+                </td>
+                <td style="text-align:center;">${row.matches || 0}</td>
+                <td style="text-align:center;">${row.goalDiff || 0}</td>
+                <td class="pts-col" style="text-align:center;">${row.points || 0}</td>
+            </tr>`;
         });
 
-        list.innerHTML = html || "<p style='text-align:center;padding:40px;color:#6b7280;'>Data structure error. Please check API.</p>";
+        html += `</tbody></table></div></div>`;
+        list.innerHTML = html;
+
     } catch (e) { 
-        console.error("Standings Loading Error:", e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>API is not responding correctly.</p>"; 
+        console.error("Error:", e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>API Error: Please check server logs.</p>"; 
     }
 }
+ 
 async function loadLive() {
     const list = document.getElementById("live-list");
     try {

@@ -31,7 +31,6 @@
     top: 0;
     z-index: 1050;
     border-bottom: 2px solid rgba(250, 204, 21, 0.5);
-    /* Header ဖောင်းကြွပုံစံ */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   }
 
@@ -42,12 +41,8 @@
     cursor: pointer;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .logo-wrapper:hover {
-    transform: scale(1.05);
-  }
-  /* ပုံ Link ကို raw သုံးထားပါတယ် */
+  .logo-wrapper:hover { transform: scale(1.05); }
   .logo-img { height: 45px; width: auto; object-fit: contain; }
-  /* Font size နည်းနည်းမြှင့်ထားပါတယ် */
   .logo-text { font-weight: 800; color: #facc15; font-size: 24px; letter-spacing: -1px; }
 
   .refresh-btn {
@@ -59,7 +54,6 @@
     font-size: 14px;
     font-weight: 800;
     cursor: pointer;
-    /* ခလုတ် ဖောင်းကြွပုံစံ */
     box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
   }
 
@@ -85,12 +79,7 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
-  .date-bar {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
+  .date-bar { display: flex; align-items: center; gap: 5px; }
   .date-bar button {
     background: #1f2937;
     border: 1px solid #374151;
@@ -121,7 +110,6 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
     backdrop-filter: blur(5px);
-    /* ကတ်ပြားများကို ဖောင်းကြွစေရန် */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
   }
   .league-header {
@@ -157,6 +145,7 @@
   .score-box { font-size: 22px; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .vs-box { font-size: 14px; font-weight: 800; color: #4b5563; }
 
+  /* Bottom Nav & Items (ဖောင်းကြွပြင်ထားသောအပိုင်း) */
   .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -170,7 +159,7 @@
     z-index: 2000;
     border-top: 1px solid #1f2937;
     padding-bottom: 5px;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.6);
   }
   .nav-item {
     display: flex;
@@ -181,9 +170,25 @@
     cursor: pointer;
     transition: 0.3s;
     flex: 1;
+    padding: 10px 5px;
+    margin: 0 5px;
+    border-radius: 12px;
   }
-  .nav-item span { font-size: 12px; font-weight: 700; }
-  .nav-item.active { color: #facc15; }
+  .nav-item span { 
+    font-size: 12px; 
+    font-weight: 800; 
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* စာသားဖောင်းကြွ */
+  }
+  .nav-item.active { 
+    color: #facc15; 
+    background: rgba(250, 204, 21, 0.05);
+    /* Active ဖြစ်ချိန် ခလုတ်ဖောင်းကြွပုံစံ */
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5), inset -2px -2px 5px rgba(255,255,255,0.05);
+  }
+  .nav-item.active span {
+    text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); /* Active စာသား လင်းစေရန် */
+  }
 
   .content-section { display: none; animation: fadeIn 0.4s ease; }
   .content-section.active { display: block; }
@@ -321,7 +326,7 @@ function renderMatches(selectedLeague) {
             const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
 
             html += `
-            <div class="match" onclick="showLineup(${m.id}, '${m.homeTeam.name.replace(/'/g, "")}', '${m.awayTeam.name.replace(/'/g, "")}')">
+            <div class="match">
                 <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isNS ? timeStr : status)}</div>
                 <div class="team-row"><img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span></div>
                 <div style="text-align:center;">${isNS ? '<div class="vs-box">VS</div>' : `<div class="score-box">${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}</div>`}</div>

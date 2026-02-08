@@ -33,7 +33,6 @@
     border-bottom: 1px solid rgba(250, 204, 21, 0.3);
   }
 
-  /* Logo & Text Wrapper with Hover Effect */
   .logo-wrapper {
     display: flex;
     align-items: center;
@@ -42,9 +41,9 @@
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .logo-wrapper:hover {
-    transform: scale(1.05); /* ဖောင်းကြွ ဒီဇိုင်း */
+    transform: scale(1.05);
   }
-  .logo-img { height: 35px; width: auto; }
+  .logo-img { height: 35px; width: 35px; object-fit: contain; }
   .logo-text { font-weight: 800; color: #facc15; font-size: 20px; letter-spacing: -1px; }
 
   .refresh-btn {
@@ -59,7 +58,6 @@
     box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);
   }
 
-  /* Date Bar နှင့် Filter Bar ကို တစ်တန်းတည်းထားခြင်း */
   .controls-wrapper {
     display: flex;
     align-items: center;
@@ -189,17 +187,16 @@
   .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; }
   .close-modal { position: absolute; top: -40px; right: 10px; color: #fff; font-size: 30px; cursor: pointer; }
 
-  footer { text-align: center; padding: 20px; color: #4b5563; font-size: 10px; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo-wrapper" onclick="location.reload()">
-    <img src="https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/logo.png" 
+    <img src="https://goalguide-mm.github.io/goalguide-api/logo.png" 
+         onerror="this.src='https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/logo.png'"
          alt="Logo" 
-         class="logo-img" 
-         crossorigin="anonymous">
+         class="logo-img">
     <div class="logo-text">GOAL GUIDE</div>
   </div>
   <button class="refresh-btn" onclick="location.reload()">REFRESH</button>
@@ -306,7 +303,7 @@ function renderMatches(selectedLeague) {
             let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "";
 
             const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
-            const aLogo = `https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
+            const aLogo = ` https://www.sofascore.com/api/v1/team/${m.awayTeam.id}/image`;
 
             html += `
             <div class="match" onclick="showLineup(${m.id}, '${m.homeTeam.name.replace(/'/g, "")}', '${m.awayTeam.name.replace(/'/g, "")}')">

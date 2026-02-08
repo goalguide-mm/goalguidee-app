@@ -373,27 +373,20 @@ function renderMatches(searchTerm) {
             const leagueLogo = `https://www.sofascore.com/api/v1/tournament/${leagueId}/image`;
 
             html += `
-<div class="match">
-    <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : (isFT ? 'FT' : timeStr)}</div>
-    <div class="team-row">
-        <span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span>
-        <img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-    </div>
-    
-    <div class="score-box">
-        ${isStarted ? `${homeScore ?? 0} : ${awayScore ?? 0}` : 'VS'}
-    </div>
-    
-    <div class="team-row">
-        <img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-        <span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span>
-    </div>
-</div>`;
+            <div class="league-card">
+                <div class="league-header">
+                    <img src="${leagueLogo}" onerror="this.style.display='none'">
+                    <span>${league}</span>
+                </div>`;
 
             filteredMatches.forEach(m => {
                 const status = m.status?.description || "";
                 const isLive = m.status?.type === "inprogress";
                 const isFT = status === "Finished" || status === "FT";
+                
+                // ပွဲမစသေးရင် VS ပြရန် Logic
+                const isStarted = m.isStarted || (m.status?.type !== "notstarted");
+                
                 let timeStr = m.startTimestamp ? new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false}) : "TBD";
                 
                 const hLogo = `https://www.sofascore.com/api/v1/team/${m.homeTeam.id}/image`;
@@ -406,9 +399,11 @@ function renderMatches(searchTerm) {
                         <span class="team-name">${m.homeTeam.shortName || m.homeTeam.name}</span>
                         <img src="${hLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
                     </div>
+                    
                     <div class="score-box">
-                        ${m.homeScore?.current ?? 0} : ${m.awayScore?.current ?? 0}
+                        ${isStarted ? `${m.homeScore?.current ?? 0} : ${m.awayScore?.current ?? 0}` : 'VS'}
                     </div>
+                    
                     <div class="team-row">
                         <img src="${aLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
                         <span class="team-name">${m.awayTeam.shortName || m.awayTeam.name}</span>

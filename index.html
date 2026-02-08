@@ -330,11 +330,13 @@ function switchTab(tab) {
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
-    try {
+  
+        allMatchesData = {};
+ 
+        try {
+         
         const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`);
         const events = await response.json();
-     
-        allMatchesData = {};
      
         if (!events || events.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";

@@ -33,7 +33,6 @@
     border-bottom: 1px solid rgba(250, 204, 21, 0.3);
   }
 
-  /* Logo & Text Wrapper with Hover Effect */
   .logo-wrapper {
     display: flex;
     align-items: center;
@@ -42,9 +41,9 @@
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .logo-wrapper:hover {
-    transform: scale(1.05); /* ဖောင်းကြွ ဒီဇိုင်း */
+    transform: scale(1.05);
   }
-  .logo-img { height: 35px; width: auto; }
+  .logo-img { height: 35px; width: auto; display: block; }
   .logo-text { font-weight: 800; color: #facc15; font-size: 20px; letter-spacing: -1px; }
 
   .refresh-btn {
@@ -59,7 +58,6 @@
     box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);
   }
 
-  /* Date Bar နှင့် Filter Bar ကို တစ်တန်းတည်းထားခြင်း */
   .controls-wrapper {
     display: flex;
     align-items: center;
@@ -196,7 +194,7 @@
 
 <header>
   <div class="logo-wrapper" onclick="location.reload()">
-    <img src="https://raw.githubusercontent.com/goalguide-mm/goalguide-api/main/logo.png" alt="Logo" class="logo-img">
+    <img src="https://i.imgur.com/vH9pGjH.png" alt="Logo" class="logo-img">
     <div class="logo-text">GOAL GUIDE</div>
   </div>
   <button class="refresh-btn" onclick="location.reload()">REFRESH</button>

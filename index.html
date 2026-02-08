@@ -53,15 +53,15 @@
     padding: 20px 10px 5px 10px;
   }
   
-  /* League Filter Style */
+  /* ပြင်ဆင်ထားသော Filter Bar Style - Header ရဲ့ အောက် ဘယ်ဘက်ကပ်ရန် */
   .filter-bar {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* ဘယ်ဘက်ကပ် */
     padding: 10px 20px;
   }
   #leagueFilter {
     width: 100%;
-    max-width: 300px;
+    max-width: 200px; /* အနည်းငယ်ကျဉ်းလိုက်သည် */
     background: #1f2937;
     border: 1px solid #374151;
     color: #fff;
@@ -183,16 +183,23 @@
 </header>
 
 <div id="section-matches" class="content-section active">
+  <div class="filter-bar">
+    <select id="leagueFilter" onchange="filterLeagues(this.value)">
+      <option value="all">All Leagues</option>
+      <option value="Premier League">Premier League</option>
+      <option value="LaLiga">La Liga</option>
+      <option value="Serie A">Serie A</option>
+      <option value="Bundesliga">Bundesliga</option>
+      <option value="Ligue 1">Ligue 1</option>
+      <option value="UEFA Champions League">Champions League</option>
+      <option value="UEFA Europa League">Europa League</option>
+    </select>
+  </div>
+
   <div class="date-bar">
     <button onclick="changeDate(-1)">◀</button>
     <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
     <button onclick="changeDate(1)">▶</button>
-  </div>
-  
-  <div class="filter-bar">
-    <select id="leagueFilter" onchange="filterLeagues(this.value)">
-      <option value="all">All Leagues</option>
-    </select>
   </div>
 
   <div id="matches-list"></div>
@@ -235,7 +242,6 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    const filter = document.getElementById("leagueFilter");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
 
     try {
@@ -244,7 +250,6 @@ async function loadMatches() {
 
         if (!events || events.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
-            filter.innerHTML = '<option value="all">All Leagues</option>';
             return;
         }
 
@@ -259,13 +264,6 @@ async function loadMatches() {
             return acc;
         }, {});
 
-        // Update Filter Options
-        let filterHtml = '<option value="all">All Leagues</option>';
-        Object.keys(allMatchesData).sort().forEach(l => {
-            filterHtml += `<option value="${l}">${l}</option>`;
-        });
-        filter.innerHTML = filterHtml;
-
         renderMatches('all');
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error</p>"; }
 }
@@ -275,7 +273,7 @@ function renderMatches(selectedLeague) {
     let html = "";
     
     for (let league in allMatchesData) {
-        if (selectedLeague !== 'all' && league !== selectedLeague) continue;
+        if (selectedLeague !== 'all' && !league.includes(selectedLeague)) continue;
 
         html += `<div class="league-card"><div class="league-header">${league}</div>`;
         allMatchesData[league].forEach(m => {

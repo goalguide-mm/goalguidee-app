@@ -1,35 +1,33 @@
 app.get("/api/fixtures/today", async (req, res) => {
-  try {
-    const API_TOKEN = "W3FI2JepFynSaW5J1fuzuDyMcWVbJTV7kWhGSdm2hGbpo4WUAYFsC6eh0Mrd";
-    
-    // ဒီနေ့ရက်စွဲကို YYYY-MM-DD format ပြောင်းခြင်း
-    const today = new Date().toISOString().split('T')[0];
+    try {
+        // ၁။ ဒီနေ့ရက်စွဲကို YYYY-MM-DD format ပြောင်းခြင်း (ဥပမာ- 2026-02-08)
+        const today = new Date().toISOString().split('T')[0];
 
-    // Sportmonks Fixtures by Date URL
-    // include=participants ထည့်မှ အသင်းနာမည်နဲ့ Logo တွေ ပါလာမှာဖြစ်ပါတယ်
-    const url = `https://api.sportmonks.com/v3/football/fixtures/date/${today}?api_token=${API_TOKEN}&include=participants`;
+        // ၂။ သင့်ရဲ့ Render API URL (ရက်စွဲကို variable နဲ့ ချိတ်ဆက်ထားသည်)
+        const url = `https://goalguide-api-1.onrender.com/api/fixtures/date/${today}`;
 
-    const r = await fetch(url);
-    const data = await r.json();
+        // ၃။ Render Server ထံမှ ဒေတာလှမ်းယူခြင်း
+        const response = await fetch(url);
+        const data = await response.json();
 
-    // ပွဲစဉ်တွေကို သင့် Website format နဲ့ ကိုက်အောင် ပြန်စီစဉ်ခြင်း
-    const formattedFixtures = (data.data || []).map(fixture => {
-      const homeTeam = fixture.participants.find(p => p.meta.location === 'home');
-      const awayTeam = fixture.participants.find(p => p.meta.location === 'away');
+        // ၄။ ရရှိလာသော ပွဲစဉ်ဒေတာများကို Website format နှင့် ကိုက်ညီအောင် ပြန်စီစဉ်ခြင်း
+        // မှတ်ချက်- Render API မှ ဒေတာပုံစံအပေါ်မူတည်၍ mapping ကို လိုအပ်သလို ပြင်နိုင်သည်
+        const formattedFixtures = (data || []).map(fixture => {
+            // Render API မှ ပြန်ပေးသော field အမည်များကို အသုံးပြုထားပါသည်
+            return {
+                id: fixture.id,
+                league: fixture.tournament?.name || "Premier League",
+                home: fixture.homeTeam?.name || "TBD",
+                away: fixture.awayTeam?.name || "TBD",
+                homeLogo: fixture.homeTeam?.image_path || "",
+                awayLogo: fixture.awayTeam?.image_path || "",
+                time: fixture.starting_at || "ပွဲချိန်မသိရသေးပါ"
+            };
+        });
 
-      return {
-        id: fixture.id,
-        league: fixture.name, // သို့မဟုတ် League ID
-        home: homeTeam ? homeTeam.name : "TBD",
-        away: awayTeam ? awayTeam.name : "TBD",
-        homeLogo: homeTeam ? homeTeam.image_path : "",
-        awayLogo: awayTeam ? awayTeam.image_path : "",
-        time: fixture.starting_at // ပွဲစမည့်အချိန်
-      };
-    });
-
-    res.json(formattedFixtures);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+        res.json(formattedFixtures);
+    } catch (e) {
+        console.error("Error fetching fixtures:", e);
+        res.status(500).json({ error: e.message });
+    }
 });

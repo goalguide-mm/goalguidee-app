@@ -190,18 +190,19 @@
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   
-  /* ခေါင်းစဉ်များကို ရွှေရောင်အနားကွက်ပေးခြင်း */
+  /* ခေါင်းစဉ်များကို size ကြီးပေးပြီး ရွှေရောင်ဘောင် ခတ်ပေးခြင်း */
   .nav-item span { 
-    font-size: 11px; 
+    font-size: 13px; /* Size ကို 11px မှ 13px သို့ တိုးမြှင့်ထားသည် */
     font-weight: 800; 
-    padding: 4px 8px;
-    border: 1.5px solid #facc15;
-    border-radius: 6px;
+    padding: 6px 12px; /* Padding ကို ပိုကျယ်ပေးထားသည် */
+    border: 2px solid #facc15; /* ဘောင်ကို ပိုထင်ရှားအောင် 2px လုပ်ထားသည် */
+    border-radius: 8px;
     background: rgba(250, 204, 21, 0.05);
+    display: inline-block;
   }
   
   .nav-item.active { color: #facc15; }
-  .nav-item.active span { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 8px rgba(250, 204, 21, 0.4); }
+  .nav-item.active span { background: rgba(250, 204, 21, 0.2); box-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
 
   /* ထောက်လိုက်တာနဲ့ ဖောင်းကြွလာတဲ့ 3D Style */
   .nav-item:hover {

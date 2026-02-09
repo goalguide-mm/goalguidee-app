@@ -453,38 +453,44 @@ async function loadLive() {
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading League Tables...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Premier League Table...</p>";
     try {
-        // ဒီနေရာမှာ /table လို့ ထည့်ပေးပါ
+        // WORKER_URL ရဲ့ အနောက်မှာ /table ပါဖို့ အရေးကြီးပါတယ်
         const response = await fetch(`${WORKER_URL}/table`);
         const data = await response.json(); 
         
+        if (!data || data.length === 0) {
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No table data found.</p>";
+            return;
+        }
+
         let html = "";
         data.forEach(league => {
             const tableRows = league.list || [];
-            if(tableRows.length > 0) {
+            html += `
+            <div class="league-card">
+                <div class="league-header"><span>${league.league_name}</span></div>
+                <div style="overflow-x: auto;">
+                    <table class="standings-table">
+                        <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
+                        <tbody>`;
+            tableRows.forEach(row => {
                 html += `
-                <div class="league-card">
-                    <div class="league-header"><span>${league.league_name}</span></div>
-                    <div style="overflow-x: auto;">
-                        <table class="standings-table">
-                            <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
-                            <tbody>`;
-                tableRows.forEach(row => {
-                    html += `
-                    <tr>
-                        <td class="rank">${row.rank}</td>
-                        <td><div class="team-info"><img src="${row.team_logo}"><span>${row.team_name}</span></div></td>
-                        <td style="text-align:center;">${row.total_count}</td>
-                        <td style="text-align:center;">${row.goal_diff}</td>
-                        <td class="pts-col" style="text-align:center;">${row.integral}</td>
-                    </tr>`;
-                });
-                html += `</tbody></table></div></div>`;
-            }
+                <tr>
+                    <td class="rank">${row.rank}</td>
+                    <td><div class="team-info"><img src="${row.team_logo}"><span>${row.team_name}</span></div></td>
+                    <td style="text-align:center;">${row.total_count}</td>
+                    <td style="text-align:center;">${row.goal_diff}</td>
+                    <td class="pts-col" style="text-align:center;">${row.integral}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div></div>`;
         });
-        list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No table data available.</p>";
-    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Tables.</p>"; }
+        list.innerHTML = html;
+    } catch (e) { 
+        console.error(e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Table.</p>"; 
+    }
 }
  
 async function loadHighlights() {

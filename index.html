@@ -368,18 +368,18 @@ function switchTab(tab) {
 // MATCHES - ပြင်ဆင်ထားသော LoadMatches
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Real Matches...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
         const response = await fetch(`${WORKER_URL}/matches`);
         const matches = await response.json();
         
         if (!matches || matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches scheduled for today.</p>";
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>";
             return;
         }
 
-        // Search လုပ်ဖို့အတွက် Data သိမ်းထားမယ်
+        // HTML ရဲ့ renderMatches function က သုံးတဲ့ allMatchesData ထဲကို ထည့်ပေးရမှာပါ
         allMatchesData = matches.reduce((acc, m) => {
             const league = m.league_name;
             if (!acc[league]) acc[league] = [];
@@ -387,10 +387,12 @@ async function loadMatches() {
             return acc;
         }, {});
 
-        renderMatches(''); // မျက်နှာပြင်မှာ စာရင်းထုတ်ပြမယ်
+        // ပွဲစဉ်တွေကို စာရင်းထုတ်ပြဖို့ ခေါ်လိုက်ပါပြီ
+        renderMatches(''); 
         
     } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: API limit reached or Connection failed.</p>"; 
+        console.error(e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error. Please try again later.</p>"; 
     }
 }
 

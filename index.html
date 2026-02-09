@@ -364,9 +364,6 @@ function switchTab(tab) {
   if(tab === 'standings') loadStandings();
   if(tab === 'highlights') loadHighlights();
 }
-// MATCHES - ပြင်ဆင်ထားသော LoadMatches
-// Variable ကို အပေါ်ဆုံးမှာ အလွတ်အဖြစ် အရင်ကြေညာထားပါ
-let allMatchesData = {}; 
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
@@ -374,7 +371,7 @@ async function loadMatches() {
     
     try {
         const response = await fetch(`${WORKER_URL}/matches`);
-        if (!response.ok) throw new Error('Worker Error: ' + response.status);
+        if (!response.ok) throw new Error('Worker Connection Failed');
         
         const matches = await response.json();
         
@@ -383,15 +380,13 @@ async function loadMatches() {
             return;
         }
 
-        // Data တွေကို Group ဖွဲ့မယ်
         allMatchesData = matches.reduce((acc, m) => {
-            const league = m.league_name || "International";
+            const league = m.league_name || "Football";
             if (!acc[league]) acc[league] = [];
             acc[league].push(m);
             return acc;
         }, {});
 
-        // ချက်ချင်း မျက်နှာပြင်မှာ ပြမယ်
         renderMatches(''); 
         
     } catch (e) { 
@@ -436,7 +431,6 @@ function renderMatches(searchTerm) {
     list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;'>No results found.</p>";
 }
 
-// LIVE ပိုင်းတွင်လည်း Socolive key များကို ပြင်ဆင်ထားသည်
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Live Matches...</p>";
@@ -455,7 +449,6 @@ async function loadLive() {
     } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Error loading Live.</p>"; }
 }
 
-// TABLE ပိုင်းတွင်လည်း row key များကို ပြင်ဆင်ထားသည်
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading League Tables...</p>";
@@ -464,10 +457,7 @@ async function loadStandings() {
         const data = await response.json(); 
         
         let html = "";
-        // Socolive table data structure အတိုင်း ပြင်ဆင်ခြင်း
-        const leaguesArray = Array.isArray(data) ? data : (data.list || []);
-
-        leaguesArray.forEach(league => {
+        data.forEach(league => {
             const tableRows = league.list || [];
             if(tableRows.length > 0) {
                 html += `
@@ -516,7 +506,6 @@ function openVideo(url) { document.getElementById("mainModal").style.display = "
 function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
-// Initial load
 loadMatches();
 </script>
 </body>

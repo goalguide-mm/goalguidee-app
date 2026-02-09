@@ -368,48 +368,29 @@ function switchTab(tab) {
 // MATCHES - ပြင်ဆင်ထားသော LoadMatches
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Real Matches...</p>";
     
     try {
-      const response = await fetch("https://rapid-cell-5054.pmk818299.workers.dev/matches");
-      const matches = await response.json();
-      
-      if (!matches || matches.length === 0) {
-          list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found for today.</p>";
-          return;
-      }
+        const response = await fetch(`${WORKER_URL}/matches`);
+        const matches = await response.json();
+        
+        if (!matches || matches.length === 0) {
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches scheduled for today.</p>";
+            return;
+        }
 
-      // League အလိုက် စုစည်းခြင်း
-      const grouped = matches.reduce((acc, m) => {
-          const league = m.league_name;
-          if (!acc[league]) acc[league] = [];
-          acc[league].push(m);
-          return acc;
-      }, {});
+        // Search လုပ်ဖို့အတွက် Data သိမ်းထားမယ်
+        allMatchesData = matches.reduce((acc, m) => {
+            const league = m.league_name;
+            if (!acc[league]) acc[league] = [];
+            acc[league].push(m);
+            return acc;
+        }, {});
 
-      let html = "";
-      for (let league in grouped) {
-          html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
-          grouped[league].forEach(m => {
-              html += `
-              <div class="match">
-                  <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : m.match_time}</div>
-                  <div class="team-row">
-                      <span class="team-name">${m.home_name}</span>
-                      <img src="${m.home_logo || 'https://via.placeholder.com/30'}" width="25">
-                  </div>
-                  <div class="score-box">${m.home_score} - ${m.away_score}</div>
-                  <div class="team-row">
-                      <img src="${m.away_logo || 'https://via.placeholder.com/30'}" width="25">
-                      <span class="team-name">${m.away_name}</span>
-                  </div>
-              </div>`;
-          });
-          html += `</div>`;
-      }
-      list.innerHTML = html;
+        renderMatches(''); // မျက်နှာပြင်မှာ စာရင်းထုတ်ပြမယ်
+        
     } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error. Please Refresh.</p>"; 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: API limit reached or Connection failed.</p>"; 
     }
 }
 

@@ -455,8 +455,8 @@ async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Premier League Table...</p>";
     try {
-        // worker url အနောက်မှာ /table ကို အသေထည့်ပေးလိုက်ပါ
-        const response = await fetch(WORKER_URL + "/table"); 
+        // WORKER_URL ရဲ့ အဆုံးမှာ / မပါရင် ဒီမှာ /table လို့ သေချာထည့်ပေးပါ
+        const response = await fetch(`${WORKER_URL}/table`); 
         const data = await response.json(); 
         
         if (!data || data.length === 0) {
@@ -488,7 +488,7 @@ async function loadStandings() {
         });
         list.innerHTML = html;
     } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Table.</p>"; 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: Connection Failed</p>"; 
     }
 }
  

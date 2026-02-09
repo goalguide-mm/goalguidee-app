@@ -370,7 +370,9 @@ async function loadMatches() {
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}/matches`);
+        // ဒီနေရာမှာ /matches ကို ဖြုတ်လိုက်ပါ (WORKER_URL တိုက်ရိုက်ခေါ်မယ်)
+        const response = await fetch(`${WORKER_URL}`); 
+        
         if (!response.ok) throw new Error('Worker Connection Failed');
         
         const matches = await response.json();

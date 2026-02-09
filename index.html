@@ -453,42 +453,58 @@ async function loadLive() {
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Premier League Table...</p>";
+    
+    // ၁။ ဒေတာ မလာခင် ဇယားကွက် အလွတ်ကို အရင်ပြထားမယ်
+    list.innerHTML = `
+        <div class="league-card">
+            <div class="league-header"><span>Premier League (Loading...)</span></div>
+            <div style="overflow-x: auto;">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th class="rank">#</th>
+                            <th>Team</th>
+                            <th style="text-align:center;">PL</th>
+                            <th style="text-align:center;">GD</th>
+                            <th class="pts-col" style="text-align:center;">PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body-placeholder">
+                        <tr><td colspan="5" style="text-align:center;padding:40px;color:#facc15;">Connecting to Server...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+
     try {
-        // WORKER_URL ရဲ့ အဆုံးမှာ / မပါရင် ဒီမှာ /table လို့ သေချာထည့်ပေးပါ
-        const response = await fetch(`${WORKER_URL}/table`); 
+        // ၂။ Worker ဆီကနေ ဒေတာ လှမ်းယူမယ်
+        const response = await fetch(`${WORKER_URL}/table`);
         const data = await response.json(); 
         
-        if (!data || data.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No table data available.</p>";
+        const tbody = document.getElementById("table-body-placeholder");
+        
+        if (!data || data.length === 0 || !data[0].list) {
+            tbody.innerHTML = "<tr><td colspan="5" style="text-align:center;padding:20px;">No data available right now.</td></tr>";
             return;
         }
 
-        let html = "";
-        data.forEach(league => {
-            const tableRows = league.list || [];
-            html += `
-            <div class="league-card">
-                <div class="league-header"><span>${league.league_name}</span></div>
-                <div style="overflow-x: auto;">
-                    <table class="standings-table">
-                        <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
-                        <tbody>`;
-            tableRows.forEach(row => {
-                html += `
-                <tr>
-                    <td class="rank">${row.rank}</td>
-                    <td><div class="team-info"><img src="${row.team_logo}"><span>${row.team_name}</span></div></td>
-                    <td style="text-align:center;">${row.total_count}</td>
-                    <td style="text-align:center;">${row.goal_diff}</td>
-                    <td class="pts-col" style="text-align:center;">${row.integral}</td>
-                </tr>`;
-            });
-            html += `</tbody></table></div></div>`;
+        // ၃။ ဒေတာ ရလာရင် ဇယားထဲမှာ အစားထိုးမယ်
+        let rowsHtml = "";
+        data[0].list.forEach(row => {
+            rowsHtml += `
+            <tr>
+                <td class="rank">${row.rank}</td>
+                <td><div class="team-info"><img src="${row.team_logo}" style="width:20px;height:20px;margin-right:8px;"><span>${row.team_name}</span></div></td>
+                <td style="text-align:center;">${row.total_count}</td>
+                <td style="text-align:center;">${row.goal_diff || 0}</td>
+                <td class="pts-col" style="text-align:center;">${row.integral}</td>
+            </tr>`;
         });
-        list.innerHTML = html;
+        tbody.innerHTML = rowsHtml;
+        document.querySelector(".league-header span").innerText = data[0].league_name;
+
     } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Error: Connection Failed</p>"; 
+        document.getElementById("table-body-placeholder").innerHTML = "<tr><td colspan="5" style="text-align:center;color:red;padding:20px;">Connection Error. Please check Worker.</td></tr>";
     }
 }
  

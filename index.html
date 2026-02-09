@@ -365,6 +365,7 @@ function switchTab(tab) {
   if(tab === 'highlights') loadHighlights();
 }
 
+// MATCHES - ပြင်ဆင်ထားသော LoadMatches
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
@@ -379,8 +380,9 @@ async function loadMatches() {
           return;
       }
 
+      // Socolive API key names များဖြစ်သော league_name ကို အသုံးပြုထားသည်
       allMatchesData = matches.reduce((acc, m) => {
-          const leagueName = m.league_name || "Other Competitions"; // m.league မှ m.league_name သို့ပြင်သည်
+          const leagueName = m.league_name || "Other Competitions"; 
           if (!acc[leagueName]) acc[leagueName] = [];
           acc[leagueName].push(m);
           return acc;
@@ -392,6 +394,7 @@ async function loadMatches() {
     }
 }
 
+// MATCHES - ပြင်ဆင်ထားသော RenderMatches
 function renderMatches(searchTerm) {
     const list = document.getElementById("matches-list");
     let html = "";
@@ -401,24 +404,29 @@ function renderMatches(searchTerm) {
     for (let league in allMatchesData) {
         const filteredMatches = allMatchesData[league].filter(m => 
             league.toLowerCase().includes(term) || 
-            (m.home && m.home.toLowerCase().includes(term)) || 
-            (m.away && m.away.toLowerCase().includes(term))
+            (m.home_name && m.home_name.toLowerCase().includes(term)) || 
+            (m.away_name && m.away_name.toLowerCase().includes(term))
         );
 
         if (filteredMatches.length > 0) {
             hasMatches = true;
             html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
             filteredMatches.forEach(m => {
-                let timeDisplay = m.time;
-                if (!isNaN(m.time)) {
-                    timeDisplay = new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false});
-                }
+                // Time format ပြင်ဆင်ခြင်း
+                let timeDisplay = m.match_time || "TBA";
+                
                 html += `
                 <div class="match">
-                    <div class="time-status">${(m.status === 'Live' || m.status === '1' || m.status === '2') ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
-                    <div class="team-row"><span class="team-name">${m.home}</span><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
-                    <div class="score-box">${m.score || '0 - 0'}</div>
-                    <div class="team-row"><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"><span class="team-name">${m.away}</span></div>
+                    <div class="time-status">${(m.status === 1 || m.status === 2) ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
+                    <div class="team-row">
+                        <span class="team-name">${m.home_name}</span>
+                        <img src="${m.home_logo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+                    </div>
+                    <div class="score-box">${m.home_score ?? 0} - ${m.away_score ?? 0}</div>
+                    <div class="team-row">
+                        <img src="${m.away_logo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+                        <span class="team-name">${m.away_name}</span>
+                    </div>
                 </div>`;
             });
             html += `</div>`;
@@ -427,7 +435,7 @@ function renderMatches(searchTerm) {
     list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
 }
 
-// LIVE - ခုလက်ရှိလွင့်နေတဲ့ပွဲစဉ်များ
+// LIVE ပိုင်းတွင်လည်း Socolive key များကို ပြင်ဆင်ထားသည်
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Live Matches...</p>";
@@ -439,31 +447,31 @@ async function loadLive() {
             return;
         }
         list.innerHTML = data.map(item => `
-            <div class="video-card" onclick="openPlayer('${item.url}')">
-                <img src="${item.img || 'https://via.placeholder.com/300x169/111827/facc15?text=LIVE'}">
-                <div class="title-box">${item.title || (item.home + ' vs ' + item.away)}</div>
+            <div class="video-card" onclick="openPlayer('${item.play_url}')">
+                <img src="${item.home_logo || 'https://via.placeholder.com/300x169/111827/facc15?text=LIVE'}">
+                <div class="title-box">${item.home_name} vs ${item.away_name}</div>
             </div>`).join('');
     } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Error loading Live.</p>"; }
 }
 
-// TABLE - League အဆင့်ဇယားများ
+// TABLE ပိုင်းတွင်လည်း row key များကို ပြင်ဆင်ထားသည်
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading League Tables...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/table`);
-        const leagues = await response.json(); 
+        const data = await response.json(); 
         
         let html = "";
-        // API ဒေတာက array ဖြစ်ရပါမယ်။ မဟုတ်ရင် array ထဲထည့်ပါမယ်။
-        const leaguesArray = Array.isArray(leagues) ? leagues : [leagues];
+        // Socolive table data structure အတိုင်း ပြင်ဆင်ခြင်း
+        const leaguesArray = Array.isArray(data) ? data : (data.list || []);
 
         leaguesArray.forEach(league => {
-            const tableRows = league.rows || league.standings || [];
+            const tableRows = league.list || [];
             if(tableRows.length > 0) {
                 html += `
                 <div class="league-card">
-                    <div class="league-header"><span>${league.name || 'League Standing'}</span></div>
+                    <div class="league-header"><span>${league.league_name || 'League Standing'}</span></div>
                     <div style="overflow-x: auto;">
                         <table class="standings-table">
                             <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
@@ -471,11 +479,11 @@ async function loadStandings() {
                 tableRows.forEach(row => {
                     html += `
                     <tr>
-                        <td class="rank">${row.position || row.rank || '-'}</td>
-                        <td><div class="team-info"><img src="${row.logo || row.teamLogo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"><span>${row.team || row.teamName || 'Unknown'}</span></div></td>
-                        <td style="text-align:center;">${row.played || row.matches || 0}</td>
-                        <td style="text-align:center;">${row.gd || row.goalDiff || 0}</td>
-                        <td class="pts-col" style="text-align:center;">${row.pts || row.points || 0}</td>
+                        <td class="rank">${row.rank || '-'}</td>
+                        <td><div class="team-info"><img src="${row.team_logo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"><span>${row.team_name || 'Unknown'}</span></div></td>
+                        <td style="text-align:center;">${row.total_count || 0}</td>
+                        <td style="text-align:center;">${row.goal_diff || 0}</td>
+                        <td class="pts-col" style="text-align:center;">${row.integral || 0}</td>
                     </tr>`;
                 });
                 html += `</tbody></table></div></div>`;

@@ -364,14 +364,14 @@ function switchTab(tab) {
   if(tab === 'standings') loadStandings();
   if(tab === 'highlights') loadHighlights();
 }
-
 // MATCHES - ပြင်ဆင်ထားသော LoadMatches
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}/matches`);
+        // Cache မငြိအောင် URL အနောက်မှာ timestamp လေး ထည့်ထားပါတယ်
+        const response = await fetch(`${WORKER_URL}/matches?t=${Date.now()}`);
         const matches = await response.json();
         
         if (!matches || matches.length === 0) {
@@ -387,15 +387,13 @@ async function loadMatches() {
             return acc;
         }, {});
 
-        // ပွဲစဉ်တွေကို စာရင်းထုတ်ပြဖို့ ခေါ်လိုက်ပါပြီ
+        // မျက်နှာပြင်မှာ စာရင်းထုတ်ပြဖို့ ချက်ချင်းခေါ်မယ်
         renderMatches(''); 
         
     } catch (e) { 
-        console.error(e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error. Please try again later.</p>"; 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Data error. Please Refresh again.</p>"; 
     }
 }
-
 // MATCHES - ပြင်ဆင်ထားသော RenderMatches
 function renderMatches(searchTerm) {
     const list = document.getElementById("matches-list");

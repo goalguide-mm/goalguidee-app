@@ -365,46 +365,40 @@ function switchTab(tab) {
   if(tab === 'highlights') loadHighlights();
 }
 // MATCHES - ပြင်ဆင်ထားသော LoadMatches
+// Variable ကို အပေါ်ဆုံးမှာ အလွတ်အဖြစ် အရင်ကြေညာထားပါ
+let allMatchesData = {}; 
+
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        // Cache မငြိအောင် ?t= နဲ့ timestamp ထည့်ခေါ်ထားပါတယ်
-        const response = await fetch(`${WORKER_URL}/matches?t=${Date.now()}`);
+        const response = await fetch(`${WORKER_URL}/matches`);
+        if (!response.ok) throw new Error('Worker Error: ' + response.status);
         
-        if (!response.ok) {
-            throw new Error('Worker Connection Failed: ' + response.status);
-        }
-
         const matches = await response.json();
         
         if (!matches || matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found at the moment.</p>";
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches today.</p>";
             return;
         }
 
-        // Search လုပ်ဖို့အတွက် data သိမ်းမယ်
+        // Data တွေကို Group ဖွဲ့မယ်
         allMatchesData = matches.reduce((acc, m) => {
-            const league = m.league_name || "Football";
+            const league = m.league_name || "International";
             if (!acc[league]) acc[league] = [];
             acc[league].push(m);
             return acc;
         }, {});
 
-        // ပွဲစဉ်တွေကို မျက်နှာပြင်မှာ ဆွဲထုတ်ပြမယ်
+        // ချက်ချင်း မျက်နှာပြင်မှာ ပြမယ်
         renderMatches(''); 
         
     } catch (e) { 
-        console.error("Full Error Info:", e);
-        // ဒီနေရာမှာ အရင်က API Limit ဆိုတဲ့ စာသားကြီး အသေပါနေလို့ လွဲနေတာပါ
-        list.innerHTML = `<p style='text-align:center;padding:40px;color:red;'>
-            Something went wrong!<br>
-            <small style='color:#ccc;'>${e.message}</small>
-        </p>`; 
+        list.innerHTML = `<p style='text-align:center;padding:40px;color:red;'>Connection Error: ${e.message}</p>`; 
     }
 }
-// MATCHES - ပြင်ဆင်ထားသော RenderMatches
+
 function renderMatches(searchTerm) {
     const list = document.getElementById("matches-list");
     let html = "";
@@ -414,27 +408,24 @@ function renderMatches(searchTerm) {
     for (let league in allMatchesData) {
         const filteredMatches = allMatchesData[league].filter(m => 
             league.toLowerCase().includes(term) || 
-            (m.home_name && m.home_name.toLowerCase().includes(term)) || 
-            (m.away_name && m.away_name.toLowerCase().includes(term))
+            m.home_name.toLowerCase().includes(term) || 
+            m.away_name.toLowerCase().includes(term)
         );
 
         if (filteredMatches.length > 0) {
             hasMatches = true;
             html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
             filteredMatches.forEach(m => {
-                // Time format ပြင်ဆင်ခြင်း
-                let timeDisplay = m.match_time || "TBA";
-                
                 html += `
                 <div class="match">
-                    <div class="time-status">${(m.status === 1 || m.status === 2) ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
+                    <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : m.match_time}</div>
                     <div class="team-row">
                         <span class="team-name">${m.home_name}</span>
-                        <img src="${m.home_logo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+                        <img src="${m.home_logo || 'https://via.placeholder.com/25'}" onerror="this.src='https://via.placeholder.com/25'">
                     </div>
-                    <div class="score-box">${m.home_score ?? 0} - ${m.away_score ?? 0}</div>
+                    <div class="score-box">${m.home_score} - ${m.away_score}</div>
                     <div class="team-row">
-                        <img src="${m.away_logo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+                        <img src="${m.away_logo || 'https://via.placeholder.com/25'}" onerror="this.src='https://via.placeholder.com/25'">
                         <span class="team-name">${m.away_name}</span>
                     </div>
                 </div>`;
@@ -442,7 +433,7 @@ function renderMatches(searchTerm) {
             html += `</div>`;
         }
     }
-    list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;color:#6b7280;'>No matches found.</p>";
+    list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;'>No results found.</p>";
 }
 
 // LIVE ပိုင်းတွင်လည်း Socolive key များကို ပြင်ဆင်ထားသည်

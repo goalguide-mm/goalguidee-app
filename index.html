@@ -455,6 +455,7 @@ async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading League Tables...</p>";
     try {
+        // ဒီနေရာမှာ /table လို့ ထည့်ပေးပါ
         const response = await fetch(`${WORKER_URL}/table`);
         const data = await response.json(); 
         
@@ -464,7 +465,7 @@ async function loadStandings() {
             if(tableRows.length > 0) {
                 html += `
                 <div class="league-card">
-                    <div class="league-header"><span>${league.league_name || 'League Standing'}</span></div>
+                    <div class="league-header"><span>${league.league_name}</span></div>
                     <div style="overflow-x: auto;">
                         <table class="standings-table">
                             <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr></thead>
@@ -472,11 +473,11 @@ async function loadStandings() {
                 tableRows.forEach(row => {
                     html += `
                     <tr>
-                        <td class="rank">${row.rank || '-'}</td>
-                        <td><div class="team-info"><img src="${row.team_logo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"><span>${row.team_name || 'Unknown'}</span></div></td>
-                        <td style="text-align:center;">${row.total_count || 0}</td>
-                        <td style="text-align:center;">${row.goal_diff || 0}</td>
-                        <td class="pts-col" style="text-align:center;">${row.integral || 0}</td>
+                        <td class="rank">${row.rank}</td>
+                        <td><div class="team-info"><img src="${row.team_logo}"><span>${row.team_name}</span></div></td>
+                        <td style="text-align:center;">${row.total_count}</td>
+                        <td style="text-align:center;">${row.goal_diff}</td>
+                        <td class="pts-col" style="text-align:center;">${row.integral}</td>
                     </tr>`;
                 });
                 html += `</tbody></table></div></div>`;
@@ -485,7 +486,7 @@ async function loadStandings() {
         list.innerHTML = html || "<p style='text-align:center;padding:40px;'>No table data available.</p>";
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Tables.</p>"; }
 }
-
+ 
 async function loadHighlights() {
     try {
         const res = await fetch(`${API_BASE}/api/highlights`, { cache: 'no-store' });

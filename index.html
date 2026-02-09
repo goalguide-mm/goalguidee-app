@@ -370,28 +370,38 @@ async function loadMatches() {
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        // Cache မငြိအောင် URL အနောက်မှာ timestamp လေး ထည့်ထားပါတယ်
+        // Cache မငြိအောင် ?t= နဲ့ timestamp ထည့်ခေါ်ထားပါတယ်
         const response = await fetch(`${WORKER_URL}/matches?t=${Date.now()}`);
+        
+        if (!response.ok) {
+            throw new Error('Worker Connection Failed: ' + response.status);
+        }
+
         const matches = await response.json();
         
         if (!matches || matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>";
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found at the moment.</p>";
             return;
         }
 
-        // HTML ရဲ့ renderMatches function က သုံးတဲ့ allMatchesData ထဲကို ထည့်ပေးရမှာပါ
+        // Search လုပ်ဖို့အတွက် data သိမ်းမယ်
         allMatchesData = matches.reduce((acc, m) => {
-            const league = m.league_name;
+            const league = m.league_name || "Football";
             if (!acc[league]) acc[league] = [];
             acc[league].push(m);
             return acc;
         }, {});
 
-        // မျက်နှာပြင်မှာ စာရင်းထုတ်ပြဖို့ ချက်ချင်းခေါ်မယ်
+        // ပွဲစဉ်တွေကို မျက်နှာပြင်မှာ ဆွဲထုတ်ပြမယ်
         renderMatches(''); 
         
     } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Data error. Please Refresh again.</p>"; 
+        console.error("Full Error Info:", e);
+        // ဒီနေရာမှာ အရင်က API Limit ဆိုတဲ့ စာသားကြီး အသေပါနေလို့ လွဲနေတာပါ
+        list.innerHTML = `<p style='text-align:center;padding:40px;color:red;'>
+            Something went wrong!<br>
+            <small style='color:#ccc;'>${e.message}</small>
+        </p>`; 
     }
 }
 // MATCHES - ပြင်ဆင်ထားသော RenderMatches

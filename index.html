@@ -381,6 +381,7 @@ async function loadMatches() {
             return;
         }
 
+        // ပြင်ဆင်လိုက်သည့် အပိုင်း (Worker က ပို့ပေးသော matches ဒေတာကို စုစည်းရန်)
         allMatchesData = matches.reduce((acc, m) => {
             const league = m.league_name || "Football";
             if (!acc[league]) acc[league] = [];
@@ -404,8 +405,8 @@ function renderMatches(searchTerm) {
     for (let league in allMatchesData) {
         const filteredMatches = allMatchesData[league].filter(m => 
             league.toLowerCase().includes(term) || 
-            m.home_name.toLowerCase().includes(term) || 
-            m.away_name.toLowerCase().includes(term)
+            (m.home_name && m.home_name.toLowerCase().includes(term)) || 
+            (m.away_name && m.away_name.toLowerCase().includes(term))
         );
 
         if (filteredMatches.length > 0) {
@@ -416,13 +417,13 @@ function renderMatches(searchTerm) {
                 <div class="match">
                     <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : m.match_time}</div>
                     <div class="team-row">
-                        <span class="team-name">${m.home_name}</span>
+                        <span class="team-name">${m.home_name || ''}</span>
                         <img src="${m.home_logo || 'https://via.placeholder.com/25'}" onerror="this.src='https://via.placeholder.com/25'">
                     </div>
-                    <div class="score-box">${m.home_score} - ${m.away_score}</div>
+                    <div class="score-box">${m.home_score || '0'} - ${m.away_score || '0'}</div>
                     <div class="team-row">
                         <img src="${m.away_logo || 'https://via.placeholder.com/25'}" onerror="this.src='https://via.placeholder.com/25'">
-                        <span class="team-name">${m.away_name}</span>
+                        <span class="team-name">${m.away_name || ''}</span>
                     </div>
                 </div>`;
             });

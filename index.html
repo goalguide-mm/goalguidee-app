@@ -370,7 +370,6 @@ async function loadMatches() {
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        // ဒီနေရာမှာ /matches ကို ဖြုတ်လိုက်ပါ (WORKER_URL တိုက်ရိုက်ခေါ်မယ်)
         const response = await fetch(`${WORKER_URL}`); 
         
         if (!response.ok) throw new Error('Worker Connection Failed');
@@ -453,8 +452,6 @@ async function loadLive() {
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    
-    // ၁။ ဒေတာ မလာခင် ဇယားကွက် အလွတ်ကို အရင်ပြထားမယ်
     list.innerHTML = `
         <div class="league-card">
             <div class="league-header"><span>Premier League (Loading...)</span></div>
@@ -477,18 +474,16 @@ async function loadStandings() {
         </div>`;
 
     try {
-        // ၂။ Worker ဆီကနေ ဒေတာ လှမ်းယူမယ်
         const response = await fetch(`${WORKER_URL}/table`);
         const data = await response.json(); 
         
         const tbody = document.getElementById("table-body-placeholder");
         
         if (!data || data.length === 0 || !data[0].list) {
-            tbody.innerHTML = "<tr><td colspan="5" style="text-align:center;padding:20px;">No data available right now.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available right now.</td></tr>";
             return;
         }
 
-        // ၃။ ဒေတာ ရလာရင် ဇယားထဲမှာ အစားထိုးမယ်
         let rowsHtml = "";
         data[0].list.forEach(row => {
             rowsHtml += `
@@ -504,7 +499,7 @@ async function loadStandings() {
         document.querySelector(".league-header span").innerText = data[0].league_name;
 
     } catch (e) { 
-        document.getElementById("table-body-placeholder").innerHTML = "<tr><td colspan="5" style="text-align:center;color:red;padding:20px;">Connection Error. Please check Worker.</td></tr>";
+        document.getElementById("table-body-placeholder").innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error. Please check Worker.</td></tr>";
     }
 }
  
@@ -530,6 +525,7 @@ function openVideo(url) { document.getElementById("mainModal").style.display = "
 function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
+// Initial load
 loadMatches();
 </script>
 </body>

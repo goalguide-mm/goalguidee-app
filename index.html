@@ -455,12 +455,12 @@ async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Premier League Table...</p>";
     try {
-        // WORKER_URL ရဲ့ အနောက်မှာ /table ပါဖို့ အရေးကြီးပါတယ်
-        const response = await fetch(`${WORKER_URL}/table`);
+        // worker url အနောက်မှာ /table ကို အသေထည့်ပေးလိုက်ပါ
+        const response = await fetch(WORKER_URL + "/table"); 
         const data = await response.json(); 
         
         if (!data || data.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No table data found.</p>";
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No table data available.</p>";
             return;
         }
 
@@ -488,7 +488,6 @@ async function loadStandings() {
         });
         list.innerHTML = html;
     } catch (e) { 
-        console.error(e);
         list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading Table.</p>"; 
     }
 }

@@ -365,7 +365,6 @@ function switchTab(tab) {
   if(tab === 'highlights') loadHighlights();
 }
 
-// MATCHES - ပွဲစဉ်ဇယားအားလုံး (Upcoming + Live)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
@@ -381,7 +380,7 @@ async function loadMatches() {
       }
 
       allMatchesData = matches.reduce((acc, m) => {
-          const leagueName = m.league || "Other Competitions";
+          const leagueName = m.league_name || "Other Competitions"; // m.league မှ m.league_name သို့ပြင်သည်
           if (!acc[leagueName]) acc[leagueName] = [];
           acc[leagueName].push(m);
           return acc;

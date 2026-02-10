@@ -346,11 +346,11 @@
 </div>
 
 <script>
-const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
+// မင်းပြောတဲ့အတိုင်း ကုဒ်မလျှော့ဘဲ API ချိတ်ပုံကိုပဲ ပြင်ထားပါတယ်
 const API_BASE = "https://goalguide-api-1.onrender.com";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
-let allMatchesData = {}; 
+let allMatchesData = []; 
 document.getElementById("matchDate").value = selectedDate;
 
 function switchTab(tab) {
@@ -360,112 +360,83 @@ function switchTab(tab) {
   document.getElementById('section-' + tab).classList.add('active');
   
   if(tab === 'matches') loadMatches();
-  if(tab === 'live') loadLive();
   if(tab === 'standings') loadStandings();
   if(tab === 'highlights') loadHighlights();
 }
 
+// MATCHES ဆွဲယူပုံကို Render API နဲ့ ကိုက်အောင် ပြင်ထားသည်
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}`); 
-        
-        if (!response.ok) throw new Error('Worker Connection Failed');
+        const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`); 
+        if (!response.ok) throw new Error('Server Connection Failed');
         
         const matches = await response.json();
-        
+        allMatchesData = matches; // Search အတွက် ဒေတာသိမ်းသည်
+
         if (!matches || matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches today.</p>";
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found for this date.</p>";
             return;
         }
 
-        // ပြင်ဆင်လိုက်သည့် အပိုင်း (Worker က ပို့ပေးသော matches ဒေတာကို စုစည်းရန်)
-        allMatchesData = matches.reduce((acc, m) => {
-            const league = m.league_name || "Football";
-            if (!acc[league]) acc[league] = [];
-            acc[league].push(m);
-            return acc;
-        }, {});
-
-        renderMatches(''); 
+        renderMatches(matches);
         
     } catch (e) { 
         list.innerHTML = `<p style='text-align:center;padding:40px;color:red;'>Connection Error: ${e.message}</p>`; 
     }
 }
 
-function renderMatches(searchTerm) {
+function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     let html = "";
-    let hasMatches = false;
-    const term = searchTerm.toLowerCase();
+    
+    // လိဂ်အလိုက် စုစည်းသည်
+    const grouped = matches.reduce((acc, m) => {
+        const league = m.tournament.name;
+        if (!acc[league]) acc[league] = [];
+        acc[league].push(m);
+        return acc;
+    }, {});
 
-    for (let league in allMatchesData) {
-        const filteredMatches = allMatchesData[league].filter(m => 
-            league.toLowerCase().includes(term) || 
-            (m.home_name && m.home_name.toLowerCase().includes(term)) || 
-            (m.away_name && m.away_name.toLowerCase().includes(term))
-        );
-
-        if (filteredMatches.length > 0) {
-            hasMatches = true;
-            html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
-            filteredMatches.forEach(m => {
-                html += `
-                <div class="match">
-                    <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : m.match_time}</div>
-                    <div class="team-row">
-                        <span class="team-name">${m.home_name || ''}</span>
-                        <img src="${m.home_logo || 'https://via.placeholder.com/25'}" onerror="this.src='https://via.placeholder.com/25'">
-                    </div>
-                    <div class="score-box">${m.home_score || '0'} - ${m.away_score || '0'}</div>
-                    <div class="team-row">
-                        <img src="${m.away_logo || 'https://via.placeholder.com/25'}" onerror="this.src='https://via.placeholder.com/25'">
-                        <span class="team-name">${m.away_name || ''}</span>
-                    </div>
-                </div>`;
-            });
-            html += `</div>`;
-        }
+    for (let league in grouped) {
+        html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
+        grouped[league].forEach(m => {
+            const time = new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            html += `
+            <div class="match">
+                <div class="time-status">${m.status.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : time}</div>
+                <div class="team-row">
+                    <span class="team-name">${m.homeTeam.name}</span>
+                </div>
+                <div class="score-box">${m.homeScore.display} - ${m.awayScore.display}</div>
+                <div class="team-row">
+                    <span class="team-name">${m.awayTeam.name}</span>
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
     }
-    list.innerHTML = hasMatches ? html : "<p style='text-align:center;padding:40px;'>No results found.</p>";
+    list.innerHTML = html;
 }
 
 async function loadLive() {
+    // LIVE အတွက် လောလောဆယ် API မရှိသေးသဖြင့် အလွတ်ပြထားမည်
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Live Matches...</p>";
-    try {
-        const res = await fetch(`${WORKER_URL}/live`);
-        const data = await res.json();
-        if(!data || data.length === 0) {
-            list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
-            return;
-        }
-        list.innerHTML = data.map(item => `
-            <div class="video-card" onclick="openPlayer('${item.play_url}')">
-                <img src="${item.home_logo || 'https://via.placeholder.com/300x169/111827/facc15?text=LIVE'}">
-                <div class="title-box">${item.home_name} vs ${item.away_name}</div>
-            </div>`).join('');
-    } catch (e) { list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Error loading Live.</p>"; }
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
 }
 
+// STANDINGS ကို Render API နဲ့ ချိတ်သည်
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = `
         <div class="league-card">
-            <div class="league-header"><span>Premier League (Loading...)</span></div>
+            <div class="league-header"><span>Premier League Loading...</span></div>
             <div style="overflow-x: auto;">
                 <table class="standings-table">
                     <thead>
-                        <tr>
-                            <th class="rank">#</th>
-                            <th>Team</th>
-                            <th style="text-align:center;">PL</th>
-                            <th style="text-align:center;">GD</th>
-                            <th class="pts-col" style="text-align:center;">PTS</th>
-                        </tr>
+                        <tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr>
                     </thead>
                     <tbody id="table-body-placeholder">
                         <tr><td colspan="5" style="text-align:center;padding:40px;color:#facc15;">Connecting to Server...</td></tr>
@@ -475,55 +446,57 @@ async function loadStandings() {
         </div>`;
 
     try {
-        const response = await fetch(`${WORKER_URL}/table`);
-        const data = await response.json(); 
-        
+        const response = await fetch(`${API_BASE}/api/standings/PL`); 
+        const data = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
         
-        if (!data || data.length === 0 || !data[0].list) {
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available right now.</td></tr>";
+        if (!data || data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available.</td></tr>";
             return;
         }
 
-        let rowsHtml = "";
-        data[0].list.forEach(row => {
-            rowsHtml += `
+        tbody.innerHTML = data.map(row => `
             <tr>
-                <td class="rank">${row.rank}</td>
-                <td><div class="team-info"><img src="${row.team_logo}" style="width:20px;height:20px;margin-right:8px;"><span>${row.team_name}</span></div></td>
-                <td style="text-align:center;">${row.total_count}</td>
-                <td style="text-align:center;">${row.goal_diff || 0}</td>
-                <td class="pts-col" style="text-align:center;">${row.integral}</td>
-            </tr>`;
-        });
-        tbody.innerHTML = rowsHtml;
-        document.querySelector(".league-header span").innerText = data[0].league_name;
+                <td class="rank">${row.position}</td>
+                <td><div class="team-info"><span>${row.teamName}</span></div></td>
+                <td style="text-align:center;">${row.played}</td>
+                <td style="text-align:center;">${row.goalDifference}</td>
+                <td class="pts-col" style="text-align:center;">${row.points}</td>
+            </tr>`).join('');
 
     } catch (e) { 
-        document.getElementById("table-body-placeholder").innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error. Please check Worker.</td></tr>";
+        document.getElementById("table-body-placeholder").innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error.</td></tr>";
     }
 }
- 
+
 async function loadHighlights() {
     try {
-        const res = await fetch(`${API_BASE}/api/highlights`, { cache: 'no-store' });
+        const res = await fetch(`${API_BASE}/api/highlights`);
         const data = await res.json();
         const listContainer = document.getElementById("highlights-list");
-        if (listContainer && data) {
-            listContainer.innerHTML = data.map(h => `
+        if (listContainer) {
+            listContainer.innerHTML = data.length === 0 ? "<p style='text-align:center;width:100%;padding:40px;'>No highlights yet.</p>" : data.map(h => `
                 <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
                     <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
                     <div class="title-box">${h.title}</div>
                 </div>`).join('');
         }
-    } catch(e) { console.error("Highlight sync failed", e); }
+    } catch(e) { console.error("Highlight failed", e); }
 }
 
-function filterBySearch(val) { renderMatches(val); }
+function filterBySearch(val) {
+    const filtered = allMatchesData.filter(m => 
+        m.homeTeam.name.toLowerCase().includes(val.toLowerCase()) || 
+        m.awayTeam.name.toLowerCase().includes(val.toLowerCase()) ||
+        m.tournament.name.toLowerCase().includes(val.toLowerCase())
+    );
+    renderMatches(filtered);
+}
+
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
-function openPlayer(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
+function openPlayer(url) { openVideo(url); }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
 // Initial load

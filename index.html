@@ -366,6 +366,7 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
+    if(!list) return; // Null error ကာကွယ်ရန်
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     
     try {
@@ -373,7 +374,7 @@ async function loadMatches() {
         const matches = await response.json();
         allMatchesData = matches;
 
-        if (matches.length === 0) {
+        if (!matches || matches.length === 0) {
             list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါသဖြင့် ခဏစောင့်ပေးပါ။</p>';
             return;
         }
@@ -386,6 +387,7 @@ async function loadMatches() {
 
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
+    if(!list) return;
     let html = "";
     
     const grouped = matches.reduce((acc, m) => {
@@ -417,14 +419,15 @@ function renderMatches(matches) {
 
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
+    if(list) list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
 }
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
+    if(!list) return;
     list.innerHTML = `
         <div class="league-card">
-            <div class="league-header"><span>Premier League Loading...</span></div>
+            <div class="league-header"><span>Premier League Table</span></div>
             <div style="overflow-x: auto;">
                 <table class="standings-table">
                     <thead>
@@ -438,11 +441,11 @@ async function loadStandings() {
         </div>`;
 
     try {
-        // Backend Standing Path ကို PLID ဖြင့် ခေါ်ယူခြင်း
         const response = await fetch(`${API_BASE}/api/standings/PL`); 
         const data = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
         
+        if (!tbody) return;
         if (!data || data.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available.</td></tr>";
             return;
@@ -458,7 +461,8 @@ async function loadStandings() {
             </tr>`).join('');
 
     } catch (e) { 
-        document.getElementById("table-body-placeholder").innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error.</td></tr>";
+        const tb = document.getElementById("table-body-placeholder");
+        if(tb) tb.innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error.</td></tr>";
     }
 }
 
@@ -468,7 +472,7 @@ async function loadHighlights() {
         const data = await res.json();
         const listContainer = document.getElementById("highlights-list");
         if (listContainer) {
-            listContainer.innerHTML = data.length === 0 ? "<p style='text-align:center;width:100%;padding:40px;'>No highlights yet.</p>" : data.map(h => `
+            listContainer.innerHTML = (!data || data.length === 0) ? "<p style='text-align:center;width:100%;padding:40px;'>No highlights yet.</p>" : data.map(h => `
                 <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
                     <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
                     <div class="title-box">${h.title}</div>
@@ -479,9 +483,9 @@ async function loadHighlights() {
 
 function filterBySearch(val) {
     const filtered = allMatchesData.filter(m => 
-        m.home_name.toLowerCase().includes(val.toLowerCase()) || 
-        m.away_name.toLowerCase().includes(val.toLowerCase()) ||
-        m.league_name.toLowerCase().includes(val.toLowerCase())
+        (m.home_name && m.home_name.toLowerCase().includes(val.toLowerCase())) || 
+        (m.away_name && m.away_name.toLowerCase().includes(val.toLowerCase())) ||
+        (m.league_name && m.league_name.toLowerCase().includes(val.toLowerCase()))
     );
     renderMatches(filtered);
 }

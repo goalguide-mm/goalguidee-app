@@ -346,6 +346,7 @@
 </div>
 
 <script>
+const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev/";
 const API_BASE = "https://goalguide-api-1.onrender.com";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
@@ -364,49 +365,31 @@ function switchTab(tab) {
 }
 
 async function loadMatches() {
-    const container = document.getElementById('matches-container'); // သင့် ID နဲ့ ကိုက်အောင် စစ်ပါ
+    const list = document.getElementById("matches-list");
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     
     try {
-        // သင့်ရဲ့ Cloudflare Worker URL ကို ဒီမှာ ထည့်ပါ
-        const response = await fetch('https://rapid-cell-5054.pmk818299.workers.dev/'); 
+        const response = await fetch(`${WORKER_URL}?date=${selectedDate}`); 
         const matches = await response.json();
+        allMatchesData = matches;
 
         if (matches.length === 0) {
-            container.innerHTML = '<p style="color:white; text-align:center;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါသဖြင့် ခဏစောင့်ပေးပါ။</p>';
+            list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါသဖြင့် ခဏစောင့်ပေးပါ။</p>';
             return;
         }
-
-        let html = '';
-        matches.forEach(match => {
-            // Worker က ပို့ပေးတဲ့ နာမည်အသစ် (home_name, away_name) တွေကို သုံးထားပါတယ်
-            html += `
-                <div class="match-card">
-                    <div class="league-name">${match.league_name}</div>
-                    <div class="match-info">
-                        <span class="team-name">${match.home_name}</span>
-                        <span class="score">${match.home_score} - ${match.away_score}</span>
-                        <span class="team-name">${match.away_name}</span>
-                    </div>
-                    <div class="match-time">${match.match_time}</div>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
+        renderMatches(matches);
     } catch (error) {
         console.error("Error loading matches:", error);
-        container.innerHTML = '<p style="color:red; text-align:center;">ဒေတာ ချိတ်ဆက်မှု အခက်အခဲရှိနေပါသည်။</p>';
+        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ဒေတာ ချိတ်ဆက်မှု အခက်အခဲရှိနေပါသည်။</p>';
     }
 }
 
-// စာမျက်နှာ စဖွင့်တာနဲ့ ပွဲစဉ်တွေ ခေါ်ခိုင်းမယ်
-window.onload = loadMatches;
- 
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     let html = "";
     
     const grouped = matches.reduce((acc, m) => {
-        const league = m.tournament.name;
+        const league = m.league_name || "Football";
         if (!acc[league]) acc[league] = [];
         acc[league].push(m);
         return acc;
@@ -415,16 +398,15 @@ function renderMatches(matches) {
     for (let league in grouped) {
         html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
         grouped[league].forEach(m => {
-            const time = new Date(m.startTimestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             html += `
             <div class="match">
-                <div class="time-status">${m.status.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : time}</div>
+                <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : m.match_time}</div>
                 <div class="team-row">
-                    <span class="team-name">${m.homeTeam.name}</span>
+                    <span class="team-name">${m.home_name}</span>
                 </div>
-                <div class="score-box">${m.homeScore.display} - ${m.awayScore.display}</div>
+                <div class="score-box">${m.home_score} - ${m.away_score}</div>
                 <div class="team-row">
-                    <span class="team-name">${m.awayTeam.name}</span>
+                    <span class="team-name">${m.away_name}</span>
                 </div>
             </div>`;
         });
@@ -456,6 +438,7 @@ async function loadStandings() {
         </div>`;
 
     try {
+        // Backend Standing Path ကို PLID ဖြင့် ခေါ်ယူခြင်း
         const response = await fetch(`${API_BASE}/api/standings/PL`); 
         const data = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
@@ -467,11 +450,11 @@ async function loadStandings() {
 
         tbody.innerHTML = data.map(row => `
             <tr>
-                <td class="rank">${row.position}</td>
-                <td><div class="team-info"><span>${row.teamName}</span></div></td>
-                <td style="text-align:center;">${row.played}</td>
-                <td style="text-align:center;">${row.goalDifference}</td>
-                <td class="pts-col" style="text-align:center;">${row.points}</td>
+                <td class="rank">${row.position || row.rank || '-'}</td>
+                <td><div class="team-info"><span>${row.teamName || row.team_name}</span></div></td>
+                <td style="text-align:center;">${row.played || row.pld}</td>
+                <td style="text-align:center;">${row.goalDifference || row.gd}</td>
+                <td class="pts-col" style="text-align:center;">${row.points || row.pts}</td>
             </tr>`).join('');
 
     } catch (e) { 
@@ -496,9 +479,9 @@ async function loadHighlights() {
 
 function filterBySearch(val) {
     const filtered = allMatchesData.filter(m => 
-        m.homeTeam.name.toLowerCase().includes(val.toLowerCase()) || 
-        m.awayTeam.name.toLowerCase().includes(val.toLowerCase()) ||
-        m.tournament.name.toLowerCase().includes(val.toLowerCase())
+        m.home_name.toLowerCase().includes(val.toLowerCase()) || 
+        m.away_name.toLowerCase().includes(val.toLowerCase()) ||
+        m.league_name.toLowerCase().includes(val.toLowerCase())
     );
     renderMatches(filtered);
 }
@@ -506,10 +489,9 @@ function filterBySearch(val) {
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
-function openPlayer(url) { openVideo(url); }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
-loadMatches();
+window.onload = loadMatches;
 </script>
 </body>
 </html>

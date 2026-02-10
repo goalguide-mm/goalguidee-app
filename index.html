@@ -346,6 +346,7 @@
 </div>
 
 <script>
+// မူရင်းအတိုင်းထားရှိသော URL များ
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev/";
 const API_BASE = "https://goalguide-api-1.onrender.com";
 
@@ -362,11 +363,13 @@ function switchTab(tab) {
   if(tab === 'matches') loadMatches();
   if(tab === 'standings') loadStandings();
   if(tab === 'highlights') loadHighlights();
+  if(tab === 'live') loadLive();
 }
 
+// ၁။ Matches Loading (Worker ကုဒ်သစ်နှင့် ကိုက်ညီအောင် ပြင်ဆင်ထားသည်)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    if(!list) return; // Null error ကာကွယ်ရန်
+    if(!list) return;
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     
     try {
@@ -417,11 +420,20 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
+// ၂။ Live Tab
 async function loadLive() {
     const list = document.getElementById("live-list");
-    if(list) list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
+    if(!list) return;
+    // Live ပွဲစဉ်များကို လက်ရှိ Matches ထဲမှ filter ထုတ်ပြခြင်း
+    const liveMatches = allMatchesData.filter(m => m.status === 1 || m.match_time.includes(':'));
+    if(liveMatches.length === 0) {
+        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
+    } else {
+        renderMatchesInGrid(liveMatches, "live-list");
+    }
 }
 
+// ၃။ Standings (API အသစ်၏ format အတိုင်း ပြင်ဆင်ထားသည်)
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     if(!list) return;
@@ -451,13 +463,13 @@ async function loadStandings() {
             return;
         }
 
-        tbody.innerHTML = data.map(row => `
+        tbody.innerHTML = data.map((row, index) => `
             <tr>
-                <td class="rank">${row.position || row.rank || '-'}</td>
-                <td><div class="team-info"><span>${row.teamName || row.team_name}</span></div></td>
-                <td style="text-align:center;">${row.played || row.pld}</td>
-                <td style="text-align:center;">${row.goalDifference || row.gd}</td>
-                <td class="pts-col" style="text-align:center;">${row.points || row.pts}</td>
+                <td class="rank">${index + 1}</td>
+                <td><div class="team-info"><span>${row.team_name || row.Tnm || 'Team'}</span></div></td>
+                <td style="text-align:center;">${row.pld || row.P || 0}</td>
+                <td style="text-align:center;">${row.gd || row.GD || 0}</td>
+                <td class="pts-col" style="text-align:center;">${row.pts || row.Pts || 0}</td>
             </tr>`).join('');
 
     } catch (e) { 
@@ -466,21 +478,35 @@ async function loadStandings() {
     }
 }
 
+// ၄။ Highlights (Worker ၏ endpoint အသစ်နှင့် ကိုက်ညီအောင် ပြင်ဆင်ထားသည်)
 async function loadHighlights() {
+    const listContainer = document.getElementById("highlights-list");
+    if(!listContainer) return;
+    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Loading Goals...</p>";
+
     try {
-        const res = await fetch(`${API_BASE}/api/highlights`);
+        // Worker မှတစ်ဆင့် Highlight များကို တောင်းယူခြင်း
+        const res = await fetch(`${WORKER_URL}api/highlights`);
         const data = await res.json();
-        const listContainer = document.getElementById("highlights-list");
-        if (listContainer) {
-            listContainer.innerHTML = (!data || data.length === 0) ? "<p style='text-align:center;width:100%;padding:40px;'>No highlights yet.</p>" : data.map(h => `
-                <div class="video-card" onclick="openVideo('${h.matchviewUrl}')">
-                    <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
-                    <div class="title-box">${h.title}</div>
-                </div>`).join('');
+        
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No highlights yet.</p>";
+            return;
         }
-    } catch(e) { console.error("Highlight failed", e); }
+
+        listContainer.innerHTML = data.map(h => `
+            <div class="video-card" onclick="openVideo('${h.url || h.matchviewUrl}')">
+                <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
+                <div class="title-box">${h.title}</div>
+            </div>`).join('');
+            
+    } catch(e) { 
+        console.error("Highlight failed", e); 
+        listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:red;'>Failed to load highlights.</p>";
+    }
 }
 
+// Helper functions (မူရင်းအတိုင်း)
 function filterBySearch(val) {
     const filtered = allMatchesData.filter(m => 
         (m.home_name && m.home_name.toLowerCase().includes(val.toLowerCase())) || 
@@ -490,10 +516,36 @@ function filterBySearch(val) {
     renderMatches(filtered);
 }
 
-function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
+function changeDate(n) { 
+  let d = new Date(selectedDate); 
+  d.setDate(d.getDate()+n); 
+  selectedDate = d.toLocaleDateString('en-CA'); 
+  document.getElementById("matchDate").value = selectedDate; 
+  loadMatches(); 
+}
+
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
-function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
+function openVideo(url) { 
+  document.getElementById("mainModal").style.display = "flex"; 
+  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
+}
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
+
+// Matches များကို Grid ပုံစံဖြင့်ပြရန် helper
+function renderMatchesInGrid(matches, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = matches.map(m => `
+        <div class="video-card" style="padding:10px; height:auto;">
+            <div style="font-size:11px; color:#facc15; margin-bottom:5px;">${m.league_name}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px;">${m.home_name}</span>
+                <span style="font-weight:bold; color:#facc15;">${m.home_score} - ${m.away_score}</span>
+                <span style="font-size:12px;">${m.away_name}</span>
+            </div>
+            <div style="text-align:center; font-size:10px; margin-top:5px; color:#ff4d4d;">${m.match_time}</div>
+        </div>
+    `).join('');
+}
 
 window.onload = loadMatches;
 </script>

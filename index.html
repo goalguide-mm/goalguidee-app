@@ -366,17 +366,15 @@ function switchTab(tab) {
   if(tab === 'live') loadLive();
 }
 
-// ၁။ Matches Loading (Data path ကို backend အသစ်နှင့် အံကိုက်ဖြစ်အောင် ပြင်ထားသည်)
+// ၁။ Matches Loading (URL Path ကို /api/fixtures ထည့်ပြီး ပြင်ဆင်ထားသည်)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     if(!list) return;
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}?date=${selectedDate}`); 
+        const response = await fetch(`${WORKER_URL}api/fixtures?date=${selectedDate}`); 
         const result = await response.json();
-        
-        // Backend မှလာသော data format ကို စစ်ဆေးခြင်း
         const matches = result.data || result;
         allMatchesData = Array.isArray(matches) ? matches : [];
 
@@ -386,8 +384,7 @@ async function loadMatches() {
         }
         renderMatches(allMatchesData);
     } catch (error) {
-        console.error("Error loading matches:", error);
-        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ဒေတာ ချိတ်ဆက်မှု အခက်အခဲရှိနေပါသည်။</p>';
+        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">Connection Error.</p>';
     }
 }
 
@@ -435,7 +432,7 @@ async function loadLive() {
     }
 }
 
-// ၃။ Standings (Data key များကို backend အသစ်နှင့် အံကိုက်ဖြစ်အောင် ပြင်ထားသည်)
+// ၃။ Standings (URL Path ကို /api/standings/PL ထည့်ပြီး ပြင်ဆင်ထားသည်)
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     if(!list) return;
@@ -455,7 +452,6 @@ async function loadStandings() {
         </div>`;
 
     try {
-        // Worker မှတစ်ဆင့် တောင်းခြင်း
         const response = await fetch(`${WORKER_URL}api/standings/PL`); 
         const result = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
@@ -483,7 +479,7 @@ async function loadStandings() {
     }
 }
 
-// ၄။ Highlights (Highlight မပျောက်စေရန် မူရင်းအတိုင်း ထားရှိသည်)
+// ၄။ Highlights
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     if(!listContainer) return;
@@ -510,7 +506,7 @@ async function loadHighlights() {
     }
 }
 
-// Helper functions (မူရင်းအတိုင်း)
+// Helper functions
 function filterBySearch(val) {
     const filtered = allMatchesData.filter(m => 
         (m.home_name && m.home_name.toLowerCase().includes(val.toLowerCase())) || 

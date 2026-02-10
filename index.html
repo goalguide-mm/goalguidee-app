@@ -364,37 +364,43 @@ function switchTab(tab) {
 }
 
 async function loadMatches() {
-    const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;'>Updating Matches...</p>";
+    const container = document.getElementById('matches-container'); // သင့် ID နဲ့ ကိုက်အောင် စစ်ပါ
     
     try {
-        // ⚠️ ဒီနေရာမှာ သင့်ရဲ့ Cloudflare Worker URL ကို အစားထိုးပါ
-        const response = await fetch(`https://rapid-cell-5054.pmk818299.workers.dev/`); 
-        
+        // သင့်ရဲ့ Cloudflare Worker URL ကို ဒီမှာ ထည့်ပါ
+        const response = await fetch('https://rapid-cell-5504.pmk818299.workers.dev/'); 
         const matches = await response.json();
 
-        if (!matches || matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>";
+        if (matches.length === 0) {
+            container.innerHTML = '<p style="color:white; text-align:center;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါသဖြင့် ခဏစောင့်ပေးပါ။</p>';
             return;
         }
 
-        let html = "";
-        matches.forEach(m => {
+        let html = '';
+        matches.forEach(match => {
+            // Worker က ပို့ပေးတဲ့ နာမည်အသစ် (home_name, away_name) တွေကို သုံးထားပါတယ်
             html += `
-            <div class="match">
-                <div class="time-status">${m.match_time}</div>
-                <div class="team-row"><span class="team-name">${m.home_name}</span></div>
-                <div class="score-box">${m.home_score} - ${m.away_score}</div>
-                <div class="team-row"><span class="team-name">${m.away_name}</span></div>
-            </div>`;
+                <div class="match-card">
+                    <div class="league-name">${match.league_name}</div>
+                    <div class="match-info">
+                        <span class="team-name">${match.home_name}</span>
+                        <span class="score">${match.home_score} - ${match.away_score}</span>
+                        <span class="team-name">${match.away_name}</span>
+                    </div>
+                    <div class="match-time">${match.match_time}</div>
+                </div>
+            `;
         });
-        list.innerHTML = html;
-        
-    } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error.</p>"; 
+        container.innerHTML = html;
+    } catch (error) {
+        console.error("Error loading matches:", error);
+        container.innerHTML = '<p style="color:red; text-align:center;">ဒေတာ ချိတ်ဆက်မှု အခက်အခဲရှိနေပါသည်။</p>';
     }
 }
 
+// စာမျက်နှာ စဖွင့်တာနဲ့ ပွဲစဉ်တွေ ခေါ်ခိုင်းမယ်
+window.onload = loadMatches;
+ 
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     let html = "";

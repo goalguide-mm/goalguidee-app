@@ -346,7 +346,6 @@
 </div>
 
 <script>
-// မင်းပြောတဲ့အတိုင်း ကုဒ်မလျှော့ဘဲ API ချိတ်ပုံကိုပဲ ပြင်ထားပါတယ်
 const API_BASE = "https://goalguide-api-1.onrender.com";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
@@ -364,17 +363,19 @@ function switchTab(tab) {
   if(tab === 'highlights') loadHighlights();
 }
 
-// MATCHES ဆွဲယူပုံကို Render API နဲ့ ကိုက်အောင် ပြင်ထားသည်
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
     
     try {
-        const response = await fetch(`${API_BASE}/api/fixtures/date/${selectedDate}`); 
+        // ဒီနေရာမှာ :1 တွေ ပါမလာအောင် clean လုပ်ထားပါတယ်
+        const cleanDate = selectedDate.split(':')[0].trim();
+        const response = await fetch(`${API_BASE}/api/fixtures/date/${cleanDate}`); 
+        
         if (!response.ok) throw new Error('Server Connection Failed');
         
         const matches = await response.json();
-        allMatchesData = matches; // Search အတွက် ဒေတာသိမ်းသည်
+        allMatchesData = matches; 
 
         if (!matches || matches.length === 0) {
             list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found for this date.</p>";
@@ -392,7 +393,6 @@ function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     let html = "";
     
-    // လိဂ်အလိုက် စုစည်းသည်
     const grouped = matches.reduce((acc, m) => {
         const league = m.tournament.name;
         if (!acc[league]) acc[league] = [];
@@ -422,12 +422,10 @@ function renderMatches(matches) {
 }
 
 async function loadLive() {
-    // LIVE အတွက် လောလောဆယ် API မရှိသေးသဖြင့် အလွတ်ပြထားမည်
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
 }
 
-// STANDINGS ကို Render API နဲ့ ချိတ်သည်
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     list.innerHTML = `
@@ -499,7 +497,6 @@ function openVideo(url) { document.getElementById("mainModal").style.display = "
 function openPlayer(url) { openVideo(url); }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
-// Initial load
 loadMatches();
 </script>
 </body>

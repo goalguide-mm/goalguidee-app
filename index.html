@@ -366,7 +366,7 @@ function switchTab(tab) {
   if(tab === 'live') loadLive();
 }
 
-// ၁။ Matches Loading (Worker ကုဒ်သစ်နှင့် ကိုက်ညီအောင် ပြင်ဆင်ထားသည်)
+// ၁။ Matches Loading (Data path ကို backend အသစ်နှင့် အံကိုက်ဖြစ်အောင် ပြင်ထားသည်)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     if(!list) return;
@@ -374,14 +374,17 @@ async function loadMatches() {
     
     try {
         const response = await fetch(`${WORKER_URL}?date=${selectedDate}`); 
-        const matches = await response.json();
-        allMatchesData = matches;
+        const result = await response.json();
+        
+        // Backend မှလာသော data format ကို စစ်ဆေးခြင်း
+        const matches = result.data || result;
+        allMatchesData = Array.isArray(matches) ? matches : [];
 
-        if (!matches || matches.length === 0) {
+        if (allMatchesData.length === 0) {
             list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါသဖြင့် ခဏစောင့်ပေးပါ။</p>';
             return;
         }
-        renderMatches(matches);
+        renderMatches(allMatchesData);
     } catch (error) {
         console.error("Error loading matches:", error);
         list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ဒေတာ ချိတ်ဆက်မှု အခက်အခဲရှိနေပါသည်။</p>';
@@ -405,13 +408,13 @@ function renderMatches(matches) {
         grouped[league].forEach(m => {
             html += `
             <div class="match">
-                <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : m.match_time}</div>
+                <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : (m.match_time || 'FT')}</div>
                 <div class="team-row">
-                    <span class="team-name">${m.home_name}</span>
+                    <span class="team-name">${m.home_name || m.home}</span>
                 </div>
-                <div class="score-box">${m.home_score} - ${m.away_score}</div>
+                <div class="score-box">${m.home_score ?? 0} - ${m.away_score ?? 0}</div>
                 <div class="team-row">
-                    <span class="team-name">${m.away_name}</span>
+                    <span class="team-name">${m.away_name || m.away}</span>
                 </div>
             </div>`;
         });
@@ -424,8 +427,7 @@ function renderMatches(matches) {
 async function loadLive() {
     const list = document.getElementById("live-list");
     if(!list) return;
-    // Live ပွဲစဉ်များကို လက်ရှိ Matches ထဲမှ filter ထုတ်ပြခြင်း
-    const liveMatches = allMatchesData.filter(m => m.status === 1 || m.match_time.includes(':'));
+    const liveMatches = allMatchesData.filter(m => m.status === 1);
     if(liveMatches.length === 0) {
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
     } else {
@@ -433,7 +435,7 @@ async function loadLive() {
     }
 }
 
-// ၃။ Standings (API အသစ်၏ format အတိုင်း ပြင်ဆင်ထားသည်)
+// ၃။ Standings (Data key များကို backend အသစ်နှင့် အံကိုက်ဖြစ်အောင် ပြင်ထားသည်)
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     if(!list) return;
@@ -453,23 +455,26 @@ async function loadStandings() {
         </div>`;
 
     try {
-        const response = await fetch(`${API_BASE}/api/standings/PL`); 
-        const data = await response.json();
+        // Worker မှတစ်ဆင့် တောင်းခြင်း
+        const response = await fetch(`${WORKER_URL}api/standings/PL`); 
+        const result = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
         
+        const standings = result.data || result;
+        
         if (!tbody) return;
-        if (!data || data.length === 0) {
+        if (!standings || !Array.isArray(standings) || standings.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available.</td></tr>";
             return;
         }
 
-        tbody.innerHTML = data.map((row, index) => `
+        tbody.innerHTML = standings.map((row, index) => `
             <tr>
                 <td class="rank">${index + 1}</td>
-                <td><div class="team-info"><span>${row.team_name || row.Tnm || 'Team'}</span></div></td>
-                <td style="text-align:center;">${row.pld || row.P || 0}</td>
-                <td style="text-align:center;">${row.gd || row.GD || 0}</td>
-                <td class="pts-col" style="text-align:center;">${row.pts || row.Pts || 0}</td>
+                <td><div class="team-info"><span>${row.team_name || row.team || 'Team'}</span></div></td>
+                <td style="text-align:center;">${row.pld || row.played || 0}</td>
+                <td style="text-align:center;">${row.gd || 0}</td>
+                <td class="pts-col" style="text-align:center;">${row.pts || row.points || 0}</td>
             </tr>`).join('');
 
     } catch (e) { 
@@ -478,14 +483,13 @@ async function loadStandings() {
     }
 }
 
-// ၄။ Highlights (Worker ၏ endpoint အသစ်နှင့် ကိုက်ညီအောင် ပြင်ဆင်ထားသည်)
+// ၄။ Highlights (Highlight မပျောက်စေရန် မူရင်းအတိုင်း ထားရှိသည်)
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     if(!listContainer) return;
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Loading Goals...</p>";
 
     try {
-        // Worker မှတစ်ဆင့် Highlight များကို တောင်းယူခြင်း
         const res = await fetch(`${WORKER_URL}api/highlights`);
         const data = await res.json();
         
@@ -531,7 +535,6 @@ function openVideo(url) {
 }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
-// Matches များကို Grid ပုံစံဖြင့်ပြရန် helper
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = matches.map(m => `
@@ -542,7 +545,7 @@ function renderMatchesInGrid(matches, containerId) {
                 <span style="font-weight:bold; color:#facc15;">${m.home_score} - ${m.away_score}</span>
                 <span style="font-size:12px;">${m.away_name}</span>
             </div>
-            <div style="text-align:center; font-size:10px; margin-top:5px; color:#ff4d4d;">${m.match_time}</div>
+            <div style="text-align:center; font-size:10px; margin-top:5px; color:#ff4d4d;">LIVE</div>
         </div>
     `).join('');
 }

@@ -365,26 +365,33 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Updating Matches...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;'>Updating Matches...</p>";
     
     try {
-        const cleanDate = selectedDate.split(':')[0].trim();
-        const response = await fetch(`${API_BASE}/api/fixtures/date/${cleanDate}`); 
-        
-        if (!response.ok) throw new Error('Server Connection Failed');
+        // ⚠️ ဒီနေရာမှာ သင့်ရဲ့ Cloudflare Worker URL ကို အစားထိုးပါ
+        const response = await fetch(`https://rapid-cell-5054.pmk818299.workers.dev/`); 
         
         const matches = await response.json();
-        allMatchesData = matches; 
 
         if (!matches || matches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found for this date.</p>";
+            list.innerHTML = "<p style='text-align:center;padding:40px;'>No matches found.</p>";
             return;
         }
 
-        renderMatches(matches);
+        let html = "";
+        matches.forEach(m => {
+            html += `
+            <div class="match">
+                <div class="time-status">${m.match_time}</div>
+                <div class="team-row"><span class="team-name">${m.home_name}</span></div>
+                <div class="score-box">${m.home_score} - ${m.away_score}</div>
+                <div class="team-row"><span class="team-name">${m.away_name}</span></div>
+            </div>`;
+        });
+        list.innerHTML = html;
         
     } catch (e) { 
-        list.innerHTML = `<p style='text-align:center;padding:40px;color:red;'>Connection Error: ${e.message}</p>`; 
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>Connection Error.</p>"; 
     }
 }
 

@@ -346,8 +346,8 @@
 </div>
 
 <script>
-// မူရင်းအတိုင်းထားရှိသော URL (Worker URL တစ်ခုတည်းသာ သုံးတော့မည်)
-const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev/";
+// ပြင်ဆင်ပြီးသော URL (အဆုံးက / ကို ဖြုတ်ထားသည်)
+const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = []; 
@@ -365,20 +365,17 @@ function switchTab(tab) {
   if(tab === 'live') loadLive();
 }
 
-// ၁။ Matches Loading (Worker URL သို့ တိုက်ရိုက်ခေါ်သည်)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     if(!list) return;
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည်...</p>";
     
     try {
-        // URL မှာ /api/fixtures လို့ အပြည့်အစုံ ထည့်ခေါ်ပါ
         const response = await fetch(`${WORKER_URL}/api/fixtures?date=${selectedDate}`);
         const result = await response.json();
         
-        console.log("Raw Data:", result); // အမှားစစ်ရန် Console မှာ ပြခိုင်းထားသည်
+        console.log("Raw Data:", result);
 
-        // API ပုံစံ အမျိုးမျိုးကို စစ်ဆေးခြင်း
         let matches = [];
         if (result.data && Array.isArray(result.data)) {
             matches = result.data;
@@ -432,7 +429,6 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
-// ၂။ Live Tab
 async function loadLive() {
     const list = document.getElementById("live-list");
     if(!list) return;
@@ -444,7 +440,6 @@ async function loadLive() {
     }
 }
 
-// ၃။ Standings (Worker URL သို့ တိုက်ရိုက်ခေါ်သည်)
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     if(!list) return;
@@ -464,7 +459,7 @@ async function loadStandings() {
         </div>`;
 
     try {
-        const response = await fetch(`${WORKER_URL}api/standings`); 
+        const response = await fetch(`${WORKER_URL}/api/standings`); 
         const result = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
         
@@ -491,14 +486,13 @@ async function loadStandings() {
     }
 }
 
-// ၄။ Highlights (Worker URL သို့ တိုက်ရိုက်ခေါ်သည်)
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     if(!listContainer) return;
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Loading Goals...</p>";
 
     try {
-        const res = await fetch(`${WORKER_URL}api/highlights`);
+        const res = await fetch(`${WORKER_URL}/api/highlights`);
         const data = await res.json();
         
         if (!data || data.length === 0) {
@@ -518,7 +512,6 @@ async function loadHighlights() {
     }
 }
 
-// Helper functions
 function filterBySearch(val) {
     const filtered = allMatchesData.filter(m => 
         (m.home_name && m.home_name.toLowerCase().includes(val.toLowerCase())) || 

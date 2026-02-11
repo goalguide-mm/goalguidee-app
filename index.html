@@ -369,24 +369,37 @@ function switchTab(tab) {
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     if(!list) return;
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည်...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}api/fixtures?date=${selectedDate}`); 
+        // URL မှာ /api/fixtures လို့ အပြည့်အစုံ ထည့်ခေါ်ပါ
+        const response = await fetch(`${WORKER_URL}/api/fixtures?date=${selectedDate}`);
         const result = await response.json();
-        const matches = result.data || result;
-        allMatchesData = Array.isArray(matches) ? matches : [];
+        
+        console.log("Raw Data:", result); // အမှားစစ်ရန် Console မှာ ပြခိုင်းထားသည်
+
+        // API ပုံစံ အမျိုးမျိုးကို စစ်ဆေးခြင်း
+        let matches = [];
+        if (result.data && Array.isArray(result.data)) {
+            matches = result.data;
+        } else if (Array.isArray(result)) {
+            matches = result;
+        } else if (result.results) {
+            matches = result.results;
+        }
+
+        allMatchesData = matches;
 
         if (allMatchesData.length === 0) {
-            list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါသဖြင့် ခဏစောင့်ပေးပါ။</p>';
+            list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါ (သို့မဟုတ်) API Key Error ဖြစ်နေသည်။</p>';
             return;
         }
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">Connection Error.</p>';
+        console.error("Error details:", error);
+        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ချိတ်ဆက်မှု မအောင်မြင်ပါ။ (Server Error)</p>';
     }
 }
-
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     if(!list) return;

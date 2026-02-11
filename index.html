@@ -346,7 +346,6 @@
 </div>
 
 <script>
-// ပြင်ဆင်ပြီးသော URL (အဆုံးက / ကို ဖြုတ်ထားသည်)
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
@@ -371,39 +370,28 @@ async function loadMatches() {
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည်...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}/api/fixtures?date=${selectedDate}`);
+        const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
         
-        console.log("Raw Data:", result);
-
-        let matches = [];
-        if (result.data && Array.isArray(result.data)) {
-            matches = result.data;
-        } else if (Array.isArray(result)) {
-            matches = result;
-        } else if (result.results) {
-            matches = result.results;
-        }
-
-        allMatchesData = matches;
+        allMatchesData = result || [];
 
         if (allMatchesData.length === 0) {
-            list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါ (သို့မဟုတ်) API Key Error ဖြစ်နေသည်။</p>';
+            list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါ。</p>';
             return;
         }
         renderMatches(allMatchesData);
     } catch (error) {
-        console.error("Error details:", error);
         list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ချိတ်ဆက်မှု မအောင်မြင်ပါ။ (Server Error)</p>';
     }
 }
+
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     if(!list) return;
     let html = "";
     
     const grouped = matches.reduce((acc, m) => {
-        const league = m.league_name || "Football";
+        const league = m.league?.name || "Football";
         if (!acc[league]) acc[league] = [];
         acc[league].push(m);
         return acc;
@@ -412,15 +400,19 @@ function renderMatches(matches) {
     for (let league in grouped) {
         html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
         grouped[league].forEach(m => {
+            const isLive = m.status_name === 'Live';
+            const time = m.start_at ? m.start_at.split(' ')[1].substring(0,5) : 'FT';
             html += `
             <div class="match">
-                <div class="time-status">${m.status === 1 ? '<span class="status-live">LIVE</span>' : (m.match_time || 'FT')}</div>
+                <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : time}</div>
                 <div class="team-row">
-                    <span class="team-name">${m.home_name || m.home}</span>
+                    <span class="team-name">${m.home_team?.name || 'Home'}</span>
+                    <img src="${m.home_team?.logo || ''}" onerror="this.style.display='none'">
                 </div>
-                <div class="score-box">${m.home_score ?? 0} - ${m.away_score ?? 0}</div>
+                <div class="score-box">${m.home_score?.current ?? 0} - ${m.away_score?.current ?? 0}</div>
                 <div class="team-row">
-                    <span class="team-name">${m.away_name || m.away}</span>
+                    <img src="${m.away_team?.logo || ''}" onerror="this.style.display='none'">
+                    <span class="team-name">${m.away_team?.name || 'Away'}</span>
                 </div>
             </div>`;
         });
@@ -432,7 +424,7 @@ function renderMatches(matches) {
 async function loadLive() {
     const list = document.getElementById("live-list");
     if(!list) return;
-    const liveMatches = allMatchesData.filter(m => m.status === 1);
+    const liveMatches = allMatchesData.filter(m => m.status_name === 'Live');
     if(liveMatches.length === 0) {
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
     } else {
@@ -459,27 +451,24 @@ async function loadStandings() {
         </div>`;
 
     try {
-        const response = await fetch(`${WORKER_URL}/api/standings`); 
+        const response = await fetch(`${WORKER_URL}/standings`); 
         const result = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
         
-        const standings = result.data || result;
-        
         if (!tbody) return;
-        if (!standings || !Array.isArray(standings) || standings.length === 0) {
+        if (!result || result.length === 0) {
             tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available.</td></tr>";
             return;
         }
 
-        tbody.innerHTML = standings.map((row, index) => `
+        tbody.innerHTML = result.map((row) => `
             <tr>
-                <td class="rank">${index + 1}</td>
-                <td><div class="team-info"><span>${row.team_name || row.team || 'Team'}</span></div></td>
-                <td style="text-align:center;">${row.pld || row.played || 0}</td>
-                <td style="text-align:center;">${row.gd || 0}</td>
-                <td class="pts-col" style="text-align:center;">${row.pts || row.points || 0}</td>
+                <td class="rank">${row.position}</td>
+                <td><div class="team-info"><span>${row.team?.name || 'Team'}</span></div></td>
+                <td style="text-align:center;">${row.games_played || 0}</td>
+                <td style="text-align:center;">${row.goals_diff || 0}</td>
+                <td class="pts-col" style="text-align:center;">${row.points || 0}</td>
             </tr>`).join('');
-
     } catch (e) { 
         const tb = document.getElementById("table-body-placeholder");
         if(tb) tb.innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error.</td></tr>";
@@ -492,7 +481,7 @@ async function loadHighlights() {
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Loading Goals...</p>";
 
     try {
-        const res = await fetch(`${WORKER_URL}/api/highlights`);
+        const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
         
         if (!data || data.length === 0) {
@@ -507,16 +496,15 @@ async function loadHighlights() {
             </div>`).join('');
             
     } catch(e) { 
-        console.error("Highlight failed", e); 
         listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:red;'>Failed to load highlights.</p>";
     }
 }
 
 function filterBySearch(val) {
     const filtered = allMatchesData.filter(m => 
-        (m.home_name && m.home_name.toLowerCase().includes(val.toLowerCase())) || 
-        (m.away_name && m.away_name.toLowerCase().includes(val.toLowerCase())) ||
-        (m.league_name && m.league_name.toLowerCase().includes(val.toLowerCase()))
+        (m.home_team?.name?.toLowerCase().includes(val.toLowerCase())) || 
+        (m.away_team?.name?.toLowerCase().includes(val.toLowerCase())) ||
+        (m.league?.name?.toLowerCase().includes(val.toLowerCase()))
     );
     renderMatches(filtered);
 }
@@ -539,12 +527,12 @@ function closeModal() { document.getElementById("mainModal").style.display = "no
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = matches.map(m => `
-        <div class="video-card" style="padding:10px; height:auto;">
-            <div style="font-size:11px; color:#facc15; margin-bottom:5px;">${m.league_name}</div>
+        <div class="video-card" style="padding:10px; height:auto; color: white;">
+            <div style="font-size:11px; color:#facc15; margin-bottom:5px;">${m.league?.name}</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px;">${m.home_name}</span>
-                <span style="font-weight:bold; color:#facc15;">${m.home_score} - ${m.away_score}</span>
-                <span style="font-size:12px;">${m.away_name}</span>
+                <span style="font-size:12px;">${m.home_team?.name}</span>
+                <span style="font-weight:bold; color:#facc15;">${m.home_score?.current} - ${m.away_score?.current}</span>
+                <span style="font-size:12px;">${m.away_team?.name}</span>
             </div>
             <div style="text-align:center; font-size:10px; margin-top:5px; color:#ff4d4d;">LIVE</div>
         </div>

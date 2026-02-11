@@ -350,8 +350,11 @@ let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = []; 
 document.getElementById("matchDate").value = selectedDate;
 
-function getLogo(id, type='teams') {
-    return id ? `https://api.sportscore.io/images/${type}/${id}` : 'https://via.placeholder.com/30';
+// SportAPI7 အတွက် Logo URL ကို ပြောင်းလဲပြင်ဆင်ထားပါတယ်
+function getLogo(id, type='team') {
+    if(!id) return 'https://via.placeholder.com/30';
+    // SofaScore CDN ကိုသုံးပြီး Logo တွေ ပေါ်အောင် လုပ်ထားပါတယ်
+    return `https://www.sofascore.com/api/v1/${type}/${id}/image`;
 }
 
 function switchTab(tab) {
@@ -381,9 +384,13 @@ async function loadMatches() {
 
 function renderMatches(matches) {
     let html = "";
+    if (matches.length === 0) {
+        document.getElementById("matches-list").innerHTML = '<p style="text-align:center;padding:40px;">ပွဲစဉ်များမရှိပါ။</p>';
+        return;
+    }
     const grouped = matches.reduce((acc, m) => {
         const league = m.tournament?.name || "Football";
-        if (!acc[league]) acc[league] = { name: league, logo: m.tournament?.image_id, matches: [] };
+        if (!acc[league]) acc[league] = { name: league, logo: m.tournament?.id, matches: [] };
         acc[league].matches.push(m);
         return acc;
     }, {});
@@ -392,29 +399,29 @@ function renderMatches(matches) {
         const league = grouped[key];
         html += `<div class="league-card">
             <div class="league-header">
-                <img src="${getLogo(league.logo, 'tournaments')}" onerror="this.style.display='none'">
+                <img src="${getLogo(league.logo, 'tournament')}" onerror="this.style.display='none'">
                 <span>${league.name}</span>
             </div>`;
         league.matches.forEach(m => {
             const hScore = m.homeScore?.current ?? 0;
             const aScore = m.awayScore?.current ?? 0;
-            const status = m.status?.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : 'FT';
+            const status = m.status?.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : (m.status?.description || 'FT');
             html += `<div class="match">
                 <div class="time-status">${status}</div>
                 <div class="team-row">
                     <span class="team-name">${m.homeTeam?.name}</span>
-                    <img src="${getLogo(m.homeTeam?.image_id)}">
+                    <img src="${getLogo(m.homeTeam?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'">
                 </div>
                 <div class="score-box">${hScore} - ${aScore}</div>
                 <div class="team-row">
-                    <img src="${getLogo(m.awayTeam?.image_id)}">
+                    <img src="${getLogo(m.awayTeam?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'">
                     <span class="team-name">${m.awayTeam?.name}</span>
                 </div>
             </div>`;
         });
         html += `</div>`;
     }
-    document.getElementById("matches-list").innerHTML = html || '<p style="text-align:center;padding:40px;">ပွဲစဉ်များမရှိပါ။</p>';
+    document.getElementById("matches-list").innerHTML = html;
 }
 
 async function loadLive() {
@@ -433,45 +440,39 @@ async function loadStandings() {
     try {
         const response = await fetch(`${WORKER_URL}/standings`); 
         const result = await response.json();
-        const data = Array.isArray(result) ? result : (result.data || []);
+        // API မှတိုက်ရိုက်ပေးပို့သော Rows များကိုယူခြင်း
+        const data = Array.isArray(result) ? result : [];
         renderStandings(data);
-    } catch (e) { list.innerHTML = "Error loading standings."; }
+    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings.</p>"; }
 }
 
 function renderStandings(data) {
     const list = document.getElementById("standings-list");
-    const grouped = data.reduce((acc, row) => {
-        const lName = row.tournament?.name || "League Table";
-        if (!acc[lName]) acc[lName] = { name: lName, logo: row.tournament?.image_id, rows: [] };
-        acc[lName].rows.push(row);
-        return acc;
-    }, {});
+    if(!data || data.length === 0) {
+        list.innerHTML = "<p style='text-align:center;padding:40px;'>ဒေတာမရှိပါ။</p>";
+        return;
+    }
 
-    let html = "";
-    for (let key in grouped) {
-        const league = grouped[key];
-        html += `<div class="league-card">
+    let html = `<div class="league-card">
             <div class="league-header">
-                <img src="${getLogo(league.logo, 'tournaments')}" onerror="this.style.display='none'">
-                <span>${league.name}</span>
+                <span>League Table</span>
             </div>
             <div style="overflow-x: auto;">
                 <table class="standings-table">
                     <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col">PTS</th></tr></thead>
-                    <tbody>${league.rows.map(r => `
+                    <tbody>${data.map(r => `
                         <tr>
                             <td class="rank">${r.position}</td>
-                            <td><div class="team-info"><img src="${getLogo(r.team?.image_id)}"><span>${r.team?.name}</span></div></td>
-                            <td style="text-align:center;">${r.games_played || 0}</td>
-                            <td style="text-align:center;">${r.goals_diff || 0}</td>
+                            <td><div class="team-info"><img src="${getLogo(r.team?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'"><span>${r.team?.name}</span></div></td>
+                            <td style="text-align:center;">${r.matches || 0}</td>
+                            <td style="text-align:center;">${(r.scoresFor || 0) - (r.scoresAgainst || 0)}</td>
                             <td class="pts-col" style="text-align:center;">${r.points || 0}</td>
                         </tr>`).join('')}
                     </tbody>
                 </table>
             </div>
         </div>`;
-    }
-    list.innerHTML = html || "<p style='text-align:center;padding:40px;'>ဒေတာမရှိပါ။</p>";
+    list.innerHTML = html;
 }
 
 async function loadHighlights() {

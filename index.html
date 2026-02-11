@@ -350,9 +350,10 @@ let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = []; 
 document.getElementById("matchDate").value = selectedDate;
 
-// SofaScore Image CDN ကို သုံးပြီး Logo တွေ ပေါ်အောင် ပြင်ထားပါတယ်
+// SofaScore Image CDN ကို အမှန်ကန်ဆုံး Link ပုံစံဖြင့် ပြင်ဆင်ထားသည်
 function getLogo(id, type='team') {
     if(!id) return 'https://via.placeholder.com/30';
+    // SofaScore ရဲ့ တိုက်ရိုက် API Image Path ကို သုံးထားပါတယ်
     return `https://www.sofascore.com/api/v1/${type}/${id}/image`;
 }
 
@@ -389,7 +390,7 @@ function renderMatches(matches) {
     }
     const grouped = matches.reduce((acc, m) => {
         const league = m.tournament?.name || "Football";
-        if (!acc[league]) acc[league] = { name: league, logo: m.tournament?.id, matches: [] };
+        if (!acc[league]) acc[league] = { name: league, logo: m.tournament?.uniqueTournament?.id || m.tournament?.id, matches: [] };
         acc[league].matches.push(m);
         return acc;
     }, {});
@@ -398,12 +399,12 @@ function renderMatches(matches) {
         const league = grouped[key];
         html += `<div class="league-card">
             <div class="league-header">
-                <img src="${getLogo(league.logo, 'tournament')}" onerror="this.style.display='none'">
+                <img src="${getLogo(league.logo, 'unique-tournament')}" onerror="this.style.display='none'">
                 <span>${league.name}</span>
             </div>`;
         league.matches.forEach(m => {
-            const hScore = m.homeScore?.current ?? 0;
-            const aScore = m.awayScore?.current ?? 0;
+            const hScore = m.homeScore?.display ?? m.homeScore?.current ?? 0;
+            const aScore = m.awayScore?.display ?? m.awayScore?.current ?? 0;
             const status = m.status?.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : (m.status?.description || 'FT');
             html += `<div class="match">
                 <div class="time-status">${status}</div>
@@ -459,7 +460,7 @@ function renderStandings(data) {
                         <tr>
                             <td class="rank">${r.position}</td>
                             <td><div class="team-info"><img src="${getLogo(r.team?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'"><span>${r.team?.name}</span></div></td>
-                            <td style="text-align:center;">${r.matches || 0}</td>
+                            <td style="text-align:center;">${r.played || r.matches || 0}</td>
                             <td style="text-align:center;">${(r.scoresFor || 0) - (r.scoresAgainst || 0)}</td>
                             <td class="pts-col" style="text-align:center;">${r.points || 0}</td>
                         </tr>`).join('')}
@@ -517,7 +518,7 @@ function renderMatchesInGrid(matches, containerId) {
             <div style="font-size:11px; color:#facc15; margin-bottom:10px;">${m.tournament?.name}</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:12px; flex:1;">${m.homeTeam?.name}</span>
-                <span style="font-weight:bold; color:#facc15; font-size:16px; flex:0.5; text-align:center;">${m.homeScore?.current} - ${m.awayScore?.current}</span>
+                <span style="font-weight:bold; color:#facc15; font-size:16px; flex:0.5; text-align:center;">${m.homeScore?.display || m.homeScore?.current} - ${m.awayScore?.display || m.awayScore?.current}</span>
                 <span style="font-size:12px; flex:1; text-align:right;">${m.awayTeam?.name}</span>
             </div>
             <div style="text-align:center; font-size:10px; margin-top:10px; color:#ff4d4d; font-weight:bold;">LIVE</div>

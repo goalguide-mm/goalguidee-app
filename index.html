@@ -346,9 +346,8 @@
 </div>
 
 <script>
-// မူရင်းအတိုင်းထားရှိသော URL များ
+// မူရင်းအတိုင်းထားရှိသော URL (Worker URL တစ်ခုတည်းသာ သုံးတော့မည်)
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev/";
-const API_BASE = "https://goalguide-api-1.onrender.com";
 
 let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = []; 
@@ -366,7 +365,7 @@ function switchTab(tab) {
   if(tab === 'live') loadLive();
 }
 
-// ၁။ Matches Loading (URL Path ကို /api/fixtures ထည့်ပြီး ပြင်ဆင်ထားသည်)
+// ၁။ Matches Loading (Worker URL သို့ တိုက်ရိုက်ခေါ်သည်)
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     if(!list) return;
@@ -432,7 +431,7 @@ async function loadLive() {
     }
 }
 
-// ၃။ Standings (URL Path ကို /api/standings/PL ထည့်ပြီး ပြင်ဆင်ထားသည်)
+// ၃။ Standings (Worker URL သို့ တိုက်ရိုက်ခေါ်သည်)
 async function loadStandings() {
     const list = document.getElementById("standings-list");
     if(!list) return;
@@ -452,7 +451,7 @@ async function loadStandings() {
         </div>`;
 
     try {
-        const response = await fetch(`${WORKER_URL}api/standings/PL`); 
+        const response = await fetch(`${WORKER_URL}api/standings`); 
         const result = await response.json();
         const tbody = document.getElementById("table-body-placeholder");
         
@@ -479,7 +478,7 @@ async function loadStandings() {
     }
 }
 
-// ၄။ Highlights
+// ၄။ Highlights (Worker URL သို့ တိုက်ရိုက်ခေါ်သည်)
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     if(!listContainer) return;

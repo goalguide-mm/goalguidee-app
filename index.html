@@ -386,12 +386,10 @@ async function loadMatches() {
 }
 
 function renderMatches(matches) {
-    const list = document.getElementById("matches-list");
-    if(!list) return;
     let html = "";
-    
+    // SportAPI data format (homeTeam, awayTeam) ကို သုံးထားသည်
     const grouped = matches.reduce((acc, m) => {
-        const league = m.league?.name || "Football";
+        const league = m.tournament?.name || "Football";
         if (!acc[league]) acc[league] = [];
         acc[league].push(m);
         return acc;
@@ -400,36 +398,34 @@ function renderMatches(matches) {
     for (let league in grouped) {
         html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
         grouped[league].forEach(m => {
-            const isLive = m.status_name === 'Live';
-            const time = m.start_at ? m.start_at.split(' ')[1].substring(0,5) : 'FT';
-            html += `
-            <div class="match">
-                <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : time}</div>
-                <div class="team-row">
-                    <span class="team-name">${m.home_team?.name || 'Home'}</span>
-                    <img src="${m.home_team?.logo || ''}" onerror="this.style.display='none'">
-                </div>
-                <div class="score-box">${m.home_score?.current ?? 0} - ${m.away_score?.current ?? 0}</div>
-                <div class="team-row">
-                    <img src="${m.away_team?.logo || ''}" onerror="this.style.display='none'">
-                    <span class="team-name">${m.away_team?.name || 'Away'}</span>
-                </div>
+            const homeScore = m.homeScore?.current ?? 0;
+            const awayScore = m.awayScore?.current ?? 0;
+            const status = m.status?.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : 'FT';
+            
+            html += `<div class="match">
+                <div class="time-status">${status}</div>
+                <div class="team-row"><span class="team-name">${m.homeTeam?.name}</span></div>
+                <div class="score-box">${homeScore} - ${awayScore}</div>
+                <div class="team-row"><span class="team-name">${m.awayTeam?.name}</span></div>
             </div>`;
         });
         html += `</div>`;
     }
-    list.innerHTML = html;
+    document.getElementById("matches-list").innerHTML = html;
 }
 
 async function loadLive() {
     const list = document.getElementById("live-list");
     if(!list) return;
-    const liveMatches = allMatchesData.filter(m => m.status_name === 'Live');
+    // SportAPI logic: status.type === 'inprogress'
+    const liveMatches = allMatchesData.filter(m => m.status?.type === 'inprogress');
+    
     if(liveMatches.length === 0) {
-        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
-    } else {
-        renderMatchesInGrid(liveMatches, "live-list");
+        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
+        return;
     }
+    
+    renderMatchesInGrid(liveMatches, "live-list");
 }
 
 async function loadStandings() {
@@ -501,10 +497,11 @@ async function loadHighlights() {
 }
 
 function filterBySearch(val) {
+    const query = val.toLowerCase();
     const filtered = allMatchesData.filter(m => 
-        (m.home_team?.name?.toLowerCase().includes(val.toLowerCase())) || 
-        (m.away_team?.name?.toLowerCase().includes(val.toLowerCase())) ||
-        (m.league?.name?.toLowerCase().includes(val.toLowerCase()))
+        (m.homeTeam?.name?.toLowerCase().includes(query)) || 
+        (m.awayTeam?.name?.toLowerCase().includes(query)) ||
+        (m.tournament?.name?.toLowerCase().includes(query))
     );
     renderMatches(filtered);
 }
@@ -527,14 +524,14 @@ function closeModal() { document.getElementById("mainModal").style.display = "no
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = matches.map(m => `
-        <div class="video-card" style="padding:10px; height:auto; color: white;">
-            <div style="font-size:11px; color:#facc15; margin-bottom:5px;">${m.league?.name}</div>
+        <div class="video-card" style="padding:15px; height:auto; color: white;">
+            <div style="font-size:11px; color:#facc15; margin-bottom:10px;">${m.tournament?.name}</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px;">${m.home_team?.name}</span>
-                <span style="font-weight:bold; color:#facc15;">${m.home_score?.current} - ${m.away_score?.current}</span>
-                <span style="font-size:12px;">${m.away_team?.name}</span>
+                <span style="font-size:12px; flex:1;">${m.homeTeam?.name}</span>
+                <span style="font-weight:bold; color:#facc15; font-size:16px; flex:0.5; text-align:center;">${m.homeScore?.current} - ${m.awayScore?.current}</span>
+                <span style="font-size:12px; flex:1; text-align:right;">${m.awayTeam?.name}</span>
             </div>
-            <div style="text-align:center; font-size:10px; margin-top:5px; color:#ff4d4d;">LIVE</div>
+            <div style="text-align:center; font-size:10px; margin-top:10px; color:#ff4d4d; font-weight:bold;">LIVE</div>
         </div>
     `).join('');
 }

@@ -255,7 +255,6 @@
     border-color: #facc15;
   }
 
-  /* Standings Table Styles */
   .standings-container { padding: 10px; }
   .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
   .standings-table th { background: #252a32; color: #facc15; padding: 12px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
@@ -347,10 +346,13 @@
 
 <script>
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
-
 let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = []; 
 document.getElementById("matchDate").value = selectedDate;
+
+function getLogo(id, type='teams') {
+    return id ? `https://api.sportscore.io/images/${type}/${id}` : 'https://via.placeholder.com/30';
+}
 
 function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -366,134 +368,125 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    if(!list) return;
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည်...</p>";
-    
     try {
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
-        
-        allMatchesData = result || [];
-
-        if (allMatchesData.length === 0) {
-            list.innerHTML = '<p style="color:white; text-align:center; padding:40px;">ယနေ့အတွက် ပွဲစဉ်များ မရှိသေးပါ。</p>';
-            return;
-        }
+        allMatchesData = Array.isArray(result) ? result : (result.data || []);
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ချိတ်ဆက်မှု မအောင်မြင်ပါ။ (Server Error)</p>';
+        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ချိတ်ဆက်မှု မအောင်မြင်ပါ။</p>';
     }
 }
 
 function renderMatches(matches) {
     let html = "";
-    // SportAPI data format (homeTeam, awayTeam) ကို သုံးထားသည်
     const grouped = matches.reduce((acc, m) => {
         const league = m.tournament?.name || "Football";
-        if (!acc[league]) acc[league] = [];
-        acc[league].push(m);
+        if (!acc[league]) acc[league] = { name: league, logo: m.tournament?.image_id, matches: [] };
+        acc[league].matches.push(m);
         return acc;
     }, {});
 
-    for (let league in grouped) {
-        html += `<div class="league-card"><div class="league-header"><span>${league}</span></div>`;
-        grouped[league].forEach(m => {
-            const homeScore = m.homeScore?.current ?? 0;
-            const awayScore = m.awayScore?.current ?? 0;
+    for (let key in grouped) {
+        const league = grouped[key];
+        html += `<div class="league-card">
+            <div class="league-header">
+                <img src="${getLogo(league.logo, 'tournaments')}" onerror="this.style.display='none'">
+                <span>${league.name}</span>
+            </div>`;
+        league.matches.forEach(m => {
+            const hScore = m.homeScore?.current ?? 0;
+            const aScore = m.awayScore?.current ?? 0;
             const status = m.status?.type === 'inprogress' ? '<span class="status-live">LIVE</span>' : 'FT';
-            
             html += `<div class="match">
                 <div class="time-status">${status}</div>
-                <div class="team-row"><span class="team-name">${m.homeTeam?.name}</span></div>
-                <div class="score-box">${homeScore} - ${awayScore}</div>
-                <div class="team-row"><span class="team-name">${m.awayTeam?.name}</span></div>
+                <div class="team-row">
+                    <span class="team-name">${m.homeTeam?.name}</span>
+                    <img src="${getLogo(m.homeTeam?.image_id)}">
+                </div>
+                <div class="score-box">${hScore} - ${aScore}</div>
+                <div class="team-row">
+                    <img src="${getLogo(m.awayTeam?.image_id)}">
+                    <span class="team-name">${m.awayTeam?.name}</span>
+                </div>
             </div>`;
         });
         html += `</div>`;
     }
-    document.getElementById("matches-list").innerHTML = html;
+    document.getElementById("matches-list").innerHTML = html || '<p style="text-align:center;padding:40px;">ပွဲစဉ်များမရှိပါ။</p>';
 }
 
 async function loadLive() {
     const list = document.getElementById("live-list");
-    if(!list) return;
-    // SportAPI logic: status.type === 'inprogress'
     const liveMatches = allMatchesData.filter(m => m.status?.type === 'inprogress');
-    
     if(liveMatches.length === 0) {
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
         return;
     }
-    
     renderMatchesInGrid(liveMatches, "live-list");
 }
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    if(!list) return;
-    list.innerHTML = `
-        <div class="league-card">
-            <div class="league-header"><span>Premier League Table</span></div>
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဇယားများ ဆွဲယူနေပါသည်...</p>";
+    try {
+        const response = await fetch(`${WORKER_URL}/standings`); 
+        const result = await response.json();
+        const data = Array.isArray(result) ? result : (result.data || []);
+        renderStandings(data);
+    } catch (e) { list.innerHTML = "Error loading standings."; }
+}
+
+function renderStandings(data) {
+    const list = document.getElementById("standings-list");
+    const grouped = data.reduce((acc, row) => {
+        const lName = row.tournament?.name || "League Table";
+        if (!acc[lName]) acc[lName] = { name: lName, logo: row.tournament?.image_id, rows: [] };
+        acc[lName].rows.push(row);
+        return acc;
+    }, {});
+
+    let html = "";
+    for (let key in grouped) {
+        const league = grouped[key];
+        html += `<div class="league-card">
+            <div class="league-header">
+                <img src="${getLogo(league.logo, 'tournaments')}" onerror="this.style.display='none'">
+                <span>${league.name}</span>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="standings-table">
-                    <thead>
-                        <tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col" style="text-align:center;">PTS</th></tr>
-                    </thead>
-                    <tbody id="table-body-placeholder">
-                        <tr><td colspan="5" style="text-align:center;padding:40px;color:#facc15;">Connecting to Server...</td></tr>
+                    <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col">PTS</th></tr></thead>
+                    <tbody>${league.rows.map(r => `
+                        <tr>
+                            <td class="rank">${r.position}</td>
+                            <td><div class="team-info"><img src="${getLogo(r.team?.image_id)}"><span>${r.team?.name}</span></div></td>
+                            <td style="text-align:center;">${r.games_played || 0}</td>
+                            <td style="text-align:center;">${r.goals_diff || 0}</td>
+                            <td class="pts-col" style="text-align:center;">${r.points || 0}</td>
+                        </tr>`).join('')}
                     </tbody>
                 </table>
             </div>
         </div>`;
-
-    try {
-        const response = await fetch(`${WORKER_URL}/standings`); 
-        const result = await response.json();
-        const tbody = document.getElementById("table-body-placeholder");
-        
-        if (!tbody) return;
-        if (!result || result.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:20px;'>No data available.</td></tr>";
-            return;
-        }
-
-        tbody.innerHTML = result.map((row) => `
-            <tr>
-                <td class="rank">${row.position}</td>
-                <td><div class="team-info"><span>${row.team?.name || 'Team'}</span></div></td>
-                <td style="text-align:center;">${row.games_played || 0}</td>
-                <td style="text-align:center;">${row.goals_diff || 0}</td>
-                <td class="pts-col" style="text-align:center;">${row.points || 0}</td>
-            </tr>`).join('');
-    } catch (e) { 
-        const tb = document.getElementById("table-body-placeholder");
-        if(tb) tb.innerHTML = "<tr><td colspan='5' style='text-align:center;color:red;padding:20px;'>Connection Error.</td></tr>";
     }
+    list.innerHTML = html || "<p style='text-align:center;padding:40px;'>ဒေတာမရှိပါ။</p>";
 }
 
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
-    if(!listContainer) return;
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Loading Goals...</p>";
-
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
-        
-        if (!data || data.length === 0) {
-            listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No highlights yet.</p>";
-            return;
-        }
-
-        listContainer.innerHTML = data.map(h => `
+        const items = Array.isArray(data) ? data : (data.data || []);
+        listContainer.innerHTML = items.map(h => `
             <div class="video-card" onclick="openVideo('${h.url || h.matchviewUrl}')">
                 <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
                 <div class="title-box">${h.title}</div>
             </div>`).join('');
-            
-    } catch(e) { 
-        listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:red;'>Failed to load highlights.</p>";
-    }
+    } catch(e) { listContainer.innerHTML = "Error loading highlights."; }
 }
 
 function filterBySearch(val) {
@@ -507,17 +500,17 @@ function filterBySearch(val) {
 }
 
 function changeDate(n) { 
-  let d = new Date(selectedDate); 
-  d.setDate(d.getDate()+n); 
-  selectedDate = d.toLocaleDateString('en-CA'); 
-  document.getElementById("matchDate").value = selectedDate; 
-  loadMatches(); 
+    let d = new Date(selectedDate); 
+    d.setDate(d.getDate()+n); 
+    selectedDate = d.toLocaleDateString('en-CA'); 
+    document.getElementById("matchDate").value = selectedDate; 
+    loadMatches(); 
 }
 
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function openVideo(url) { 
-  document.getElementById("mainModal").style.display = "flex"; 
-  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
+    document.getElementById("mainModal").style.display = "flex"; 
+    document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 

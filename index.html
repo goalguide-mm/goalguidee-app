@@ -7,7 +7,8 @@
 <title>GOAL GUIDE</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* စာလုံးအားလုံးကို Bold တင်ရန် ပြင်ဆင်မှု */
+  * { box-sizing: border-box; margin: 0; padding: 0; font-weight: 700; }
   
   body {
     font-family: 'Inter', sans-serif;
@@ -403,7 +404,33 @@ async function loadLive() {
 
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = matches.map(m => `<div class="league-card" style="padding:15px; text-align:center;"><div style="font-size:11px; color:#facc15;">${m.league.name}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;"><img src="${m.teams.home.logo}" width="30"><div style="font-size:18px; font-weight:900;">${m.goals.home} - ${m.goals.away}</div><img src="${m.teams.away.logo}" width="30"></div><div class="status-live" style="margin-top:5px; font-size:11px;">LIVE ${m.fixture.status.elapsed}'</div></div>`).join('');
+    container.innerHTML = matches.map(m => `
+        <div class="league-card" style="padding:15px; text-align:center;">
+            <div style="font-size:11px; color:#facc15; font-weight:800; margin-bottom:10px;">
+                ${m.league.name.toUpperCase()}
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;">
+                    <img src="${m.teams.home.logo}" width="35">
+                    <span style="font-size:12px; font-weight:800; color:#fff;">${m.teams.home.name}</span>
+                </div>
+
+                <div style="font-size:22px; font-weight:900; color:#facc15; margin:0 10px;">
+                    ${m.goals.home} - ${m.goals.away}
+                </div>
+
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;">
+                    <img src="${m.teams.away.logo}" width="35">
+                    <span style="font-size:12px; font-weight:800; color:#fff;">${m.teams.away.name}</span>
+                </div>
+            </div>
+
+            <div class="status-live" style="font-size:12px; margin-top:10px; font-weight:800;">
+                LIVE ${m.fixture.status.elapsed}'
+            </div>
+        </div>
+    `).join('');
 }
 
 function filterBySearch(val) {

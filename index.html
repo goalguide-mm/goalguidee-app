@@ -388,51 +388,58 @@ async function loadStandings() {
 function renderStandings(data) {
     if (!data || data.length === 0) return;
     
-    // League အချက်အလက်ယူခြင်း (Logo ရော Name ရော ပါအောင်)
     const leagueName = data[0].league?.name || "LEAGUE";
     const leagueLogo = data[0].league?.logo || "";
     const list = document.getElementById("standings-list");
 
     let html = `
-        <div style="max-width: 600px; margin: 15px auto;">
+        <div style="max-width: 600px; margin: 15px auto; font-family: sans-serif;">
             
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; 
-                        padding: 10px; background: rgba(26, 29, 35, 0.8); 
-                        border: 1.5px solid #facc15; border-radius: 8px; margin-bottom: 10px;">
-                ${leagueLogo ? `<img src="${leagueLogo}" width="30" height="30" style="object-fit: contain;">` : ''}
-                <span style="color: #facc15; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 1px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; 
+                        padding: 12px; background: linear-gradient(145deg, #23272f, #1a1d23); 
+                        border: 1.5px solid #facc15; border-radius: 12px; margin-bottom: 20px;
+                        box-shadow: 0 8px 15px rgba(0,0,0,0.4), inset 0 1px 1px rgba(250,204,21,0.2);">
+                ${leagueLogo ? `<img src="${leagueLogo}" width="28" height="28" style="object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">` : ''}
+                <span style="color: #facc15; font-size: 16px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
                     ${leagueName.toUpperCase()} STANDINGS
                 </span>
             </div>
 
-            <div style="border: 1.5px solid #facc15; border-radius: 10px; overflow: hidden; background: #1a1d23;">
+            <div style="border: 1.5px solid #facc15; border-radius: 12px; overflow: hidden; background: #1a1d23; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
                 <table class="standings-table" style="width: 100%; border-collapse: collapse; margin: 0;">
                     <thead>
-                        <tr style="background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.3);">
-                            <th style="text-align:center; width:60px; padding: 10px; color: #facc15; font-size: 13px;">အဆင့်</th>
-                            <th style="text-align:left; padding: 10px; color: #facc15; font-size: 13px;">TEAM</th>
-                            <th style="text-align:center; padding: 10px; color: #facc15; font-size: 13px;">PL</th>
-                            <th style="text-align:center; padding: 10px; color: #facc15; font-size: 13px;">GD</th>
-                            <th class="pts-col" style="text-align:center; padding: 10px; color: #facc15; font-size: 13px;">PTS</th>
+                        <tr style="background: rgba(250, 204, 21, 0.15); border-bottom: 1px solid rgba(250, 204, 21, 0.3);">
+                            <th style="text-align:center; width:60px; padding: 12px; color: #facc15; font-size: 12px; font-weight: 800;">RANK</th>
+                            <th style="text-align:left; padding: 12px; color: #facc15; font-size: 12px; font-weight: 800;">TEAM</th>
+                            <th style="text-align:center; padding: 12px; color: #facc15; font-size: 12px; font-weight: 800;">PL</th>
+                            <th style="text-align:center; padding: 12px; color: #facc15; font-size: 12px; font-weight: 800;">GF-GA</th>
+                            <th class="pts-col" style="text-align:center; padding: 12px; color: #facc15; font-size: 12px; font-weight: 800;">PTS</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${data.map((r, index) => `
+                        ${data.map((r, index) => {
+                            // ရဂိုး နဲ့ ပေးဂိုး ကို API data ထဲကနေ ဆွဲထုတ်ခြင်း
+                            const gf = r.all?.goals?.for ?? 0;
+                            const ga = r.all?.goals?.against ?? 0;
+                            
+                            return `
                             <tr style="${index !== data.length - 1 ? 'border-bottom: 1px solid rgba(255,255,255,0.05);' : ''}">
                                 <td style="text-align:center; font-weight:700; padding: 12px; color: #9ca3af; font-size: 13px;">${r.rank}</td>
                                 <td style="padding: 12px;">
                                     <div style="display:flex; align-items:center; gap:10px;">
-                                        <img src="${r.team.logo}" width="25" height="25" style="object-fit:contain;">
+                                        <img src="${r.team.logo}" width="24" height="24" style="object-fit:contain;">
                                         <span style="font-weight:700; color:#fff; font-size: 13px;">${r.team.name}</span>
                                     </div>
                                 </td>
                                 <td style="text-align:center; font-weight:600; padding: 12px; color: #e5e7eb; font-size: 13px;">${r.all?.played ?? 0}</td>
-                                <td style="text-align:center; font-weight:600; padding: 12px; color: #e5e7eb; font-size: 13px;">${r.goalsDiff ?? 0}</td>
-                                <td class="pts-col" style="text-align:center; font-weight:800; font-size:14px; padding: 12px; color: #facc15;">
+                                <td style="text-align:center; font-weight:600; padding: 12px; color: #e5e7eb; font-size: 13px;">
+                                    ${gf}:${ga}
+                                </td>
+                                <td class="pts-col" style="text-align:center; font-weight:900; font-size:15px; padding: 12px; color: #facc15;">
                                     ${r.points ?? 0}
                                 </td>
-                            </tr>
-                        `).join('')}
+                            </tr>`;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>

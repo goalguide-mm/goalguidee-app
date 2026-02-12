@@ -388,41 +388,37 @@ async function loadStandings() {
 function renderStandings(data) {
     const list = document.getElementById("standings-list");
     let html = `
-        <table class="standings-table" style="border-collapse: separate; border-spacing: 0 8px; width: 100%;">
-            <thead>
-                <tr>
-                    <th style="text-align:center; width:60px; padding: 15px; color: #facc15; border: 1.5px solid #facc15; border-right: none; border-radius: 8px 0 0 8px;">#</th>
-                    <th style="padding: 15px; color: #facc15; border-top: 1.5px solid #facc15; border-bottom: 1.5px solid #facc15;">TEAM</th>
-                    <th style="text-align:center; padding: 15px; color: #facc15; border-top: 1.5px solid #facc15; border-bottom: 1.5px solid #facc15;">PL</th>
-                    <th style="text-align:center; padding: 15px; color: #facc15; border-top: 1.5px solid #facc15; border-bottom: 1.5px solid #facc15;">GD</th>
-                    <th class="pts-col" style="text-align:center; padding: 15px; color: #facc15; border: 1.5px solid #facc15; border-left: none; border-radius: 0 8px 8px 0;">PTS</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${data.map(r => `
-                    <tr style="background: #1a1d23;">
-                        <td style="text-align:center; font-weight:800; padding: 20px; border: 1.5px solid #facc15; border-right: none; border-radius: 10px 0 0 10px;">
-                            ${r.rank}
-                        </td>
-                        <td style="padding: 20px; border-top: 1.5px solid #facc15; border-bottom: 1.5px solid #facc15;">
-                            <div style="display:flex; align-items:center; gap:15px;">
-                                <img src="${r.team.logo}" width="35" height="35" style="object-fit:contain;">
-                                <span style="font-weight:700; color:#fff; font-size: 16px;">${r.team.name}</span>
-                            </div>
-                        </td>
-                        <td style="text-align:center; font-weight:600; padding: 20px; border-top: 1.5px solid #facc15; border-bottom: 1.5px solid #facc15;">
-                            ${r.all?.played ?? 0}
-                        </td>
-                        <td style="text-align:center; font-weight:600; padding: 20px; border-top: 1.5px solid #facc15; border-bottom: 1.5px solid #facc15;">
-                            ${r.goalsDiff ?? 0}
-                        </td>
-                        <td class="pts-col" style="text-align:center; font-weight:900; font-size:18px; padding: 20px; border: 1.5px solid #facc15; border-left: none; border-radius: 0 10px 10px 0;">
-                            ${r.points ?? 0}
-                        </td>
+        <div style="border: 2px solid #facc15; border-radius: 12px; overflow: hidden; background: #1a1d23; max-width: 800px; margin: 20px auto;">
+            <table class="standings-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead>
+                    <tr style="background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.3);">
+                        <th style="text-align:center; width:50px; padding: 12px; color: #facc15; font-size: 13px;">#</th>
+                        <th style="text-align:left; padding: 12px; color: #facc15; font-size: 13px;">TEAM</th>
+                        <th style="text-align:center; padding: 12px; color: #facc15; font-size: 13px;">PL</th>
+                        <th style="text-align:center; padding: 12px; color: #facc15; font-size: 13px;">GD</th>
+                        <th class="pts-col" style="text-align:center; padding: 12px; color: #facc15; font-size: 13px;">PTS</th>
                     </tr>
-                `).join('')}
-            </tbody>
-        </table>`;
+                </thead>
+                <tbody>
+                    ${data.map((r, index) => `
+                        <tr style="${index !== data.length - 1 ? 'border-bottom: 1px solid rgba(255,255,255,0.05);' : ''}">
+                            <td style="text-align:center; font-weight:700; padding: 15px; color: #9ca3af;">${r.rank}</td>
+                            <td style="padding: 15px;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <img src="${r.team.logo}" width="28" height="28" style="object-fit:contain;">
+                                    <span style="font-weight:700; color:#fff; font-size: 14px;">${r.team.name}</span>
+                                </div>
+                            </td>
+                            <td style="text-align:center; font-weight:600; padding: 15px; color: #e5e7eb;">${r.all?.played ?? 0}</td>
+                            <td style="text-align:center; font-weight:600; padding: 15px; color: #e5e7eb;">${r.goalsDiff ?? 0}</td>
+                            <td class="pts-col" style="text-align:center; font-weight:800; font-size:16px; padding: 15px; color: #facc15;">
+                                ${r.points ?? 0}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>`;
     list.innerHTML = html;
 }
   

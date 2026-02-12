@@ -388,46 +388,47 @@ async function loadStandings() {
 function renderStandings(data) {
     if (!data || data.length === 0) return;
     
-    // ပထမဆုံး data ထဲကနေ League အချက်အလက်ကို ယူခြင်း
-    const leagueInfo = data[0].league || { name: "League", logo: "" };
+    // League အချက်အလက်ယူခြင်း (Logo ရော Name ရော ပါအောင်)
+    const leagueName = data[0].league?.name || "LEAGUE";
+    const leagueLogo = data[0].league?.logo || "";
     const list = document.getElementById("standings-list");
 
     let html = `
-        <div style="max-width: 800px; margin: 20px auto;">
+        <div style="max-width: 600px; margin: 15px auto;">
             
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; 
-                        padding: 15px; background: rgba(26, 29, 35, 0.9); 
-                        border: 2px solid #facc15; border-radius: 12px; margin-bottom: 15px;">
-                <img src="${leagueInfo.logo}" width="40" height="40" style="object-fit: contain;">
-                <h2 style="color: #facc15; margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 1px;">
-                    ${leagueInfo.name.toUpperCase()} STANDINGS
-                </h2>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; 
+                        padding: 10px; background: rgba(26, 29, 35, 0.8); 
+                        border: 1.5px solid #facc15; border-radius: 8px; margin-bottom: 10px;">
+                ${leagueLogo ? `<img src="${leagueLogo}" width="30" height="30" style="object-fit: contain;">` : ''}
+                <span style="color: #facc15; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 1px;">
+                    ${leagueName.toUpperCase()} STANDINGS
+                </span>
             </div>
 
-            <div style="border: 2px solid #facc15; border-radius: 12px; overflow: hidden; background: #1a1d23;">
+            <div style="border: 1.5px solid #facc15; border-radius: 10px; overflow: hidden; background: #1a1d23;">
                 <table class="standings-table" style="width: 100%; border-collapse: collapse; margin: 0;">
                     <thead>
                         <tr style="background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.3);">
-                            <th style="text-align:center; width:50px; padding: 12px; color: #facc15; font-size: 13px;">#</th>
-                            <th style="text-align:left; padding: 12px; color: #facc15; font-size: 13px;">TEAM</th>
-                            <th style="text-align:center; padding: 12px; color: #facc15; font-size: 13px;">PL</th>
-                            <th style="text-align:center; padding: 12px; color: #facc15; font-size: 13px;">GD</th>
-                            <th class="pts-col" style="text-align:center; padding: 12px; color: #facc15; font-size: 13px;">PTS</th>
+                            <th style="text-align:center; width:60px; padding: 10px; color: #facc15; font-size: 13px;">အဆင့်</th>
+                            <th style="text-align:left; padding: 10px; color: #facc15; font-size: 13px;">TEAM</th>
+                            <th style="text-align:center; padding: 10px; color: #facc15; font-size: 13px;">PL</th>
+                            <th style="text-align:center; padding: 10px; color: #facc15; font-size: 13px;">GD</th>
+                            <th class="pts-col" style="text-align:center; padding: 10px; color: #facc15; font-size: 13px;">PTS</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${data.map((r, index) => `
                             <tr style="${index !== data.length - 1 ? 'border-bottom: 1px solid rgba(255,255,255,0.05);' : ''}">
-                                <td style="text-align:center; font-weight:700; padding: 15px; color: #9ca3af;">${r.rank}</td>
-                                <td style="padding: 15px;">
-                                    <div style="display:flex; align-items:center; gap:12px;">
-                                        <img src="${r.team.logo}" width="28" height="28" style="object-fit:contain;">
-                                        <span style="font-weight:700; color:#fff; font-size: 14px;">${r.team.name}</span>
+                                <td style="text-align:center; font-weight:700; padding: 12px; color: #9ca3af; font-size: 13px;">${r.rank}</td>
+                                <td style="padding: 12px;">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <img src="${r.team.logo}" width="25" height="25" style="object-fit:contain;">
+                                        <span style="font-weight:700; color:#fff; font-size: 13px;">${r.team.name}</span>
                                     </div>
                                 </td>
-                                <td style="text-align:center; font-weight:600; padding: 15px; color: #e5e7eb;">${r.all?.played ?? 0}</td>
-                                <td style="text-align:center; font-weight:600; padding: 15px; color: #e5e7eb;">${r.goalsDiff ?? 0}</td>
-                                <td class="pts-col" style="text-align:center; font-weight:800; font-size:16px; padding: 15px; color: #facc15;">
+                                <td style="text-align:center; font-weight:600; padding: 12px; color: #e5e7eb; font-size: 13px;">${r.all?.played ?? 0}</td>
+                                <td style="text-align:center; font-weight:600; padding: 12px; color: #e5e7eb; font-size: 13px;">${r.goalsDiff ?? 0}</td>
+                                <td class="pts-col" style="text-align:center; font-weight:800; font-size:14px; padding: 12px; color: #facc15;">
                                     ${r.points ?? 0}
                                 </td>
                             </tr>

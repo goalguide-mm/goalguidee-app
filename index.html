@@ -444,10 +444,11 @@ async function loadMatches() {
     try {
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
-        allMatchesData = result;
+        // Array စစ်ဆေးခြင်းအပိုင်း
+        allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error.</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Loading Data.</p>`;
     }
 }
 
@@ -511,7 +512,7 @@ async function loadLive() {
         return;
     }
     list.innerHTML = liveMatches.map(m => `
-        <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;" onclick="openVideo('https://www.youtube.com/embed/live_stream?channel=YOUR_CHANNEL_ID')">
+        <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;" onclick="openVideo('${m.stream_url}')">
             <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px; text-align: center; width: 100%;">
                 ${m.league.name.toUpperCase()}
             </div>
@@ -623,8 +624,8 @@ async function loadStandings() {
 
 function renderStandings(data) {
     if (!data || data.length === 0) return;
-    const leagueName = data[0].league?.name || "LEAGUE";
-    const leagueLogo = data[0].league?.logo || "";
+    const leagueName = data[0].league?.name || "PREMIER LEAGUE";
+    const leagueLogo = data[0].league?.logo || "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg";
     const list = document.getElementById("standings-list");
     
     let html = `<div style="max-width: 600px; margin: 10px auto;">
@@ -703,7 +704,11 @@ function filterBySearch(val) {
 
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
-function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
+function openVideo(url) { 
+  if(!url || url === 'undefined') { alert('Live stream not available yet.'); return; }
+  document.getElementById("mainModal").style.display = "flex"; 
+  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
+}
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
 window.onload = loadMatches;

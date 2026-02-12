@@ -387,9 +387,34 @@ async function loadStandings() {
 
 function renderStandings(data) {
     const list = document.getElementById("standings-list");
-    let html = `<table class="standings-table">
-            <thead><tr><th>#</th><th>TEAM</th><th>PL</th><th>GD</th><th class="pts-col">PTS</th></tr></thead>
-            <tbody>${data.map(r => `<tr><td>${r.rank}</td><td><img src="${r.team.logo}" width="20"> ${r.team.name}</td><td>${r.all?.played ?? 0}</td><td>${r.goalsDiff ?? 0}</td><td class="pts-col">${r.points ?? 0}</td></tr>`).join('')}</tbody></table>`;
+    let html = `
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th style="text-align:center; width:40px;">#</th>
+                    <th>TEAM</th>
+                    <th style="text-align:center;">PL</th>
+                    <th style="text-align:center;">GD</th>
+                    <th class="pts-col" style="text-align:center;">PTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.map(r => `
+                    <tr>
+                        <td style="text-align:center; font-weight:800; color:#9ca3af;">${r.rank}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <img src="${r.team.logo}" width="28" height="28" style="object-fit:contain;">
+                                <span style="font-weight:700; color:#fff;">${r.team.name}</span>
+                            </div>
+                        </td>
+                        <td style="text-align:center; font-weight:600;">${r.all?.played ?? 0}</td>
+                        <td style="text-align:center; font-weight:600;">${r.goalsDiff ?? 0}</td>
+                        <td class="pts-col" style="text-align:center; font-weight:800; font-size:15px;">${r.points ?? 0}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>`;
     list.innerHTML = html;
 }
 

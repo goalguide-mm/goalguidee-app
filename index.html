@@ -203,6 +203,7 @@
   .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.5); }
   @keyframes blink { 50% { opacity: 0.5; } }
 
+  /* 3D Navigation ပြင်ဆင်ချက် */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -225,17 +226,25 @@
     background: #1f2937;
     color: #fff;
     display: inline-block;
-    box-shadow: 0 4px 0px #9a7d0a;
-    transition: 0.2s;
+    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect shadow */
+    transition: all 0.1s ease;
   }
   
   .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
-  .nav-item.active span { background: rgba(250, 204, 21, 0.3); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; color: #facc15; }
+  .nav-item.active span { 
+    background: rgba(250, 204, 21, 0.3); 
+    transform: translateY(3px); /* Pressed effect */
+    box-shadow: 0 1px 0px #9a7d0a; 
+    color: #facc15; 
+  }
 
   .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
+  
+  /* Table Alignment ပြင်ဆင်ချက် */
   .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; border: 1.5px solid #facc15; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: left; border-bottom: 1.5px solid #facc15; }
-  .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; }
+  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: center; border-bottom: 1.5px solid #facc15; }
+  .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; text-align: center; }
+  .standings-table td.team-cell { text-align: left; }
   .pts-col { font-weight: 800; color: #facc15; }
 
   .content-section { 
@@ -251,12 +260,11 @@
   .content-section.active { display: block; }
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  /* ဤနေရာတွင် Modal Background ကို အမည်းမဖြစ်အောင် ပြင်ဆင်ထားသည် */
   .modal { 
     display: none; 
     position: fixed; 
     inset: 0; 
-    background: transparent; /* နောက်ခံအမည်းကြီးကို ဖယ်ရှားလိုက်သည် */
+    background: transparent; 
     align-items: center; 
     justify-content: center; 
     z-index: 3000; 
@@ -271,15 +279,14 @@
     border: 2px solid #facc15; 
     max-height: 95vh; 
     overflow-y: auto; 
-    box-shadow: 0 0 30px rgba(0,0,0,0.8); /* Modal ပေါ်လာတာ သိသာအောင် shadow ထည့်ထားသည် */
+    box-shadow: 0 0 30px rgba(0,0,0,0.8); 
   }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 
-  /* Pitch Section - အလျားကို ပိုရှည်အောင် ပြုပြင်ထားသည် */
   .pitch-container { 
     background: #121212; 
     width: 100%; 
-    aspect-ratio: 21 / 9; /* အလျားကို ပိုရှည်စေရန် */
+    aspect-ratio: 21 / 9; 
     position: relative; 
     border: 2px solid #333; 
     border-radius: 8px;
@@ -570,7 +577,47 @@ function renderStandings(data) {
     const leagueName = data[0].league?.name || "LEAGUE";
     const leagueLogo = data[0].league?.logo || "";
     const list = document.getElementById("standings-list");
-    let html = `<div style="max-width: 600px; margin: 10px auto;"><div style="display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; background:#1a1d23; border:1.5px solid #facc15; border-radius:30px; margin-bottom:8px;"><img src="${leagueLogo}" width="25"> <span style="color:#facc15; font-size:15px; font-weight:900;">${leagueName.toUpperCase()} STANDINGS</span></div><div style="border:1.5px solid #facc15; border-radius:10px; overflow:hidden; background:#1a1d23;"><table class="standings-table" style="width:100%; border-collapse:collapse;"><thead><tr style="background:rgba(250,204,21,0.1); border-bottom:1px solid rgba(250,204,21,0.3);"><th style="padding:10px; color:#facc15;">RANK</th><th style="padding:10px; color:#facc15;">TEAM</th><th style="padding:10px; color:#facc15;">PL</th><th style="padding:10px; color:#facc15;">GF-GA</th><th style="padding:10px; color:#facc15;">PTS</th></tr></thead><tbody>${data.map(r => `<tr><td style="text-align:center; padding:12px;">${r.rank}</td><td style="padding:12px;"><div style="display:flex; align-items:center; gap:10px;"><img src="${r.team.logo}" width="24"><span>${r.team.name}</span></div></td><td style="text-align:center;">${r.all?.played}</td><td style="text-align:center;">${r.all?.goals?.for}:${r.all?.goals?.against}</td><td style="text-align:center; color:#facc15; font-weight:900;">${r.points}</td></tr>`).join('')}</tbody></table></div></div>`;
+    
+    let html = `<div style="max-width: 600px; margin: 10px auto;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; background:#1a1d23; border:1.5px solid #facc15; border-radius:30px; margin-bottom:8px;">
+            <img src="${leagueLogo}" width="25"> 
+            <span style="color:#facc15; font-size:15px; font-weight:900;">${leagueName.toUpperCase()} STANDINGS</span>
+        </div>
+        <div style="border:1.5px solid #facc15; border-radius:10px; overflow:hidden; background:#1a1d23;">
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">RANK</th>
+                        <th style="width: 45%; text-align: left;">TEAM</th>
+                        <th style="width: 10%;">PL</th>
+                        <th style="width: 20%;">GF-GA</th>
+                        <th style="width: 10%;">PTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(r => {
+                        // Undefined မဖြစ်အောင် data structure စစ်ထုတ်ခြင်း
+                        const played = r.all?.played ?? 0;
+                        const goalsFor = r.all?.goals?.for ?? r.goalsFor ?? 0;
+                        const goalsAgainst = r.all?.goals?.against ?? r.goalsAgainst ?? 0;
+                        
+                        return `<tr>
+                            <td>${r.rank}</td>
+                            <td class="team-cell">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <img src="${r.team.logo}" width="24" height="24" style="object-fit:contain;">
+                                    <span>${r.team.name}</span>
+                                </div>
+                            </td>
+                            <td>${played}</td>
+                            <td>${goalsFor}:${goalsAgainst}</td>
+                            <td class="pts-col">${r.points}</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
     list.innerHTML = html;
 }
 

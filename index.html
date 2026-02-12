@@ -18,12 +18,12 @@
     background-size: 300px;
     background-attachment: fixed;
     color: #fff;
-    padding-bottom: 80px;
+    /* --- ပြင်ဆင်ချက်- Body ကို scroll ပိတ်ပြီး Screen အပြည့်ယူခိုင်းခြင်း --- */
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
     
     border: 3px solid #facc15; /* ရွှေရောင်ဘောင် */
-    min-height: 100vh;         /* Screen အပြည့် ဖြစ်နေစေရန် */
-    margin: 8px;               /* Screen အစွန်းကနေ နည်းနည်းခွာရန် */
-    border-radius: 15px;       /* ဘောင်အနားတွေကို ဝိုင်းရန် */
     box-shadow: inset 0 0 15px rgba(250, 204, 21, 0.2); /* ဘောင်ကို အလင်းဖျော့လေး ထည့်ရန် */
   }
 
@@ -34,8 +34,10 @@
     padding: 12px 20px;
     background: rgba(17, 24, 39, 0.95);
     backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
+    /* --- ပြင်ဆင်ချက်- Header ကို အပေါ်မှာ အသေကပ်ထားခြင်း --- */
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 70px;
     z-index: 1050;
     border-bottom: 2px solid #facc15; /* ရွှေရောင် အောက်လိုင်း */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
@@ -79,11 +81,11 @@
     display: flex;
     align-items: center;
     background: #1a1d23;
-    padding: 10px 20px; /* အဝိုင်းနဲ့လိုက်အောင် padding နည်းနည်းတိုးထားသည် */
+    padding: 10px 20px; 
     max-width: 600px; 
     margin: 15px auto;
-    border-radius: 30px; /* ထောင့်ဝိုင်းဝိုင်းဖြစ်အောင် ပြင်လိုက်ပါပြီ */
-    border: 1px solid #facc15; /* ရွှေရောင်ဘောင် */
+    border-radius: 30px; 
+    border: 1px solid #facc15; 
     gap: 10px;
   }
 
@@ -113,7 +115,7 @@
     border: 1px solid #facc15;
     color: #fff;
     padding: 5px 8px;
-    border-radius: 15px; /* input အကွက်လေးကိုပါ အဝိုင်းနဲ့လိုက်အောင် ထောင့်ဝိုင်းလိုက်ပါသည် */
+    border-radius: 15px; 
     font-size: 12px;
     outline: none;
     width: 120px;
@@ -129,13 +131,12 @@
     margin-bottom: 20px;
     background: #1a1d23;
     border-radius: 8px;
-    border: 1.5px solid #facc15; /* ရွှေရောင်ဘောင် */
-    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect အောက်ခံရိပ် */
+    border: 1.5px solid #facc15; 
+    box-shadow: 0 4px 0px #9a7d0a; 
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
-  /* 3D ဖောင်းကြွ effect ဖြစ်အောင်ပြင်ထားမှု */
   .league-card:hover {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 8px 0px #facc15;
@@ -151,7 +152,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    /* League Header ကို ဘောင်ထဲထည့်ရန် border အောက်မှာထပ်ထည့်ထားသည် */
     border-bottom: 1px solid #facc15;
   }
   
@@ -166,7 +166,6 @@
     background: #1a1d23;
   }
 
-  /* Logo တွေ ညီသွားအောင် fixed width ပေးထားသည် */
   .team-row { display: flex; align-items: center; gap: 10px; width: 100%; }
   .match .team-row.home { justify-content: flex-end; text-align: right; }
   .match .team-row.away { justify-content: flex-start; text-align: left; }
@@ -188,6 +187,12 @@
     font-weight: 900; 
     color: #facc15; 
     letter-spacing: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    min-width: 80px; 
   }
 
   .time-status {
@@ -202,6 +207,7 @@
 
   .bottom-nav {
     position: fixed;
+    /* --- ပြင်ဆင်ချက်- Bottom Nav ကို အောက်မှာ အသေကပ်ထားခြင်း --- */
     bottom: 0; left: 0; right: 0;
     height: 75px;
     background: #111827;
@@ -225,16 +231,6 @@
     box-shadow: 0 4px 0px #9a7d0a;
     transition: 0.2s;
   }
-
-  /* ရလဒ်ကို တစ်တန်းတည်းဖြစ်အောင် ထိန်းချုပ်ခြင်း */
-    .score-box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px; /* ဂဏန်းနဲ့ - ကြား အကွာအဝေး */
-    white-space: nowrap; /* စာသားကို အောက်တစ်ကြောင်း ဆင်းမသွားအောင် တားဆီးခြင်း */
-    min-width: 80px; 
-}
   
   .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
   .nav-item.active span { background: rgba(250, 204, 21, 0.3); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; color: #facc15; }
@@ -245,7 +241,17 @@
   .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; }
   .pts-col { font-weight: 800; color: #facc15; }
 
-  .content-section { display: none; }
+  /* --- ပြင်ဆင်ချက်- Content Section ကို Scroll ဆွဲလို့ရအောင် သတ်မှတ်ခြင်း --- */
+  .content-section { 
+    display: none; 
+    position: absolute;
+    top: 70px;    /* Header height */
+    bottom: 75px; /* Bottom Nav height */
+    left: 0; right: 0;
+    overflow-y: auto;
+    padding-bottom: 20px;
+    -webkit-overflow-scrolling: touch; /* Mobile ချောမွေ့စေရန် */
+  }
   .content-section.active { display: block; }
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
@@ -407,12 +413,11 @@ function renderStandings(data) {
                 display: flex; align-items: center; justify-content: center; gap: 10px; 
                 padding: 10px; background: #1a1d23; 
                 border: 1.5px solid #facc15; border-radius: 30px; 
-                margin-bottom: 8px; /* အကွာအဝေးကို အစ်ကိုပြောသလို လျှော့လိုက်ပါပြီ */
+                margin-bottom: 8px; 
                 transition: all 0.3s ease;
                 cursor: pointer;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             }
-            /* Mouse ထောက်လိုက်ရင် 3D ဖောင်းကြွဖြစ်လာစေမည့်အပိုင်း */
             .league-header-3d:hover {
                 transform: translateY(-3px) scale(1.01);
                 box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 10px rgba(250,204,21,0.2);

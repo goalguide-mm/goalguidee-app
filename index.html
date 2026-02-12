@@ -412,7 +412,6 @@ function renderMatches(matches) {
             } else if(isFinished) {
                 statusText = "FT";
             } else {
-                // ပွဲမစရသေးရင် အချိန်ပြရန် (Timestamp ရှိရင် အချိန်ပြောင်းမယ်)
                 if(m.startTimestamp) {
                     const date = new Date(m.startTimestamp * 1000);
                     statusText = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -443,6 +442,7 @@ async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
     
+    // matches-list ထဲက live ဖြစ်နေတဲ့ပွဲတွေကို စစ်ထုတ်တယ်
     const liveMatches = allMatchesData.filter(m => m.status?.type === 'inprogress');
     
     if(liveMatches.length === 0) {
@@ -454,7 +454,7 @@ async function loadLive() {
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>2025/26 ဇယားများ ဆွဲယူနေပါသည်...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဇယားများ ဆွဲယူနေပါသည်...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/standings`); 
         const data = await response.json();
@@ -470,7 +470,7 @@ function renderStandings(data) {
     }
 
     let html = `<div class="league-card">
-            <div class="league-header"><span>Premier League Table 2024/25</span></div>
+            <div class="league-header"><span>Premier League Table</span></div>
             <div style="overflow-x: auto;">
                 <table class="standings-table">
                     <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col">PTS</th></tr></thead>
@@ -495,13 +495,15 @@ async function loadHighlights() {
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
-        const items = Array.isArray(data) ? data : (data.response || []);
+        // Worker ကနေပြန်ပေးတဲ့ Array ကို တိုက်ရိုက်ယူတယ်
+        const items = Array.isArray(data) ? data : [];
+        
         listContainer.innerHTML = items.map(h => `
-            <div class="video-card" onclick="openVideo('${h.url || h.matchviewUrl}')">
+            <div class="video-card" onclick="openVideo('${h.url}')">
                 <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
                 <div class="title-box">${h.title}</div>
             </div>`).join('');
-    } catch(e) { listContainer.innerHTML = "Error loading highlights."; }
+    } catch(e) { listContainer.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading highlights.</p>"; }
 }
 
 function filterBySearch(val) {
@@ -523,10 +525,13 @@ function changeDate(n) {
 }
 
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
+
 function openVideo(url) { 
     document.getElementById("mainModal").style.display = "flex"; 
+    // Embed code အတွက် iframe ထည့်သွင်းခြင်း
     document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
+
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
 function renderMatchesInGrid(matches, containerId) {
@@ -542,7 +547,7 @@ function renderMatchesInGrid(matches, containerId) {
                     <div style="font-weight:800; font-size:13px; margin-top:5px;">${m.homeTeam?.name}</div>
                 </div>
                 <div style="font-weight:900; color:#facc15; font-size:24px; flex:1; text-align:center;">
-                    ${m.homeScore?.current} - ${m.awayScore?.current}
+                    ${m.homeScore?.current ?? 0} - ${m.awayScore?.current ?? 0}
                 </div>
                 <div style="text-align:center; flex:1;">
                     <img src="${getLogo(m.awayTeam?.id)}" width="35">

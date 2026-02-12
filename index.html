@@ -218,6 +218,17 @@
     box-shadow: 0 4px 0px #9a7d0a;
     transition: 0.2s;
   }
+
+  /* ရလဒ်ကို တစ်တန်းတည်းဖြစ်အောင် ထိန်းချုပ်ခြင်း */
+    .score-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* ဂဏန်းနဲ့ - ကြား အကွာအဝေး */
+    white-space: nowrap; /* စာသားကို အောက်တစ်ကြောင်း ဆင်းမသွားအောင် တားဆီးခြင်း */
+    min-width: 80px; 
+}
+  
   .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
   .nav-item.active span { background: rgba(250, 204, 21, 0.3); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; color: #facc15; }
 
@@ -412,14 +423,21 @@ function renderMatchesInGrid(matches, containerId) {
                 ${m.league.name.toUpperCase()}
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: nowrap;">
                 <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;">
                     <img src="${m.teams.home.logo}" width="35">
                     <span style="font-size:12px; font-weight:800; color:#fff;">${m.teams.home.name}</span>
                 </div>
 
-                <div style="font-size:22px; font-weight:900; color:#facc15; margin:0 10px;">
-                    ${m.goals.home} - ${m.goals.away}
+                <div style="display:flex; flex-direction:column; align-items:center; min-width:100px;">
+                    <div style="font-size:22px; font-weight:900; color:#facc15; display:flex; gap:8px;">
+                        <span>${m.goals.home}</span>
+                        <span>-</span>
+                        <span>${m.goals.away}</span>
+                    </div>
+                    <div class="status-live" style="font-size:12px; font-weight:800;">
+                        LIVE ${m.fixture.status.elapsed}'
+                    </div>
                 </div>
 
                 <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;">
@@ -427,14 +445,10 @@ function renderMatchesInGrid(matches, containerId) {
                     <span style="font-size:12px; font-weight:800; color:#fff;">${m.teams.away.name}</span>
                 </div>
             </div>
-
-            <div class="status-live" style="font-size:12px; margin-top:10px; font-weight:800;">
-                LIVE ${m.fixture.status.elapsed}'
-            </div>
         </div>
     `).join('');
 }
-
+  
 function filterBySearch(val) {
     const query = val.toLowerCase();
     const filtered = allMatchesData.filter(m => (m.teams.home.name.toLowerCase().includes(query)) || (m.teams.away.name.toLowerCase().includes(query)) || (m.league.name.toLowerCase().includes(query)));

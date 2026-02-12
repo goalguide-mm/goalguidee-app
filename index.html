@@ -393,50 +393,44 @@ async function loadMatches() {
     }
 }
 
+// Matches Card ပြင်ဆင်ခြင်း (NS, FT, LIVE အကုန်ပါတယ်)
 function renderMatches(matches) {
     let html = "";
-    if (!matches || matches.length === 0) {
-        document.getElementById("matches-list").innerHTML = '<p style="text-align:center;padding:40px;">ပွဲစဉ်များမရှိပါ။</p>';
-        return;
-    }
-    const grouped = matches.reduce((acc, m) => {
-        const league = m.tournament?.name || "Football";
-        if (!acc[league]) acc[league] = { name: league, logo: m.tournament?.uniqueTournament?.id || m.tournament?.id, matches: [] };
-        acc[league].matches.push(m);
-        return acc;
-    }, {});
+    matches.forEach(m => {
+        const status = m.fixture.status.short;
+        let scoreDisplay = "";
+        
+        if (status === "NS") {
+            const time = new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            scoreDisplay = `<span style="color:#888;">${time}</span>`;
+        } else {
+            scoreDisplay = `<span>${m.goals.home ?? 0} - ${m.goals.away ?? 0}</span>`;
+        }
 
-    for (let key in grouped) {
-        const league = grouped[key];
-        html += `<div class="league-card">
-            <div class="league-header">
-                <img src="${getLogo(league.logo, 'unique-tournament')}" onerror="this.style.display='none'">
-                <span>${league.name}</span>
-            </div>`;
-        league.matches.forEach(m => {
-            const hScore = m.homeScore?.display ?? m.homeScore?.current ?? 0;
-            const aScore = m.awayScore?.display ?? m.awayScore?.current ?? 0;
-            const isLive = m.status?.type === 'inprogress';
-            const status = isLive ? `<span class="status-live">LIVE ${m.status?.description || ''}</span>` : (m.status?.description || 'FT');
-            
-            html += `<div class="match">
-                <div class="time-status">${status}</div>
-                <div class="team-row">
-                    <span class="team-name">${m.homeTeam?.name}</span>
-                    <img src="${getLogo(m.homeTeam?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'">
+        html += `
+            <div class="match-card" style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1a; margin-bottom:10px; padding:15px; border-radius:8px;">
+                <div style="width:40%; text-align:right;">
+                    <span style="margin-right:10px;">${m.teams.home.name}</span>
+                    <img src="${m.teams.home.logo}" width="25">
                 </div>
-                <div class="score-box">${hScore} - ${aScore}</div>
-                <div class="team-row">
-                    <img src="${getLogo(m.awayTeam?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'">
-                    <span class="team-name">${m.awayTeam?.name}</span>
+                
+                <div style="width:20%; text-align:center;">
+                    <div style="font-weight:bold; font-size:1.2rem;">${scoreDisplay}</div>
+                    <div style="font-size:0.7rem; color:${status === '1H' ? '#ff4d4d' : '#888'};">
+                        ${status === 'NS' ? 'Upcoming' : (status === 'FT' ? 'FT' : m.fixture.status.elapsed + "'")}
+                    </div>
                 </div>
-            </div>`;
-        });
-        html += `</div>`;
-    }
+
+                <div style="width:40%; text-align:left;">
+                    <img src="${m.teams.away.logo}" width="25" style="margin-right:10px;">
+                    <span>${m.teams.away.name}</span>
+                </div>
+            </div>
+        `;
+    });
     document.getElementById("matches-list").innerHTML = html;
 }
-
+ 
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
@@ -461,30 +455,34 @@ async function loadStandings() {
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings.</p>"; }
 }
 
+// Standings Table ပြင်ဆင်ခြင်း
 function renderStandings(data) {
     const list = document.getElementById("standings-list");
-    if(!data || data.length === 0) {
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>ဒေတာမရှိပါ။</p>";
-        return;
-    }
-
-    let html = `<div class="league-card">
-            <div class="league-header"><span>Premier League Table 2025/26</span></div>
-            <div style="overflow-x: auto;">
-                <table class="standings-table">
-                    <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col">PTS</th></tr></thead>
-                    <tbody>${data.map(r => `
-                        <tr>
-                            <td class="rank">${r.position}</td>
-                            <td><div class="team-info"><img src="${getLogo(r.team?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'"><span>${r.team?.name}</span></div></td>
-                            <td style="text-align:center;">${r.matches || 0}</td>
-                            <td style="text-align:center;">${(r.scoresFor || 0) - (r.scoresAgainst || 0)}</td>
-                            <td class="pts-col" style="text-align:center;">${r.points || 0}</td>
-                        </tr>`).join('')}
-                    </tbody>
-                </table>
-            </div>
-        </div>`;
+    let html = `
+        <table style="width:100%; border-collapse: collapse; text-align: left;">
+            <tr style="background: #222; color: #facc15;">
+                <th style="padding: 10px;">#</th>
+                <th>TEAM</th>
+                <th>PL</th>
+                <th>GD</th>
+                <th>PTS</th>
+            </tr>
+            ${data.map(r => `
+                <tr style="border-bottom: 1px solid #333;">
+                    <td style="padding: 10px;">${r.rank}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${r.team.logo}" width="20">
+                            <span>${r.team.name}</span>
+                        </div>
+                    </td>
+                    <td>${r.all?.played ?? 0}</td>
+                    <td>${r.goalsDiff ?? 0}</td>
+                    <td style="color:#facc15; font-weight:bold;">${r.points ?? 0}</td>
+                </tr>
+            `).join('')}
+        </table>
+    `;
     list.innerHTML = html;
 }
 

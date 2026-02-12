@@ -7,191 +7,220 @@
 <title>GOAL GUIDE</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  /* စာလုံးအားလုံးကို Bold တင်ရန် ပြင်ဆင်မှု */
-  * { box-sizing: border-box; margin: 0; padding: 0; font-weight: 700; }
-  
-  body {
-    font-family: 'Inter', sans-serif;
-    background-color: #0b0f14;
-    background-image: linear-gradient(rgba(11, 15, 20, 0.9), rgba(11, 15, 20, 0.9)), 
-                      url('https://www.transparenttextures.com/patterns/football-no-fill.png'); 
-    background-size: 300px;
-    background-attachment: fixed;
-    color: #fff;
-    padding-bottom: 80px;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; font-weight: 700; }
 
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
-    background: rgba(17, 24, 39, 0.95);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-    z-index: 1050;
-    border-bottom: 2px solid #facc15; /* ရွှေရောင် အောက်လိုင်း */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0b0f14;
+  background-image: linear-gradient(rgba(11, 15, 20, 0.9), rgba(11, 15, 20, 0.9)), 
+                    url('https://www.transparenttextures.com/patterns/football-no-fill.png'); 
+  background-size: 300px;
+  background-attachment: fixed;
+  color: #fff;
+  padding-bottom: 80px;
+}
 
-  .logo-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .logo-wrapper:hover { transform: scale(1.05); }
-  
-  .logo-img { 
-    height: 45px; 
-    width: auto; 
-    object-fit: contain; 
-    border: 2px solid #facc15; 
-    border-radius: 50%; 
-  }
-  
-  .logo-text { font-weight: 800; color: #facc15; font-size: 24px; letter-spacing: -1px; }
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  border-bottom: 2px solid #facc15;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
 
-  .refresh-btn {
-    background: #facc15;
-    border: none;
-    color: #000;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
-    transition: 0.3s;
-  }
-  .refresh-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(250, 204, 21, 0.6); }
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.logo-wrapper:hover { transform: scale(1.05); }
 
-  .controls-wrapper {
-    display: flex;
-    align-items: center;
-    background: #1a1d23;
-    padding: 10px 15px;
-    max-width: 600px; 
-    margin: 15px auto;
-    border-radius: 10px;
-    border: 1px solid #facc15; /* ရွှေရောင်ဘောင် */
-    gap: 10px;
-  }
+.logo-img { 
+  height: 45px; 
+  width: auto; 
+  object-fit: contain; 
+  border: 2px solid #facc15; 
+  border-radius: 50%; 
+}
 
-  #teamSearch {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-right: 1px solid #facc15;
-    color: #fff;
-    padding: 8px;
-    font-size: 14px;
-    outline: none;
-  }
+.logo-text { font-weight: 800; color: #facc15; font-size: 24px; letter-spacing: -1px; }
 
-  .date-bar { display: flex; align-items: center; gap: 5px; }
-  .date-bar button {
-    background: transparent;
-    border: none;
-    color: #facc15;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  .date-bar input {
-    background: #252a32;
-    border: 1px solid #facc15;
-    color: #fff;
-    padding: 5px 8px;
-    border-radius: 5px;
-    font-size: 12px;
-    outline: none;
-    width: 120px;
-  }
+.refresh-btn {
+  background: #facc15;
+  border: none;
+  color: #000;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
+  transition: 0.3s;
+}
+.refresh-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(250, 204, 21, 0.6); }
 
-  #matches-list {
-    max-width: 600px; 
-    margin: 0 auto;
-    padding: 10px;
-  }
+.controls-wrapper {
+  display: flex;
+  align-items: center;
+  background: #1a1d23;
+  padding: 10px 15px;
+  max-width: 600px; 
+  margin: 15px auto;
+  border-radius: 10px;
+  border: 1px solid #facc15;
+  gap: 10px;
+}
 
-  .league-card {
-    margin-bottom: 20px;
-    background: #1a1d23;
-    border-radius: 8px;
-    border: 1.5px solid #facc15; /* ရွှေရောင်ဘောင် */
-    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect အောက်ခံရိပ် */
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+#teamSearch {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-right: 1px solid #facc15;
+  color: #fff;
+  padding: 8px;
+  font-size: 14px;
+  outline: none;
+}
 
-  .league-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 8px 0px #facc15;
-    z-index: 10;
-  }
+.date-bar { display: flex; align-items: center; gap: 5px; }
+.date-bar button {
+  background: transparent;
+  border: none;
+  color: #facc15;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.date-bar input {
+  background: #252a32;
+  border: 1px solid #facc15;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  outline: none;
+  width: 120px;
+}
 
-  /* League Header ကို အကွက်ထဲမှာ ဘောင်ခတ်ရန် ပြင်ဆင်မှု */
-  .league-header {
-    padding: 12px 15px;
-    font-size: 14px;
-    font-weight: 800;
-    background: #252a32;
-    color: #facc15;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1.5px solid #facc15; /* ခေါင်းစဉ်အောက် ဘောင်ခတ်ခြင်း */
-  }
-  
-  .league-header img { width: 24px; height: 24px; object-fit: contain; }
+#matches-list {
+  max-width: 600px; 
+  margin: 0 auto;
+  padding: 10px;
+}
 
-  .match {
-    display: grid;
-    grid-template-columns: 1fr 110px 1fr; /* Center space ကို သေချာညှိထားသည် */
-    align-items: center;
-    padding: 18px 10px;
-    border-bottom: 1px solid rgba(250, 204, 21, 0.15);
-    background: #1a1d23;
-  }
+.league-card {
+  margin-bottom: 20px;
+  background: #1a1d23;
+  border-radius: 8px;
+  border: 1.5px solid #facc15;
+  box-shadow: 0 4px 0px #9a7d0a;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-  /* Team logos တွေကို တစ်ဖက်စီ ညီအောင် align လုပ်ခြင်း */
-  .team-row { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-  .match .team-row.home { justify-content: flex-end; text-align: right; }
-  .match .team-row.away { justify-content: flex-start; text-align: left; }
+.league-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 8px 0px #facc15;
+  z-index: 10;
+}
 
-  .team-row img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
-  .team-name { font-size: 13px; font-weight: 700; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 🔥 League header fix */
+.league-header {
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  background: #252a32;
+  color: #facc15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid #facc15;
+  margin: 10px;
+  border-radius: 6px;
+}
 
-  .score-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-left: 1px solid rgba(250, 204, 21, 0.2);
-    border-right: 1px solid rgba(250, 204, 21, 0.2);
-    padding: 0 8px;
-  }
+.league-header img { 
+  width: 26px; 
+  height: 26px; 
+  object-fit: contain; 
+}
 
-  .score-box { 
-    font-size: 19px; 
-    font-weight: 900; 
-    color: #facc15; 
-    letter-spacing: 1.5px;
-  }
+/* 🔥 Team logo alignment fix */
+.match {
+  display: grid;
+  grid-template-columns: 1fr 110px 1fr;
+  align-items: center;
+  padding: 18px 10px;
+  border-bottom: 1px solid rgba(250, 204, 21, 0.15);
+  background: #1a1d23;
+}
 
-  .time-status {
-    font-size: 10px; 
-    color: #9ca3af;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.3); }
-  @keyframes blink { 50% { opacity: 0.6; } }
+.match .team-row.home {
+  justify-content: flex-end;
+}
+
+.match .team-row.away {
+  justify-content: flex-start;
+}
+
+.team-row img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  display: block;
+}
+
+.team-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e5e7eb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-left: 1px solid rgba(250, 204, 21, 0.2);
+  border-right: 1px solid rgba(250, 204, 21, 0.2);
+  padding: 0 8px;
+}
+
+.score-box { 
+  font-size: 19px; 
+  font-weight: 900; 
+  color: #facc15; 
+  letter-spacing: 1.5px;
+}
+
+.time-status {
+  font-size: 10px; 
+  color: #9ca3af;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.status-live { color: #ff4d4d; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0.6; } }
 
   .bottom-nav {
     position: fixed;

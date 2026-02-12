@@ -264,7 +264,7 @@
     display: none; 
     position: fixed; 
     inset: 0; 
-    background: transparent; 
+    background: rgba(0,0,0,0.8); 
     align-items: center; 
     justify-content: center; 
     z-index: 3000; 
@@ -596,7 +596,6 @@ function renderStandings(data) {
                 </thead>
                 <tbody>
                     ${data.map(r => {
-                        // Undefined မဖြစ်အောင် data structure စစ်ထုတ်ခြင်း
                         const played = r.all?.played ?? 0;
                         const goalsFor = r.all?.goals?.for ?? r.goalsFor ?? 0;
                         const goalsAgainst = r.all?.goals?.against ?? r.goalsAgainst ?? 0;
@@ -621,15 +620,30 @@ function renderStandings(data) {
     list.innerHTML = html;
 }
 
+// Highlights (GOALS) ပေါ်အောင် ပြင်ဆင်ထားသည့် အပိုင်း
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading...</p>";
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
+        // API Response ထဲက response array ကို ခေါ်ယူခြင်း
         const items = Array.isArray(data) ? data : (data.response || []);
-        listContainer.innerHTML = items.map(h => `<div class="league-card" style="padding:10px;" onclick="openVideo('${h.url || h.matchviewUrl}')"><img src="${h.thumbnail}" style="width:100%;border-radius:5px;"><div style="font-size:12px;margin-top:5px;">${h.title}</div></div>`).join('');
-    } catch(e) { listContainer.innerHTML = "Error."; }
+        
+        if (items.length === 0) {
+            listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No highlights available.</p>";
+            return;
+        }
+
+        listContainer.innerHTML = items.map(h => `
+            <div class="league-card" style="padding:10px;" onclick="openVideo('${h.url || h.matchviewUrl}')">
+                <img src="${h.thumbnail}" style="width:100%;border-radius:5px;" onerror="this.src='https://via.placeholder.com/300x169?text=No+Thumbnail'">
+                <div style="font-size:12px;margin-top:5px;text-align:center;">${h.title}</div>
+            </div>
+        `).join('');
+    } catch(e) { 
+        listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:red;'>Error loading highlights.</p>"; 
+    }
 }
 
 function filterBySearch(val) {

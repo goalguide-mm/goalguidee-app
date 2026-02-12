@@ -241,7 +241,7 @@
   .content-section { 
     display: none; 
     position: absolute;
-    top: 70px;    
+    top: 70px;     
     bottom: 75px; 
     left: 0; right: 0;
     overflow-y: auto;
@@ -255,14 +255,56 @@
   .modal-content { width: 95%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; max-height: 90vh; overflow-y: auto; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 
-  /* Pitch Styles */
-  .pitch-container { background: #1a1d23; width: 100%; aspect-ratio: 3/4; position: relative; border: 1px solid #333; overflow: hidden; }
-  .player-icon { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .player-circle { width: 28px; height: 28px; background: #252a32; border: 2px solid #facc15; border-radius: 50%; position: relative; }
-  .player-rating-badge { position: absolute; top: -10px; right: -10px; width: 18px; height: 18px; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; }
+  /* Pitch New Design (ပုံစံအသစ်) */
+  .pitch-container { 
+    background: #121212; 
+    width: 100%; 
+    aspect-ratio: 3/4; 
+    position: relative; 
+    border: 2px solid #333; 
+    border-radius: 8px;
+    margin-top: 10px;
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, rgba(250, 204, 21, 0.05) 0%, transparent 70%);
+  }
+  
+  /* Pitch Lines */
+  .pitch-line { position: absolute; border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: none; }
+  .pitch-center-circle { position: absolute; top: 50%; left: 50%; width: 80px; height: 80px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(-50%, -50%); }
+  .pitch-half-line { position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255, 255, 255, 0.1); }
+
+  /* Player Styling */
+  .player-icon { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease; }
+  .player-avatar { 
+    width: 35px; height: 35px; 
+    background: #252a32; 
+    border: 2px solid #facc15; 
+    border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background-size: cover;
+    background-position: center;
+  }
+  .player-rating-badge { 
+    position: absolute; top: -8px; right: -8px; 
+    min-width: 18px; height: 18px; 
+    border-radius: 4px; font-size: 9px; 
+    display: flex; align-items: center; justify-content: center; 
+    color: #000; font-weight: 900;
+    padding: 0 2px;
+  }
   .rating-green { background: #22c55e; }
-  .rating-orange { background: #f97316; }
-  .player-name-txt { color: #fff; font-size: 9px; text-align: center; width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
+  .rating-orange { background: #facc15; }
+  
+  .player-name-txt { 
+    color: #fff; font-size: 10px; text-align: center; 
+    width: 70px; margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    text-shadow: 1px 1px 2px #000;
+    background: rgba(0,0,0,0.4);
+    border-radius: 4px;
+  }
 </style>
 </head>
 <body>
@@ -387,7 +429,6 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
-// Live Section ပြင်ဆင်ချက် - Lineup မပါဘဲ Video သီးသန့်
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
@@ -420,27 +461,60 @@ async function loadLive() {
     `).join('');
 }
 
-// Matches Section အတွက် Test Lineup Logic
+// Lineup Logic ပြင်ဆင်ချက်
 function openTestLineup(home, away, hLogo, aLogo) {
     const modal = document.getElementById("mainModal");
     modal.style.display = "flex";
-    const players = ["Player A", "Player B", "Player C", "Player D", "Player E", "Player F", "Player G", "Player H", "Player I", "Player J", "GK"];
     
-    let homePlayersHtml = players.map((p, i) => `<div class="player-icon" style="left:${(i%4+1)*20}%; top:${65 + Math.floor(i/4)*10}%;"><div class="player-circle"><div class="player-rating-badge rating-green">${(Math.random()*(9-7)+7).toFixed(1)}</div></div><div class="player-name-txt">${p}</div></div>`).join('');
-    let awayPlayersHtml = players.map((p, i) => `<div class="player-icon" style="left:${(i%4+1)*20}%; top:${10 + Math.floor(i/4)*10}%;"><div class="player-circle"><div class="player-rating-badge rating-orange">${(Math.random()*(7-6)+6).toFixed(1)}</div></div><div class="player-name-txt">${p}</div></div>`).join('');
+    // ပုံထဲကလို နေရာချထားမှုအတွက် coordinates များ
+    const homePos = [
+      {t: 85, l: 50}, {t: 70, l: 20}, {t: 70, l: 40}, {t: 70, l: 60}, {t: 70, l: 80},
+      {t: 55, l: 30}, {t: 55, l: 70}, {t: 55, l: 50}, {t: 42, l: 25}, {t: 42, l: 75}, {t: 35, l: 50}
+    ];
+    const awayPos = [
+      {t: 10, l: 50}, {t: 25, l: 20}, {t: 25, l: 40}, {t: 25, l: 60}, {t: 25, l: 80},
+      {t: 35, l: 30}, {t: 35, l: 70}, {t: 40, l: 50}, {t: 48, l: 25}, {t: 48, l: 75}, {t: 55, l: 50}
+    ];
+
+    const players = ["Player", "Player", "Player", "Player", "Player", "Player", "Player", "Player", "Player", "Player", "GK"];
+    
+    let homePlayersHtml = homePos.map((pos, i) => `
+      <div class="player-icon" style="left:${pos.l}%; top:${pos.t}%;">
+        <div class="player-avatar" style="border-color:#facc15;">
+          <div class="player-rating-badge rating-green">${(Math.random()*(9-7.5)+7.5).toFixed(1)}</div>
+        </div>
+        <div class="player-name-txt">${players[i]} ${i+1}</div>
+      </div>`).join('');
+
+    let awayPlayersHtml = awayPos.map((pos, i) => `
+      <div class="player-icon" style="left:${pos.l}%; top:${pos.t}%;">
+        <div class="player-avatar" style="border-color:#fff;">
+          <div class="player-rating-badge rating-orange">${(Math.random()*(8-6.5)+6.5).toFixed(1)}</div>
+        </div>
+        <div class="player-name-txt">${players[i]} ${i+1}</div>
+      </div>`).join('');
 
     document.getElementById("modalBody").innerHTML = `
-        <div style="padding:15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <div style="text-align:center;"><img src="${hLogo}" width="30"><div style="font-size:10px;">${home}</div></div>
-                <div style="font-size:14px; color:#facc15; font-weight:800;">TEST LINEUPS</div>
-                <div style="text-align:center;"><img src="${aLogo}" width="30"><div style="font-size:10px;">${away}</div></div>
+        <div style="padding:15px; background:#0b0f14;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+                <div style="text-align:center;"><img src="${hLogo}" width="35"><div style="font-size:11px; color:#facc15;">${home}</div></div>
+                <div style="text-align:center;">
+                  <div style="font-size:14px; color:#facc15; font-weight:800;">PREDICTED LINEUP</div>
+                  <div style="font-size:10px; color:#888;">4-3-3 vs 4-3-3</div>
+                </div>
+                <div style="text-align:center;"><img src="${aLogo}" width="35"><div style="font-size:11px; color:#fff;">${away}</div></div>
             </div>
             <div class="pitch-container">
-                <div style="position:absolute; inset:10px; border:1px solid rgba(250,204,21,0.2);"></div>
-                <div style="position:absolute; top:50%; left:10px; right:10px; height:1px; background:rgba(250,204,21,0.2);"></div>
+                <div class="pitch-half-line"></div>
+                <div class="pitch-center-circle"></div>
+                <div style="position:absolute; top:0; left:25%; right:25%; height:40px; border:1px solid rgba(255,255,255,0.1); border-top:none;"></div>
+                <div style="position:absolute; bottom:0; left:25%; right:25%; height:40px; border:1px solid rgba(255,255,255,0.1); border-bottom:none;"></div>
                 ${awayPlayersHtml}
                 ${homePlayersHtml}
+            </div>
+            <div style="margin-top:15px; display:flex; justify-content:center; gap:20px;">
+               <div style="font-size:11px; color:#888;"><span style="color:#22c55e;">●</span> Season Stats</div>
+               <div style="font-size:11px; color:#888;"><span style="color:#facc15;">●</span> Transfer Value</div>
             </div>
         </div>
     `;

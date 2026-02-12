@@ -7,7 +7,7 @@
 <title>GOAL GUIDE</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-weight: 700; } /* စာလုံးအားလုံး Bold ဖြစ်အောင် 700 ထည့်ထားသည် */
   
   body {
     font-family: 'Inter', sans-serif;
@@ -30,7 +30,7 @@
     position: sticky;
     top: 0;
     z-index: 1050;
-    border-bottom: 2px solid #facc15; /* ရွှေရောင် အောက်လိုင်း */
+    border-bottom: 2px solid #facc15;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   }
 
@@ -39,14 +39,10 @@
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .logo-wrapper:hover { transform: scale(1.05); }
   
   .logo-img { 
     height: 45px; 
-    width: auto; 
-    object-fit: contain; 
     border: 2px solid #facc15; 
     border-radius: 50%; 
   }
@@ -63,9 +59,7 @@
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
-    transition: 0.3s;
   }
-  .refresh-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(250, 204, 21, 0.6); }
 
   .controls-wrapper {
     display: flex;
@@ -75,7 +69,7 @@
     max-width: 600px; 
     margin: 15px auto;
     border-radius: 10px;
-    border: 1px solid #facc15; /* ရွှေရောင်ဘောင် */
+    border: 1.5px solid #facc15;
     gap: 10px;
   }
 
@@ -86,7 +80,6 @@
     border-right: 1px solid #facc15;
     color: #fff;
     padding: 8px;
-    font-size: 14px;
     outline: none;
   }
 
@@ -95,8 +88,6 @@
     background: transparent;
     border: none;
     color: #facc15;
-    width: 30px;
-    height: 30px;
     cursor: pointer;
     font-size: 16px;
   }
@@ -106,9 +97,7 @@
     color: #fff;
     padding: 5px 8px;
     border-radius: 5px;
-    font-size: 12px;
     outline: none;
-    width: 120px;
   }
 
   #matches-list {
@@ -120,30 +109,29 @@
   .league-card {
     margin-bottom: 20px;
     background: #1a1d23;
-    border-radius: 8px;
-    border: 1.5px solid #facc15; /* ရွှေရောင်ဘောင် */
-    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect အောက်ခံရိပ် */
+    border-radius: 10px;
+    border: 1.5px solid #facc15;
+    box-shadow: 0 4px 0px #9a7d0a;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
-  /* 3D ဖောင်းကြွ effect ဖြစ်အောင်ပြင်ထားမှု */
+  /* 3D Float Effect on Hover */
   .league-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 8px 0px #facc15;
-    z-index: 10;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.6), 0 8px 0px #facc15;
+    border-color: #fff;
   }
 
   .league-header {
-    padding: 10px 15px;
-    font-size: 13px;
-    font-weight: 700;
+    padding: 12px 15px;
     background: #252a32;
     color: #facc15;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #facc15;
+    border-bottom: 1.5px solid #facc15;
+    font-weight: 800;
   }
   
   .league-header img { width: 22px; height: 22px; object-fit: contain; }
@@ -154,15 +142,14 @@
     align-items: center;
     padding: 15px 10px;
     border-bottom: 1px solid rgba(250, 204, 21, 0.2);
-    background: #1a1d23;
   }
 
-  .team-row { display: flex; align-items: center; gap: 10px; }
+  .team-row { display: flex; align-items: center; gap: 8px; }
   .match .team-row.home { justify-content: flex-end; text-align: right; }
   .match .team-row.away { justify-content: flex-start; text-align: left; }
 
-  .team-row img { width: 28px; height: 28px; object-fit: contain; }
-  .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
+  .team-row img { width: 30px; height: 30px; object-fit: contain; }
+  .team-name { font-size: 13px; font-weight: 700; color: #fff; }
 
   .score-section {
     display: flex;
@@ -170,25 +157,38 @@
     align-items: center;
     border-left: 1px solid rgba(250, 204, 21, 0.3);
     border-right: 1px solid rgba(250, 204, 21, 0.3);
-    padding: 0 5px;
   }
 
-  .score-box { 
-    font-size: 18px; 
-    font-weight: 900; 
-    color: #facc15; 
-    letter-spacing: 1px;
-  }
+  .score-box { font-size: 20px; font-weight: 900; color: #facc15; }
+  .time-status { font-size: 11px; color: #888; text-transform: uppercase; }
 
-  .time-status {
-    font-size: 10px; 
-    color: #888;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.5); }
+  .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
   @keyframes blink { 50% { opacity: 0.5; } }
+
+  /* Live Grid Card Styles */
+  .live-grid-card {
+    padding: 15px; 
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .live-teams-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .live-team-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .live-team-box span { font-size: 11px; font-weight: 800; color: #fff; }
 
   .bottom-nav {
     position: fixed;
@@ -202,35 +202,27 @@
     border-top: 2px solid #facc15;
   }
   
-  .nav-item { flex: 1; text-align: center; cursor: pointer; }
   .nav-item span { 
     font-size: 11px;
-    font-weight: 800; 
     padding: 8px 12px;
     border: 2px solid #facc15;
     border-radius: 8px;
     background: #1f2937;
     color: #fff;
-    display: inline-block;
     box-shadow: 0 4px 0px #9a7d0a;
-    transition: 0.2s;
   }
-  .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
-  .nav-item.active span { background: rgba(250, 204, 21, 0.3); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; color: #facc15; }
+  .nav-item.active span { background: #facc15; color: #000; transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; }
 
-  .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
-  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; border: 1.5px solid #facc15; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: left; border-bottom: 1.5px solid #facc15; }
-  .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; }
-  .pts-col { font-weight: 800; color: #facc15; }
+  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border: 1.5px solid #facc15; }
+  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-weight: 800; border-bottom: 1.5px solid #facc15; }
+  .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-weight: 700; }
 
   .content-section { display: none; }
   .content-section.active { display: block; }
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; }
-  .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
+  .modal-content { width: 95%; max-width: 500px; background: #0b0f14; border-radius: 12px; border: 2px solid #facc15; overflow: hidden; }
 </style>
 </head>
 <body>
@@ -267,7 +259,6 @@
 </div>
 
 <div id="mainModal" class="modal" onclick="closeModal()">
-  <span class="close-modal">&times;</span>
   <div class="modal-content" onclick="event.stopPropagation()">
     <div id="modalBody"></div>
   </div>
@@ -300,14 +291,14 @@ async function loadMatches() {
         allMatchesData = result;
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error.</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Connection Error.</p>`;
     }
 }
 
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     if (!matches || matches.length === 0) {
-        list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found.</p>';
+        list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found for this date.</p>';
         return;
     }
 
@@ -324,21 +315,13 @@ function renderMatches(matches) {
         html += `<div class="league-card">
                     <div class="league-header">
                         <img src="${league.logo}">
-                        <span>${leagueName}</span>
+                        <span>${leagueName.toUpperCase()}</span>
                     </div>`;
 
         league.games.forEach(m => {
             const status = m.fixture.status.short;
             const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
-            let timeDisplay = "";
-            
-            if (status === "NS") {
-                timeDisplay = new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } else if (isLive) {
-                timeDisplay = `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>`;
-            } else {
-                timeDisplay = status;
-            }
+            let timeDisplay = isLive ? `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>` : (status === "NS" ? new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : status);
 
             html += `
                 <div class="match">
@@ -361,49 +344,57 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
+async function loadLive() {
+    const list = document.getElementById("live-list");
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching Live Matches...</p>";
+    const liveMatches = allMatchesData.filter(m => ["1H", "2H", "HT", "ET", "P"].includes(m.fixture.status.short));
+    
+    if(liveMatches.length === 0) {
+        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches at the moment.</p>";
+        return;
+    }
+    
+    list.innerHTML = liveMatches.map(m => `
+        <div class="league-card live-grid-card">
+            <div style="font-size:10px; color:#facc15; font-weight:800;">${m.league.name.toUpperCase()}</div>
+            <div class="live-teams-container">
+                <div class="live-team-box">
+                    <img src="${m.teams.home.logo}" width="35">
+                    <span>${m.teams.home.name}</span>
+                </div>
+                <div style="font-size:22px; font-weight:900; color:#facc15;">${m.goals.home} - ${m.goals.away}</div>
+                <div class="live-team-box">
+                    <img src="${m.teams.away.logo}" width="35">
+                    <span>${m.teams.away.name}</span>
+                </div>
+            </div>
+            <div class="status-live" style="font-size:12px;">LIVE ${m.fixture.status.elapsed}'</div>
+        </div>
+    `).join('');
+}
+
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Standings...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Table...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/standings`); 
         const data = await response.json();
-        renderStandings(data);
+        let html = `<table class="standings-table">
+            <thead><tr><th>#</th><th>TEAM</th><th>PL</th><th>GD</th><th>PTS</th></tr></thead>
+            <tbody>${data.map(r => `<tr><td>${r.rank}</td><td><img src="${r.team.logo}" width="20" style="vertical-align:middle;margin-right:5px;"> ${r.team.name}</td><td>${r.all?.played ?? 0}</td><td>${r.goalsDiff ?? 0}</td><td style="color:#facc15;">${r.points ?? 0}</td></tr>`).join('')}</tbody></table>`;
+        list.innerHTML = html;
     } catch (e) { list.innerHTML = "Error."; }
-}
-
-function renderStandings(data) {
-    const list = document.getElementById("standings-list");
-    let html = `<table class="standings-table">
-            <thead><tr><th>#</th><th>TEAM</th><th>PL</th><th>GD</th><th class="pts-col">PTS</th></tr></thead>
-            <tbody>${data.map(r => `<tr><td>${r.rank}</td><td><img src="${r.team.logo}" width="20"> ${r.team.name}</td><td>${r.all?.played ?? 0}</td><td>${r.goalsDiff ?? 0}</td><td class="pts-col">${r.points ?? 0}</td></tr>`).join('')}</tbody></table>`;
-    list.innerHTML = html;
 }
 
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
-    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading...</p>";
+    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading Highlights...</p>";
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
         const items = Array.isArray(data) ? data : (data.response || []);
-        listContainer.innerHTML = items.map(h => `<div class="league-card" style="padding:10px;" onclick="openVideo('${h.url || h.matchviewUrl}')"><img src="${h.thumbnail}" style="width:100%;border-radius:5px;"><div style="font-size:12px;margin-top:5px;">${h.title}</div></div>`).join('');
+        listContainer.innerHTML = items.map(h => `<div class="league-card" style="padding:10px;" onclick="openVideo('${h.url || h.matchviewUrl}')"><img src="${h.thumbnail}" style="width:100%;border-radius:5px;"><div style="font-size:12px;margin-top:8px;font-weight:800;">${h.title}</div></div>`).join('');
     } catch(e) { listContainer.innerHTML = "Error."; }
-}
-
-async function loadLive() {
-    const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
-    const liveMatches = allMatchesData.filter(m => ["1H", "2H", "HT", "ET", "P"].includes(m.fixture.status.short));
-    if(liveMatches.length === 0) {
-        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
-        return;
-    }
-    renderMatchesInGrid(liveMatches, "live-list");
-}
-
-function renderMatchesInGrid(matches, containerId) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = matches.map(m => `<div class="league-card" style="padding:15px; text-align:center;"><div style="font-size:11px; color:#facc15;">${m.league.name}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;"><img src="${m.teams.home.logo}" width="30"><div style="font-size:18px; font-weight:900;">${m.goals.home} - ${m.goals.away}</div><img src="${m.teams.away.logo}" width="30"></div><div class="status-live" style="margin-top:5px; font-size:11px;">LIVE ${m.fixture.status.elapsed}'</div></div>`).join('');
 }
 
 function filterBySearch(val) {

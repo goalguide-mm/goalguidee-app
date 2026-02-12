@@ -144,6 +144,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    /* League Header ကို ဘောင်ထဲထည့်ရန် border အောက်မှာထပ်ထည့်ထားသည် */
     border-bottom: 1px solid #facc15;
   }
   
@@ -158,12 +159,13 @@
     background: #1a1d23;
   }
 
-  .team-row { display: flex; align-items: center; gap: 10px; }
+  /* Logo တွေ ညီသွားအောင် fixed width ပေးထားသည် */
+  .team-row { display: flex; align-items: center; gap: 10px; width: 100%; }
   .match .team-row.home { justify-content: flex-end; text-align: right; }
   .match .team-row.away { justify-content: flex-start; text-align: left; }
 
-  .team-row img { width: 28px; height: 28px; object-fit: contain; }
-  .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
+  .team-row img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+  .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .score-section {
     display: flex;

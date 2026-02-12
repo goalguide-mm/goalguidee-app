@@ -166,6 +166,7 @@
     padding: 15px 10px;
     border-bottom: 1px solid rgba(250, 204, 21, 0.2);
     background: #1a1d23;
+    cursor: pointer; /* လက်ရှိပွဲနှိပ်လို့ရကြောင်းပြရန် */
   }
 
   .team-row { display: flex; align-items: center; gap: 10px; width: 100%; }
@@ -258,8 +259,18 @@
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; }
+  .modal-content { width: 95%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; max-height: 90vh; overflow-y: auto; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
+
+  /* --- Lineup Pitch Styles --- */
+  .pitch-container { background: #1a1d23; width: 100%; aspect-ratio: 3/4; position: relative; border: 1px solid #333; overflow: hidden; }
+  .pitch-line { position: absolute; border: 1px solid rgba(250, 204, 21, 0.3); }
+  .player-icon { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .player-circle { width: 28px; height: 28px; background: #252a32; border: 2px solid #facc15; border-radius: 50%; position: relative; }
+  .player-rating-badge { position: absolute; top: -10px; right: -10px; width: 18px; height: 18px; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; }
+  .rating-green { background: #22c55e; }
+  .rating-orange { background: #f97316; }
+  .player-name-txt { color: #fff; font-size: 9px; text-align: center; width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
 </style>
 </head>
 <body>
@@ -371,8 +382,9 @@ function renderMatches(matches) {
                 timeDisplay = status;
             }
 
+            // onclick="openLineup(${m.fixture.id})" ကို ပေါင်းထည့်ထားသည်
             html += `
-                <div class="match">
+                <div class="match" onclick="openLineup(${m.fixture.id})">
                     <div class="team-row home">
                         <span class="team-name">${m.teams.home.name}</span>
                         <img src="${m.teams.home.logo}">
@@ -501,7 +513,7 @@ async function loadLive() {
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = matches.map(m => `
-        <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;">
+        <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;" onclick="openLineup(${m.fixture.id})">
             <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px; text-align: center; width: 100%;">
                 ${m.league.name.toUpperCase()}
             </div>
@@ -548,6 +560,98 @@ function changeDate(n) {
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
+
+/* --- Lineup Logic (အသစ်ပေါင်းထည့်ထားသည့်အပိုင်း) --- */
+async function openLineup(fixtureId) {
+    const modal = document.getElementById("mainModal");
+    const modalBody = document.getElementById("modalBody");
+    modal.style.display = "flex";
+    modalBody.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Lineups & Ratings...</p>";
+
+    try {
+        // Lineup ခေါ်ယူခြင်း
+        const lineupRes = await fetch(`${WORKER_URL}/lineups?fixture=${fixtureId}`);
+        const lineups = await lineupRes.json();
+        
+        // Match status စစ်ဆေးရန် (Rating ပြမပြ ဆုံးဖြတ်ရန်)
+        const matchInfo = allMatchesData.find(m => m.fixture.id === fixtureId);
+        const isStarted = matchInfo && !["NS", "TBD"].includes(matchInfo.fixture.status.short);
+
+        if (!lineups || lineups.length === 0) {
+            modalBody.innerHTML = "<p style='text-align:center;padding:40px;'>Lineup not available.</p>";
+            return;
+        }
+
+        renderPitchUI(lineups, isStarted, matchInfo);
+    } catch (e) {
+        modalBody.innerHTML = "<p style='text-align:center;padding:40px;color:red;'>Error Loading Data.</p>";
+    }
+}
+
+function renderPitchUI(lineups, isStarted, match) {
+    const modalBody = document.getElementById("modalBody");
+    const homeLineup = lineups[0];
+    const awayLineup = lineups[1];
+
+    let html = `
+        <div style="padding:15px;">
+            <div style="text-align:center; margin-bottom:15px;">
+                <div style="font-size:14px; color:#facc15; font-weight:800;">LINEUPS & RATINGS</div>
+                <div style="font-size:11px; color:#888;">${homeLineup.formation} vs ${awayLineup.formation}</div>
+            </div>
+
+            <div class="pitch-container">
+                <div style="position:absolute; inset:10px; border:1px solid rgba(250,204,21,0.2);"></div>
+                <div style="position:absolute; top:50%; left:10px; right:10px; height:1px; background:rgba(250,204,21,0.2);"></div>
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:70px; height:70px; border:1px solid rgba(250,204,21,0.2); border-radius:50%;"></div>
+                
+                ${renderPlayersOnPitch(awayLineup.startXI, true, isStarted)}
+                
+                ${renderPlayersOnPitch(homeLineup.startXI, false, isStarted)}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+                <div style="text-align:center; flex:1;">
+                    <img src="${match.teams.home.logo}" width="25">
+                    <div style="font-size:10px; color:#facc15;">${homeLineup.team.name}</div>
+                </div>
+                <div style="text-align:center; flex:1;">
+                    <img src="${match.teams.away.logo}" width="25">
+                    <div style="font-size:10px; color:#facc15;">${awayLineup.team.name}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    modalBody.innerHTML = html;
+}
+
+function renderPlayersOnPitch(players, isAway, isStarted) {
+    return players.map(p => {
+        // Formation string (e.g., "1:1") ကို coordinate အဖြစ်ပြောင်းခြင်း
+        const pos = p.player.grid ? p.player.grid.split(':') : [1, 1];
+        let x = parseInt(pos[1]) * 20; 
+        let y = parseInt(pos[0]) * 18;
+
+        if (isAway) {
+            y = y / 2.2; // Away အသင်းကို အပေါ်ခြမ်းပို့
+        } else {
+            y = 100 - (y / 2.2); // Home အသင်းကို အောက်ခြမ်းပို့
+        }
+
+        // Rating အတု (API မှမပါလျှင် test အနေဖြင့်ပြရန်)
+        const rating = (Math.random() * (9.0 - 6.0) + 6.0).toFixed(1);
+        const ratingClass = rating >= 7.5 ? 'rating-green' : 'rating-orange';
+
+        return `
+            <div class="player-icon" style="left:${x}%; top:${y}%;">
+                <div class="player-circle">
+                    ${isStarted ? `<div class="player-rating-badge ${ratingClass}">${rating}</div>` : ''}
+                </div>
+                <div class="player-name-txt">${p.player.name.split(' ').pop()}</div>
+            </div>
+        `;
+    }).join('');
+}
 
 window.onload = loadMatches;
 </script>

@@ -128,70 +128,70 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
-  /* 3D ဖောင်းကြွ effect ဖြစ်အောင်ပြင်ထားမှု */
   .league-card:hover {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 8px 0px #facc15;
     z-index: 10;
   }
 
+  /* League Header ကို အကွက်ထဲမှာ ဘောင်ခတ်ရန် ပြင်ဆင်မှု */
   .league-header {
-    padding: 10px 15px;
-    font-size: 13px;
-    font-weight: 700;
+    padding: 12px 15px;
+    font-size: 14px;
+    font-weight: 800;
     background: #252a32;
     color: #facc15;
     display: flex;
     align-items: center;
-    gap: 10px;
-    /* League Header ကို ဘောင်ထဲထည့်ရန် border အောက်မှာထပ်ထည့်ထားသည် */
-    border-bottom: 1px solid #facc15;
+    gap: 12px;
+    border-bottom: 1.5px solid #facc15; /* ခေါင်းစဉ်အောက် ဘောင်ခတ်ခြင်း */
   }
   
-  .league-header img { width: 22px; height: 22px; object-fit: contain; }
+  .league-header img { width: 24px; height: 24px; object-fit: contain; }
 
   .match {
     display: grid;
-    grid-template-columns: 1fr 100px 1fr; 
+    grid-template-columns: 1fr 110px 1fr; /* Center space ကို သေချာညှိထားသည် */
     align-items: center;
-    padding: 15px 10px;
-    border-bottom: 1px solid rgba(250, 204, 21, 0.2);
+    padding: 18px 10px;
+    border-bottom: 1px solid rgba(250, 204, 21, 0.15);
     background: #1a1d23;
   }
 
-  /* Logo တွေ ညီသွားအောင် fixed width ပေးထားသည် */
-  .team-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+  /* Team logos တွေကို တစ်ဖက်စီ ညီအောင် align လုပ်ခြင်း */
+  .team-row { display: flex; align-items: center; gap: 10px; overflow: hidden; }
   .match .team-row.home { justify-content: flex-end; text-align: right; }
   .match .team-row.away { justify-content: flex-start; text-align: left; }
 
-  .team-row img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
-  .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .team-row img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+  .team-name { font-size: 13px; font-weight: 700; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .score-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-left: 1px solid rgba(250, 204, 21, 0.3);
-    border-right: 1px solid rgba(250, 204, 21, 0.3);
-    padding: 0 5px;
+    border-left: 1px solid rgba(250, 204, 21, 0.2);
+    border-right: 1px solid rgba(250, 204, 21, 0.2);
+    padding: 0 8px;
   }
 
   .score-box { 
-    font-size: 18px; 
+    font-size: 19px; 
     font-weight: 900; 
     color: #facc15; 
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
   }
 
   .time-status {
     font-size: 10px; 
-    color: #888;
+    color: #9ca3af;
     font-weight: 700;
     text-transform: uppercase;
+    margin-top: 2px;
   }
 
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.5); }
-  @keyframes blink { 50% { opacity: 0.5; } }
+  .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.3); }
+  @keyframes blink { 50% { opacity: 0.6; } }
 
   .bottom-nav {
     position: fixed;

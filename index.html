@@ -65,145 +65,127 @@
     box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
   }
 
+  /* Search & Date Bar Design - ပုံထဲက အနီဝိုင်းအတိုင်း ပြင်ဆင်ထားမှု */
   .controls-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 15px 20px 5px 20px;
-    max-width: 600px; /* မင်းအနီဝိုင်းပြထားတဲ့ ပမာဏအတိုင်း ညှိထားတာ */
-    margin: 0 auto;
+    background: #1a1d23; /* ပုံထဲကလို နောက်ခံအမှောင် */
+    padding: 10px 15px;
+    max-width: 600px; 
+    margin: 15px auto;
+    border-radius: 10px;
+    border: 1px solid #2d303a;
+    gap: 10px;
   }
 
   #teamSearch {
-    flex: 2;
-    background: #1f2937;
-    border: 1px solid #374151;
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-right: 1px solid #333; /* ကြားလိုင်းလေး */
     color: #fff;
-    padding: 8px 15px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 8px;
+    font-size: 14px;
     outline: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    min-width: 150px;
   }
 
-  .date-bar { display: flex; align-items: center; gap: 5px; flex: 1.5; justify-content: flex-end; }
+  .date-bar { display: flex; align-items: center; gap: 5px; }
   .date-bar button {
-    background: #1f2937;
-    border: 1px solid #374151;
+    background: transparent;
+    border: none;
     color: #facc15;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
+    font-size: 16px;
   }
   .date-bar input {
-    background: #1f2937;
-    border: 1px solid #facc15;
+    background: #252a32;
+    border: 1px solid #333;
     color: #fff;
-    padding: 7px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 12px;
     outline: none;
-    width: 140px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 120px;
   }
 
-  /* Matches List Container ညှိခြင်း */
+  /* Matches List Container */
   #matches-list {
-    max-width: 600px; /* မင်းအနီဝိုင်းပြထားတဲ့ ပမာဏအတိုင်း ညှိထားတာ */
+    max-width: 600px; 
     margin: 0 auto;
     padding: 10px;
   }
 
+  /* League Card Design - ပုံထဲကအတိုင်း ဘောင်ကပ်လျက်ပုံစံ */
   .league-card {
     margin-bottom: 20px;
     background: #1a1d23;
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    border: 1px solid #2d303a;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     overflow: hidden;
   }
 
   .league-header {
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 10px 15px;
+    font-size: 13px;
     font-weight: 700;
     background: #252a32;
-    color: #facc15;
+    color: #fff;
     display: flex;
-    justify-content: flex-start;
     align-items: center;
     gap: 10px;
     border-bottom: 1px solid #333;
   }
   
-  .league-header img { width: 25px; height: 25px; object-fit: contain; }
+  .league-header img { width: 22px; height: 22px; object-fit: contain; }
 
+  /* Match Row - Grid System အမှန် */
   .match {
     display: grid;
-    grid-template-columns: 1fr 80px 1fr; /* ဘယ်၊ လယ်၊ ညာ အတိအကျ ညီအောင် ညှိထားတာ */
+    grid-template-columns: 1fr 100px 1fr; 
     align-items: center;
     padding: 15px 10px;
     border-bottom: 1px solid #2a2f38;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    background: #1a1d23;
   }
 
-  .match:hover {
-    background: rgba(250, 204, 21, 0.05);
-  }
-
-  .score-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-  }
-
-  .time-status {
-    font-size: 16px; 
-    color: #facc15;
-    text-align: center;
-    font-weight: 800; 
-  }
-
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; font-size: 11px; }
-  @keyframes blink { 50% { opacity: 0.5; } }
-
-  .team-row { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-  }
-
+  .team-row { display: flex; align-items: center; gap: 10px; }
   .match .team-row.home { justify-content: flex-end; text-align: right; }
   .match .team-row.away { justify-content: flex-start; text-align: left; }
 
   .team-row img { width: 28px; height: 28px; object-fit: contain; }
-  .team-name { font-size: 14px; font-weight: 600; color: #e5e7eb; }
+  .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
+
+  /* Score & Time Section - ပုံထဲကအတိုင်း အလယ်ဗဟိုကျကျ */
+  .score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 1px solid #2d303a;
+    border-right: 1px solid #2d303a;
+    padding: 0 5px;
+  }
 
   .score-box { 
-    background: #0b0f14; 
-    padding: 4px 10px; 
-    border-radius: 6px; 
     font-size: 18px; 
     font-weight: 900; 
     color: #facc15; 
-    text-align: center;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-    min-width: 65px;
+    letter-spacing: 1px;
   }
 
+  .time-status {
+    font-size: 10px; 
+    color: #888;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .status-live { color: #ff4d4d; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0.5; } }
+
+  /* Bottom Nav */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -214,64 +196,31 @@
     align-items: center;
     z-index: 2000;
     border-top: 1px solid #1f2937;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
-    padding: 0 10px;
   }
   
-  .nav-item { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    gap: 5px; 
-    color: #6b7280; 
-    flex: 1; 
-    cursor: pointer; 
-    height: 50px;
-    margin: 0 5px;
-    border-radius: 10px;
-    transition: all 0.2s ease-in-out;
-    position: relative;
-  }
-  
+  .nav-item { flex: 1; text-align: center; cursor: pointer; }
   .nav-item span { 
     font-size: 11px;
     font-weight: 800; 
-    padding: 6px 10px;
+    padding: 8px 12px;
     border: 2px solid #facc15;
     border-radius: 8px;
     background: #1f2937;
+    color: #fff;
     display: inline-block;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 0px #9a7d0a, 0 5px 10px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 0px #9a7d0a;
   }
-  
-  .nav-item:hover span {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 0px #9a7d0a, 0 10px 15px rgba(0,0,0,0.5);
-    background: #2d3748;
-    color: #facc15;
-  }
+  .nav-item.active span { background: rgba(250, 204, 21, 0.2); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; }
 
-  .nav-item.active { color: #facc15; }
-
-  .nav-item.active span { 
-    background: rgba(250, 204, 21, 0.2); 
-    transform: translateY(2px);
-    box-shadow: 0 2px 0px #9a7d0a, 0 2px 5px rgba(0,0,0,0.3);
-    border-color: #facc15;
-  }
-
+  /* Table & Others */
   .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
-  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
-  .standings-table th { background: #252a32; color: #facc15; padding: 12px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
-  .standings-table td { padding: 12px 8px; border-bottom: 1px solid #2a2f38; font-size: 13px; color: #e5e7eb; }
+  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; }
+  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: left; }
+  .standings-table td { padding: 12px; border-bottom: 1px solid #2a2f38; font-size: 13px; color: #e5e7eb; }
   .pts-col { font-weight: 800; color: #facc15; }
 
-  .content-section { display: none; animation: fadeIn 0.4s ease; }
+  .content-section { display: none; }
   .content-section.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
@@ -339,26 +288,24 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည် (Loading...)</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
         allMatchesData = result;
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Connection Error.</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error.</p>`;
     }
 }
 
-// Matches ပြသခြင်း (League ခွဲပြီး အကွက်ညှိထားသည်)
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     if (!matches || matches.length === 0) {
-        list.innerHTML = '<p style="text-align:center;padding:40px;">ပွဲစဉ်များမရှိသေးပါ။</p>';
+        list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found.</p>';
         return;
     }
 
-    // League အလိုက် ပွဲများကို Group ဖွဲ့ခြင်း
     const grouped = matches.reduce((acc, m) => {
         const leagueName = m.league.name;
         if (!acc[leagueName]) acc[leagueName] = { logo: m.league.logo, games: [] };
@@ -396,7 +343,7 @@ function renderMatches(matches) {
                     </div>
                     <div class="score-section">
                         <div class="score-box">${m.goals.home ?? 0} - ${m.goals.away ?? 0}</div>
-                        <div class="time-status" style="font-size:11px; margin-top:2px;">${timeDisplay}</div>
+                        <div class="time-status">${timeDisplay}</div>
                     </div>
                     <div class="team-row away">
                         <img src="${m.teams.away.logo}">
@@ -411,65 +358,36 @@ function renderMatches(matches) {
 
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>2025/26 ဇယားများ ဆွဲယူနေပါသည်...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Standings...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/standings`); 
         const data = await response.json();
         renderStandings(data);
-    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings.</p>"; }
+    } catch (e) { list.innerHTML = "Error."; }
 }
 
 function renderStandings(data) {
     const list = document.getElementById("standings-list");
-    let html = `
-        <table class="standings-table">
-            <thead>
-                <tr>
-                    <th class="rank">#</th>
-                    <th>TEAM</th>
-                    <th>PL</th>
-                    <th>GD</th>
-                    <th class="pts-col">PTS</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${data.map(r => `
-                    <tr>
-                        <td class="rank">${r.rank}</td>
-                        <td>
-                            <div class="team-info">
-                                <img src="${r.team.logo}">
-                                <span>${r.team.name}</span>
-                            </div>
-                        </td>
-                        <td>${r.all?.played ?? 0}</td>
-                        <td>${r.goalsDiff ?? 0}</td>
-                        <td class="pts-col">${r.points ?? 0}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>`;
+    let html = `<table class="standings-table">
+            <thead><tr><th>#</th><th>TEAM</th><th>PL</th><th>GD</th><th class="pts-col">PTS</th></tr></thead>
+            <tbody>${data.map(r => `<tr><td>${r.rank}</td><td><img src="${r.team.logo}" width="20"> ${r.team.name}</td><td>${r.all?.played ?? 0}</td><td>${r.goalsDiff ?? 0}</td><td class="pts-col">${r.points ?? 0}</td></tr>`).join('')}</tbody></table>`;
     list.innerHTML = html;
 }
 
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
-    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Loading Goals...</p>";
+    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading...</p>";
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
         const items = Array.isArray(data) ? data : (data.response || []);
-        listContainer.innerHTML = items.map(h => `
-            <div class="video-card" onclick="openVideo('${h.url || h.matchviewUrl}')">
-                <img src="${h.thumbnail}">
-                <div class="title-box">${h.title}</div>
-            </div>`).join('');
+        listContainer.innerHTML = items.map(h => `<div class="league-card" style="padding:10px;" onclick="openVideo('${h.url || h.matchviewUrl}')"><img src="${h.thumbnail}" style="width:100%;border-radius:5px;"><div style="font-size:12px;margin-top:5px;">${h.title}</div></div>`).join('');
     } catch(e) { listContainer.innerHTML = "Error."; }
 }
 
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
     const liveMatches = allMatchesData.filter(m => ["1H", "2H", "HT", "ET", "P"].includes(m.fixture.status.short));
     if(liveMatches.length === 0) {
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
@@ -480,41 +398,21 @@ async function loadLive() {
 
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = matches.map(m => `
-        <div class="league-card" style="padding:15px; text-align:center;">
-             <div style="font-size:11px; color:#facc15; margin-bottom:10px;">${m.league.name}</div>
-             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <img src="${m.teams.home.logo}" width="30">
-                <div style="font-size:20px; font-weight:900; color:#facc15;">${m.goals.home} - ${m.goals.away}</div>
-                <img src="${m.teams.away.logo}" width="30">
-             </div>
-             <div class="status-live" style="margin-top:10px;">LIVE ${m.fixture.status.elapsed}'</div>
-        </div>`).join('');
+    container.innerHTML = matches.map(m => `<div class="league-card" style="padding:15px; text-align:center;"><div style="font-size:11px; color:#facc15;">${m.league.name}</div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;"><img src="${m.teams.home.logo}" width="30"><div style="font-size:18px; font-weight:900;">${m.goals.home} - ${m.goals.away}</div><img src="${m.teams.away.logo}" width="30"></div><div class="status-live" style="margin-top:5px; font-size:11px;">LIVE ${m.fixture.status.elapsed}'</div></div>`).join('');
 }
 
 function filterBySearch(val) {
     const query = val.toLowerCase();
-    const filtered = allMatchesData.filter(m => 
-        (m.teams.home.name.toLowerCase().includes(query)) || 
-        (m.teams.away.name.toLowerCase().includes(query)) ||
-        (m.league.name.toLowerCase().includes(query))
-    );
+    const filtered = allMatchesData.filter(m => (m.teams.home.name.toLowerCase().includes(query)) || (m.teams.away.name.toLowerCase().includes(query)) || (m.league.name.toLowerCase().includes(query)));
     renderMatches(filtered);
 }
 
 function changeDate(n) { 
-    let d = new Date(selectedDate); 
-    d.setDate(d.getDate()+n); 
-    selectedDate = d.toLocaleDateString('en-CA'); 
-    document.getElementById("matchDate").value = selectedDate; 
-    loadMatches(); 
+    let d = new Date(selectedDate); d.setDate(d.getDate()+n); 
+    selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); 
 }
-
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
-function openVideo(url) { 
-    document.getElementById("mainModal").style.display = "flex"; 
-    document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
-}
+function openVideo(url) { document.getElementById("mainModal").style.display = "flex"; document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
 window.onload = loadMatches;

@@ -30,7 +30,7 @@
     position: sticky;
     top: 0;
     z-index: 1050;
-    border-bottom: 2px solid rgba(250, 204, 21, 0.5);
+    border-bottom: 2px solid #facc15; /* ရွှေရောင် အောက်လိုင်း */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   }
 
@@ -63,18 +63,19 @@
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
+    transition: 0.3s;
   }
+  .refresh-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(250, 204, 21, 0.6); }
 
-  /* Search & Date Bar Design - ပုံထဲက အနီဝိုင်းအတိုင်း ပြင်ဆင်ထားမှု */
   .controls-wrapper {
     display: flex;
     align-items: center;
-    background: #1a1d23; /* ပုံထဲကလို နောက်ခံအမှောင် */
+    background: #1a1d23;
     padding: 10px 15px;
     max-width: 600px; 
     margin: 15px auto;
     border-radius: 10px;
-    border: 1px solid #2d303a;
+    border: 1px solid #facc15; /* ရွှေရောင်ဘောင် */
     gap: 10px;
   }
 
@@ -82,7 +83,7 @@
     flex: 1;
     background: transparent;
     border: none;
-    border-right: 1px solid #333; /* ကြားလိုင်းလေး */
+    border-right: 1px solid #facc15;
     color: #fff;
     padding: 8px;
     font-size: 14px;
@@ -101,7 +102,7 @@
   }
   .date-bar input {
     background: #252a32;
-    border: 1px solid #333;
+    border: 1px solid #facc15;
     color: #fff;
     padding: 5px 8px;
     border-radius: 5px;
@@ -110,21 +111,27 @@
     width: 120px;
   }
 
-  /* Matches List Container */
   #matches-list {
     max-width: 600px; 
     margin: 0 auto;
     padding: 10px;
   }
 
-  /* League Card Design - ပုံထဲကအတိုင်း ဘောင်ကပ်လျက်ပုံစံ */
   .league-card {
     margin-bottom: 20px;
     background: #1a1d23;
     border-radius: 8px;
-    border: 1px solid #2d303a;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border: 1.5px solid #facc15; /* ရွှေရောင်ဘောင် */
+    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect အောက်ခံရိပ် */
     overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* 3D ဖောင်းကြွ effect ဖြစ်အောင်ပြင်ထားမှု */
+  .league-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 8px 0px #facc15;
+    z-index: 10;
   }
 
   .league-header {
@@ -132,22 +139,21 @@
     font-size: 13px;
     font-weight: 700;
     background: #252a32;
-    color: #fff;
+    color: #facc15;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #facc15;
   }
   
   .league-header img { width: 22px; height: 22px; object-fit: contain; }
 
-  /* Match Row - Grid System အမှန် */
   .match {
     display: grid;
     grid-template-columns: 1fr 100px 1fr; 
     align-items: center;
     padding: 15px 10px;
-    border-bottom: 1px solid #2a2f38;
+    border-bottom: 1px solid rgba(250, 204, 21, 0.2);
     background: #1a1d23;
   }
 
@@ -158,13 +164,12 @@
   .team-row img { width: 28px; height: 28px; object-fit: contain; }
   .team-name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
 
-  /* Score & Time Section - ပုံထဲကအတိုင်း အလယ်ဗဟိုကျကျ */
   .score-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-left: 1px solid #2d303a;
-    border-right: 1px solid #2d303a;
+    border-left: 1px solid rgba(250, 204, 21, 0.3);
+    border-right: 1px solid rgba(250, 204, 21, 0.3);
     padding: 0 5px;
   }
 
@@ -182,10 +187,9 @@
     text-transform: uppercase;
   }
 
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; }
+  .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.5); }
   @keyframes blink { 50% { opacity: 0.5; } }
 
-  /* Bottom Nav */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -195,7 +199,7 @@
     justify-content: space-around;
     align-items: center;
     z-index: 2000;
-    border-top: 1px solid #1f2937;
+    border-top: 2px solid #facc15;
   }
   
   .nav-item { flex: 1; text-align: center; cursor: pointer; }
@@ -209,14 +213,15 @@
     color: #fff;
     display: inline-block;
     box-shadow: 0 4px 0px #9a7d0a;
+    transition: 0.2s;
   }
-  .nav-item.active span { background: rgba(250, 204, 21, 0.2); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; }
+  .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
+  .nav-item.active span { background: rgba(250, 204, 21, 0.3); transform: translateY(2px); box-shadow: 0 2px 0px #9a7d0a; color: #facc15; }
 
-  /* Table & Others */
   .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
-  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; }
-  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: left; }
-  .standings-table td { padding: 12px; border-bottom: 1px solid #2a2f38; font-size: 13px; color: #e5e7eb; }
+  .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; border: 1.5px solid #facc15; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+  .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: left; border-bottom: 1.5px solid #facc15; }
+  .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; }
   .pts-col { font-weight: 800; color: #facc15; }
 
   .content-section { display: none; }
@@ -224,7 +229,7 @@
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
+  .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 </style>
 </head>

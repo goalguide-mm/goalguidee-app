@@ -251,8 +251,28 @@
   .content-section.active { display: block; }
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 95%; max-width: 800px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; max-height: 95vh; overflow-y: auto; }
+  /* ဤနေရာတွင် Modal Background ကို အမည်းမဖြစ်အောင် ပြင်ဆင်ထားသည် */
+  .modal { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: transparent; /* နောက်ခံအမည်းကြီးကို ဖယ်ရှားလိုက်သည် */
+    align-items: center; 
+    justify-content: center; 
+    z-index: 3000; 
+  }
+  .modal-content { 
+    width: 95%; 
+    max-width: 800px; 
+    background: #0b0f14; 
+    position: relative; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    border: 2px solid #facc15; 
+    max-height: 95vh; 
+    overflow-y: auto; 
+    box-shadow: 0 0 30px rgba(0,0,0,0.8); /* Modal ပေါ်လာတာ သိသာအောင် shadow ထည့်ထားသည် */
+  }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 
   /* Pitch Section - အလျားကို ပိုရှည်အောင် ပြုပြင်ထားသည် */
@@ -460,25 +480,23 @@ async function loadLive() {
     `).join('');
 }
 
-// Lineup Logic - လူချင်းမထပ်အောင် နေရာအသစ် ပြင်ဆင်ထားသည်
+// Lineup Logic
 function openTestLineup(home, away, hLogo, aLogo) {
     const modal = document.getElementById("mainModal");
     modal.style.display = "flex";
     
-    // Home Team (ဘယ်ဘက်)
     const homePos = [
-      {t: 50, l: 6},   // GK
-      {t: 15, l: 18}, {t: 38, l: 18}, {t: 62, l: 18}, {t: 85, l: 18}, // Defenders
-      {t: 25, l: 32}, {t: 50, l: 32}, {t: 75, l: 32}, // Midfielders
-      {t: 20, l: 44}, {t: 80, l: 44}, {t: 50, l: 46}  // Forwards
+      {t: 50, l: 6},
+      {t: 15, l: 18}, {t: 38, l: 18}, {t: 62, l: 18}, {t: 85, l: 18},
+      {t: 25, l: 32}, {t: 50, l: 32}, {t: 75, l: 32},
+      {t: 20, l: 44}, {t: 80, l: 44}, {t: 50, l: 46}
     ];
 
-    // Away Team (ညာဘက်)
     const awayPos = [
-      {t: 50, l: 94},  // GK
-      {t: 15, l: 82}, {t: 38, l: 82}, {t: 62, l: 82}, {t: 85, l: 82}, // Defenders
-      {t: 25, l: 68}, {t: 50, l: 68}, {t: 75, l: 68}, // Midfielders
-      {t: 20, l: 56}, {t: 80, l: 56}, {t: 50, l: 54}  // Forwards
+      {t: 50, l: 94},
+      {t: 15, l: 82}, {t: 38, l: 82}, {t: 62, l: 82}, {t: 85, l: 82},
+      {t: 25, l: 68}, {t: 50, l: 68}, {t: 75, l: 68},
+      {t: 20, l: 56}, {t: 80, l: 56}, {t: 50, l: 54}
     ];
 
     const players = ["GK", "Def", "Def", "Def", "Def", "Mid", "Mid", "Mid", "Fwd", "Fwd", "Fwd"];

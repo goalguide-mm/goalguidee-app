@@ -394,22 +394,24 @@ function renderStandings(data) {
 
     let html = `
         <style>
-            /* LEAGUE STANDINGS ဘောင် - Effect နဲ့ အဝါရောင်ပြောင်းတာကို ဖယ်ထားသည် */
+            /* Header ကို ပိုကျစ်လျစ်စေပြီး Hover လုပ်လျှင် 3D ပိုဆန်စေရန် */
             .league-header-3d {
                 display: flex; align-items: center; justify-content: center; gap: 8px; 
                 padding: 8px; background: #1a1d23; 
                 border: 1.5px solid #facc15; border-radius: 8px; 
                 margin-bottom: 8px;
-                /* Hover effect အားလုံးကို ဖယ်ရှားလိုက်ပါသည် */
+                transition: all 0.2s ease-in-out;
+                cursor: pointer;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             }
-
-            /* Table Row ထောက်လိုက်လျှင် အဝါရောင်ဖြစ်တာကို ဖယ်ရှားပြီး ဆိုဒ်ကို ညီအောင် ထိန်းခြင်း */
-            .standings-table {
-                width: 100%; border-collapse: collapse; margin: 0; table-layout: fixed; /* Column size တွေ ညီအောင် ထိန်းပေးသည် */
+            .league-header-3d:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 15px rgba(250, 204, 21, 0.2), inset 0 0 5px rgba(250,204,21,0.1);
+                background: #1e2128;
             }
-            
-            .standings-table td, .standings-table th {
-                overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            /* Table Row Hover effect */
+            .standings-table tbody tr:hover {
+                background: rgba(255, 255, 255, 0.03);
             }
         </style>
 
@@ -422,15 +424,15 @@ function renderStandings(data) {
                 </span>
             </div>
 
-            <div style="border: 1.5px solid #facc15; border-radius: 10px; overflow: hidden; background: #1a1d23;">
-                <table class="standings-table">
+            <div style="border: 1.5px solid #facc15; border-radius: 10px; overflow: hidden; background: #1a1d23; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <table class="standings-table" style="width: 100%; border-collapse: collapse; margin: 0;">
                     <thead>
                         <tr style="background: rgba(250, 204, 21, 0.15); border-bottom: 1px solid rgba(250, 204, 21, 0.3);">
-                            <th style="text-align:center; width:55px; padding: 10px; color: #facc15; font-size: 11px; font-weight: 800;">RANK</th>
-                            <th style="text-align:left; padding: 10px; color: #facc15; font-size: 11px; font-weight: 800;">TEAM</th>
-                            <th style="text-align:center; width:40px; padding: 10px; color: #facc15; font-size: 11px; font-weight: 800;">PL</th>
-                            <th style="text-align:center; width:70px; padding: 10px; color: #facc15; font-size: 11px; font-weight: 800;">GF-GA</th>
-                            <th class="pts-col" style="text-align:center; width:50px; padding: 10px; color: #facc15; font-size: 11px; font-weight: 800;">PTS</th>
+                            <th style="text-align:center; width:50px; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">RANK</th>
+                            <th style="text-align:left; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">TEAM</th>
+                            <th style="text-align:center; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">PL</th>
+                            <th style="text-align:center; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">GF-GA</th>
+                            <th class="pts-col" style="text-align:center; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">PTS</th>
                         </tr>
                     </thead>
                     <tbody>

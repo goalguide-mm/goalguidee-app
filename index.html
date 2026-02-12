@@ -418,32 +418,32 @@ async function loadLive() {
 function renderMatchesInGrid(matches, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = matches.map(m => `
-        <div class="league-card" style="padding:15px; text-align:center; min-width: 280px; margin: 10px;">
-            <div style="font-size:11px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 5px;">
+        <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;">
+            <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px; text-align: center; width: 100%;">
                 ${m.league.name.toUpperCase()}
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; gap: 10px;">
+            <div style="display:flex; justify-content: space-around; align-items:center; width: 100%;">
                 
-                <div style="flex:1; display:flex; flex-direction:column; align-items:center;">
-                    <img src="${m.teams.home.logo}" width="40" style="margin-bottom:5px;">
-                    <span style="font-size:12px; font-weight:800; color:#fff; display:block; width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
+                    <img src="${m.teams.home.logo}" width="45" height="45" style="object-fit: contain; margin-bottom:5px;">
+                    <span style="font-size:12px; font-weight:800; color:#fff; text-align: center; display: block; width: 100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                         ${m.teams.home.name}
                     </span>
                 </div>
 
-                <div style="flex: 0 0 100px; display:flex; flex-direction:column; align-items:center;">
-                    <div style="font-size:24px; font-weight:900; color:#facc15; letter-spacing: 2px; white-space: nowrap;">
+                <div style="width: 80px; display:flex; flex-direction:column; align-items:center; justify-content: center;">
+                    <div style="font-size:24px; font-weight:900; color:#facc15; letter-spacing: 2px; line-height: 1;">
                         ${m.goals.home} - ${m.goals.away}
                     </div>
-                    <div class="status-live" style="font-size:11px; font-weight:800; margin-top:5px;">
+                    <div class="status-live" style="font-size:11px; font-weight:800; margin-top:8px; white-space: nowrap;">
                         LIVE ${m.fixture.status.elapsed}'
                     </div>
                 </div>
 
-                <div style="flex:1; display:flex; flex-direction:column; align-items:center;">
-                    <img src="${m.teams.away.logo}" width="40" style="margin-bottom:5px;">
-                    <span style="font-size:12px; font-weight:800; color:#fff; display:block; width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
+                    <img src="${m.teams.away.logo}" width="45" height="45" style="object-fit: contain; margin-bottom:5px;">
+                    <span style="font-size:12px; font-weight:800; color:#fff; text-align: center; display: block; width: 100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                         ${m.teams.away.name}
                     </span>
                 </div>

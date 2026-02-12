@@ -252,14 +252,14 @@
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
-  .modal-content { width: 95%; max-width: 600px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; max-height: 90vh; overflow-y: auto; }
+  .modal-content { width: 95%; max-width: 800px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; border: 2px solid #facc15; max-height: 95vh; overflow-y: auto; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 
-  /* Pitch New Design (အလျားလိုက် ပုံစံသို့ ပြောင်းလဲထားသည်) */
+  /* Pitch Section - အလျားကို ပိုရှည်အောင် ပြုပြင်ထားသည် */
   .pitch-container { 
     background: #121212; 
     width: 100%; 
-    aspect-ratio: 16 / 9; 
+    aspect-ratio: 21 / 9; /* အလျားကို ပိုရှည်စေရန် */
     position: relative; 
     border: 2px solid #333; 
     border-radius: 8px;
@@ -269,10 +269,10 @@
   }
   
   .pitch-line { position: absolute; border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: none; }
-  .pitch-center-circle { position: absolute; top: 50%; left: 50%; width: 80px; height: 80px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(-50%, -50%); }
+  .pitch-center-circle { position: absolute; top: 50%; left: 50%; width: 70px; height: 70px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(-50%, -50%); }
   .pitch-half-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(255, 255, 255, 0.1); }
 
-  .player-icon { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease; }
+  .player-icon { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease; z-index: 5; }
   .player-avatar { 
     width: 32px; height: 32px; 
     background: #252a32; 
@@ -296,12 +296,13 @@
   .rating-orange { background: #facc15; }
   
   .player-name-txt { 
-    color: #fff; font-size: 10px; text-align: center; 
-    width: 60px; margin-top: 4px;
+    color: #fff; font-size: 9px; text-align: center; 
+    width: 55px; margin-top: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
     text-shadow: 1px 1px 2px #000;
-    background: rgba(0,0,0,0.4);
-    border-radius: 4px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 3px;
+    padding: 1px 0;
   }
 </style>
 </head>
@@ -459,27 +460,28 @@ async function loadLive() {
     `).join('');
 }
 
-// Lineup Logic (Horizontal အလျားလိုက် ပုံစံသို့ ပြင်ဆင်ထားသည်)
+// Lineup Logic - လူချင်းမထပ်အောင် နေရာအသစ် ပြင်ဆင်ထားသည်
 function openTestLineup(home, away, hLogo, aLogo) {
     const modal = document.getElementById("mainModal");
     modal.style.display = "flex";
     
-    // အလျားလိုက် (Horizontal) အတွက် Coordinates များ
+    // Home Team (ဘယ်ဘက်)
     const homePos = [
-      {t: 50, l: 8},   // GK
-      {t: 20, l: 22}, {t: 40, l: 22}, {t: 60, l: 22}, {t: 80, l: 22}, // Defenders
-      {t: 30, l: 38}, {t: 50, l: 38}, {t: 70, l: 38}, // Midfielders
-      {t: 25, l: 48}, {t: 75, l: 48}, {t: 50, l: 50}  // Forwards
+      {t: 50, l: 6},   // GK
+      {t: 15, l: 18}, {t: 38, l: 18}, {t: 62, l: 18}, {t: 85, l: 18}, // Defenders
+      {t: 25, l: 32}, {t: 50, l: 32}, {t: 75, l: 32}, // Midfielders
+      {t: 20, l: 44}, {t: 80, l: 44}, {t: 50, l: 46}  // Forwards
     ];
 
+    // Away Team (ညာဘက်)
     const awayPos = [
-      {t: 50, l: 92},  // GK
-      {t: 20, l: 78}, {t: 40, l: 78}, {t: 60, l: 78}, {t: 80, l: 78}, // Defenders
-      {t: 30, l: 62}, {t: 50, l: 62}, {t: 70, l: 62}, // Midfielders
-      {t: 25, l: 52}, {t: 75, l: 52}, {t: 50, l: 50}  // Forwards
+      {t: 50, l: 94},  // GK
+      {t: 15, l: 82}, {t: 38, l: 82}, {t: 62, l: 82}, {t: 85, l: 82}, // Defenders
+      {t: 25, l: 68}, {t: 50, l: 68}, {t: 75, l: 68}, // Midfielders
+      {t: 20, l: 56}, {t: 80, l: 56}, {t: 50, l: 54}  // Forwards
     ];
 
-    const players = ["Player", "Player", "Player", "Player", "Player", "Player", "Player", "Player", "Player", "Player", "GK"];
+    const players = ["GK", "Def", "Def", "Def", "Def", "Mid", "Mid", "Mid", "Fwd", "Fwd", "Fwd"];
     
     let homePlayersHtml = homePos.map((pos, i) => `
       <div class="player-icon" style="left:${pos.l}%; top:${pos.t}%;">
@@ -499,30 +501,34 @@ function openTestLineup(home, away, hLogo, aLogo) {
 
     document.getElementById("modalBody").innerHTML = `
         <div style="padding:15px; background:#0b0f14;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <img src="${hLogo}" width="30">
-                    <span style="color:#facc15; font-size:14px;">${home}</span>
-                    <span style="color:#888; font-size:11px;">4-3-3</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                    <img src="${hLogo}" width="28">
+                    <div>
+                        <div style="color:#facc15; font-size:13px;">${home}</div>
+                        <div style="color:#888; font-size:10px;">4-3-3</div>
+                    </div>
                 </div>
-                <div style="color:#facc15; font-size:14px; font-weight:800; letter-spacing:1px;">PREDICTED LINEUP</div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="color:#888; font-size:11px;">4-3-3</span>
-                    <span style="color:#fff; font-size:14px;">${away}</span>
-                    <img src="${aLogo}" width="30">
+                <div style="color:#facc15; font-size:13px; font-weight:800; text-align:center; flex:1;">PREDICTED LINEUP</div>
+                <div style="display:flex; align-items:center; gap:8px; flex:1; justify-content:flex-end; text-align:right;">
+                    <div>
+                        <div style="color:#fff; font-size:13px;">${away}</div>
+                        <div style="color:#888; font-size:10px;">4-3-3</div>
+                    </div>
+                    <img src="${aLogo}" width="28">
                 </div>
             </div>
             
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <span style="background:#252a32; padding:4px 10px; border-radius:15px; font-size:10px; color:#888;">Season stats</span>
-                <span style="background:#252a32; padding:4px 10px; border-radius:15px; font-size:10px; color:#888;">Transfer value</span>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <span style="background:#1a1d23; padding:3px 10px; border:1px solid #333; border-radius:15px; font-size:9px; color:#facc15;">Season stats</span>
+                <span style="background:#1a1d23; padding:3px 10px; border:1px solid #333; border-radius:15px; font-size:9px; color:#facc15;">Transfer value</span>
             </div>
 
             <div class="pitch-container">
                 <div class="pitch-half-line"></div>
                 <div class="pitch-center-circle"></div>
-                <div style="position:absolute; top:25%; bottom:25%; left:0; width:60px; border:1px solid rgba(255,255,255,0.1); border-left:none;"></div>
-                <div style="position:absolute; top:25%; bottom:25%; right:0; width:60px; border:1px solid rgba(255,255,255,0.1); border-right:none;"></div>
+                <div style="position:absolute; top:20%; bottom:20%; left:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-left:none;"></div>
+                <div style="position:absolute; top:20%; bottom:20%; right:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-right:none;"></div>
                 
                 ${awayPlayersHtml}
                 ${homePlayersHtml}

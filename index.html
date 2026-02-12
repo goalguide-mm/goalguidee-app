@@ -369,14 +369,27 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည်...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည် (Loading...)</p>";
+    
     try {
-        const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // ၁၀ စက္ကန့်ထက်ကြာရင် Pending ဖြတ်မယ်
+
+        const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
         const result = await response.json();
-        allMatchesData = Array.isArray(result) ? result : [];
+
+        if (result.error) {
+            list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">ERROR: ${result.error}</p>`;
+            return;
+        }
+
+        allMatchesData = result;
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = '<p style="color:red; text-align:center; padding:40px;">ချိတ်ဆက်မှု မအောင်မြင်ပါ။</p>';
+        const errorMsg = error.name === 'AbortError' ? "ချိတ်ဆက်မှု ကြာမြင့်နေပါသည်။ ခဏနေမှ ပြန်ကြိုးစားပါ။" : "Worker နှင့် ချိတ်ဆက်မရပါ။";
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">${errorMsg}</p>`;
     }
 }
 

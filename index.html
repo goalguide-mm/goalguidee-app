@@ -442,7 +442,6 @@ async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
     
-    // matches-list ထဲက live ဖြစ်နေတဲ့ပွဲတွေကို စစ်ထုတ်တယ်
     const liveMatches = allMatchesData.filter(m => m.status?.type === 'inprogress');
     
     if(liveMatches.length === 0) {
@@ -495,7 +494,6 @@ async function loadHighlights() {
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
         const data = await res.json();
-        // Worker ကနေပြန်ပေးတဲ့ Array ကို တိုက်ရိုက်ယူတယ်
         const items = Array.isArray(data) ? data : [];
         
         listContainer.innerHTML = items.map(h => `
@@ -528,7 +526,6 @@ function handleDateChange(v) { selectedDate = v; loadMatches(); }
 
 function openVideo(url) { 
     document.getElementById("mainModal").style.display = "flex"; 
-    // Embed code အတွက် iframe ထည့်သွင်းခြင်း
     document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
 

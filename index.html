@@ -444,7 +444,7 @@ async function loadMatches() {
     try {
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
-        // Array စစ်ဆေးခြင်းအပိုင်း
+        // Array စစ်ဆေးခြင်းအပိုင်းကို ပိုမိုခိုင်မာအောင်လုပ်ထားပါတယ်
         allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
@@ -454,7 +454,7 @@ async function loadMatches() {
 
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
-    if (!matches || matches.length === 0) {
+    if (!Array.isArray(matches) || matches.length === 0) {
         list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found.</p>';
         return;
     }
@@ -506,6 +506,13 @@ function renderMatches(matches) {
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
+    
+    // allMatchesData က Array ဟုတ်မဟုတ် အရင်စစ်ရပါမယ်
+    if(!Array.isArray(allMatchesData)) {
+       list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
+       return;
+    }
+
     const liveMatches = allMatchesData.filter(m => ["1H", "2H", "HT", "ET", "P"].includes(m.fixture.status.short));
     if(liveMatches.length === 0) {
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
@@ -623,7 +630,7 @@ async function loadStandings() {
 }
 
 function renderStandings(data) {
-    if (!data || data.length === 0) return;
+    if (!Array.isArray(data) || data.length === 0) return;
     const leagueName = data[0].league?.name || "PREMIER LEAGUE";
     const leagueLogo = data[0].league?.logo || "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg";
     const list = document.getElementById("standings-list");
@@ -699,13 +706,14 @@ async function loadHighlights() {
 
 function filterBySearch(val) {
     const query = val.toLowerCase();
+    if(!Array.isArray(allMatchesData)) return;
     renderMatches(allMatchesData.filter(m => m.teams.home.name.toLowerCase().includes(query) || m.teams.away.name.toLowerCase().includes(query) || m.league.name.toLowerCase().includes(query)));
 }
 
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 function openVideo(url) { 
-  if(!url || url === 'undefined') { alert('Live stream not available yet.'); return; }
+  if(!url || url === 'undefined' || url === 'null') { alert('Live stream not available yet.'); return; }
   document.getElementById("mainModal").style.display = "flex"; 
   document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }

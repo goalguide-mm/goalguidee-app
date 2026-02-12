@@ -404,10 +404,25 @@ function renderMatches(matches) {
             const hScore = m.homeScore?.display ?? m.homeScore?.current ?? 0;
             const aScore = m.awayScore?.display ?? m.awayScore?.current ?? 0;
             const isLive = m.status?.type === 'inprogress';
-            const status = isLive ? `<span class="status-live">LIVE ${m.status?.description || ''}</span>` : (m.status?.description || 'FT');
+            const isFinished = m.status?.type === 'finished';
+            
+            let statusText = "";
+            if(isLive) {
+                statusText = `<span class="status-live">LIVE ${m.status?.description || ''}</span>`;
+            } else if(isFinished) {
+                statusText = "FT";
+            } else {
+                // ပွဲမစရသေးရင် အချိန်ပြရန် (Timestamp ရှိရင် အချိန်ပြောင်းမယ်)
+                if(m.startTimestamp) {
+                    const date = new Date(m.startTimestamp * 1000);
+                    statusText = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    statusText = m.status?.description || '-';
+                }
+            }
             
             html += `<div class="match">
-                <div class="time-status">${status}</div>
+                <div class="time-status">${statusText}</div>
                 <div class="team-row">
                     <span class="team-name">${m.homeTeam?.name}</span>
                     <img src="${getLogo(m.homeTeam?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'">
@@ -428,7 +443,6 @@ async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
     
-    // API အသစ်မှ Live ပွဲများကို Fixtures ထဲမှ Filter လုပ်သည်
     const liveMatches = allMatchesData.filter(m => m.status?.type === 'inprogress');
     
     if(liveMatches.length === 0) {
@@ -456,7 +470,7 @@ function renderStandings(data) {
     }
 
     let html = `<div class="league-card">
-            <div class="league-header"><span>Premier League Table 2025/26</span></div>
+            <div class="league-header"><span>Premier League Table 2024/25</span></div>
             <div style="overflow-x: auto;">
                 <table class="standings-table">
                     <thead><tr><th class="rank">#</th><th>Team</th><th style="text-align:center;">PL</th><th style="text-align:center;">GD</th><th class="pts-col">PTS</th></tr></thead>
@@ -464,8 +478,8 @@ function renderStandings(data) {
                         <tr>
                             <td class="rank">${r.position}</td>
                             <td><div class="team-info"><img src="${getLogo(r.team?.id, 'team')}" onerror="this.src='https://via.placeholder.com/20'"><span>${r.team?.name}</span></div></td>
-                            <td style="text-align:center;">${r.matches || 0}</td>
-                            <td style="text-align:center;">${(r.scoresFor || 0) - (r.scoresAgainst || 0)}</td>
+                            <td style="text-align:center;">${r.matches || (r.wins + r.losses + r.draws) || 0}</td>
+                            <td style="text-align:center;">${r.goalDiff !== undefined ? r.goalDiff : ((r.scoresFor || 0) - (r.scoresAgainst || 0))}</td>
                             <td class="pts-col" style="text-align:center;">${r.points || 0}</td>
                         </tr>`).join('')}
                     </tbody>
@@ -536,7 +550,7 @@ function renderMatchesInGrid(matches, containerId) {
                 </div>
             </div>
             <div style="text-align:center; font-size:12px; margin-top:10px; color:#ff4d4d; font-weight:900; letter-spacing:1px;">
-                LIVE ${m.status?.description}'
+                LIVE ${m.status?.description || ''}'
             </div>
         </div>
     `).join('');

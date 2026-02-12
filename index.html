@@ -331,6 +331,50 @@
     border-radius: 3px;
     padding: 1px 0;
   }
+
+  /* --- RESPONSIVE ပေါင်းထည့်ထားသော အပိုင်း --- */
+  
+  /* ဖုန်းအတွက် (Mobile - Screen width 768px ထက်ငယ်ရင်) */
+  @media screen and (max-width: 768px) {
+    .controls-wrapper {
+      margin: 10px;
+      flex-direction: column;
+      border-radius: 15px;
+    }
+    #teamSearch {
+      border-right: none;
+      border-bottom: 1px solid #facc15;
+      width: 100%;
+      padding: 10px;
+    }
+    .date-bar { width: 100%; justify-content: center; padding-top: 5px; }
+    
+    .match { grid-template-columns: 1fr 80px 1fr; }
+    .team-name { font-size: 11px; }
+    .score-box { font-size: 16px; min-width: 60px; }
+    
+    .logo-text { font-size: 18px; }
+    .refresh-btn { padding: 6px 12px; font-size: 11px; }
+
+    /* Lineup ကို ဖုန်းမှာ Scroll လုပ်လို့ရအောင် */
+    .pitch-container {
+      aspect-ratio: 16 / 9;
+      min-width: 600px; /* ဖုန်းမှာ ကွင်းပုံစံမပျက်အောင် အကျယ်တစ်ခုသတ်မှတ် */
+    }
+    #modalBody { overflow-x: auto; }
+
+    .bottom-nav { height: 65px; }
+    .nav-item span { padding: 6px 8px; font-size: 10px; }
+    
+    .grid-layout { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+  }
+
+  /* Tablet နှင့် Desktop အတွက် (Screen width 769px ထက်ကြီးရင်) */
+  @media screen and (min-width: 769px) {
+    .content-section::-webkit-scrollbar { width: 6px; }
+    .content-section::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
+    .grid-layout { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  }
 </style>
 </head>
 <body>
@@ -549,14 +593,16 @@ function openTestLineup(home, away, hLogo, aLogo) {
                 <span style="background:#1a1d23; padding:3px 10px; border:1px solid #333; border-radius:15px; font-size:9px; color:#facc15;">Transfer value</span>
             </div>
 
-            <div class="pitch-container">
-                <div class="pitch-half-line"></div>
-                <div class="pitch-center-circle"></div>
-                <div style="position:absolute; top:20%; bottom:20%; left:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-left:none;"></div>
-                <div style="position:absolute; top:20%; bottom:20%; right:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-right:none;"></div>
-                
-                ${awayPlayersHtml}
-                ${homePlayersHtml}
+            <div id="lineup-scroll-wrapper" style="overflow-x: auto; width: 100%;">
+                <div class="pitch-container">
+                    <div class="pitch-half-line"></div>
+                    <div class="pitch-center-circle"></div>
+                    <div style="position:absolute; top:20%; bottom:20%; left:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-left:none;"></div>
+                    <div style="position:absolute; top:20%; bottom:20%; right:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-right:none;"></div>
+                    
+                    ${awayPlayersHtml}
+                    ${homePlayersHtml}
+                </div>
             </div>
         </div>
     `;
@@ -584,37 +630,39 @@ function renderStandings(data) {
             <span style="color:#facc15; font-size:15px; font-weight:900;">${leagueName.toUpperCase()} STANDINGS</span>
         </div>
         <div style="border:1.5px solid #facc15; border-radius:10px; overflow:hidden; background:#1a1d23;">
-            <table class="standings-table">
-                <thead>
-                    <tr>
-                        <th style="width: 15%;">RANK</th>
-                        <th style="width: 45%; text-align: left;">TEAM</th>
-                        <th style="width: 10%;">PL</th>
-                        <th style="width: 20%;">GF-GA</th>
-                        <th style="width: 10%;">PTS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${data.map(r => {
-                        const played = r.all?.played ?? 0;
-                        const goalsFor = r.all?.goals?.for ?? r.goalsFor ?? 0;
-                        const goalsAgainst = r.all?.goals?.against ?? r.goalsAgainst ?? 0;
-                        
-                        return `<tr>
-                            <td>${r.rank}</td>
-                            <td class="team-cell">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <img src="${r.team.logo}" width="24" height="24" style="object-fit:contain;">
-                                    <span>${r.team.name}</span>
-                                </div>
-                            </td>
-                            <td>${played}</td>
-                            <td>${goalsFor}:${goalsAgainst}</td>
-                            <td class="pts-col">${r.points}</td>
-                        </tr>`;
-                    }).join('')}
-                </tbody>
-            </table>
+            <div style="overflow-x: auto;">
+              <table class="standings-table">
+                  <thead>
+                      <tr>
+                          <th style="width: 15%;">RANK</th>
+                          <th style="width: 45%; text-align: left;">TEAM</th>
+                          <th style="width: 10%;">PL</th>
+                          <th style="width: 20%;">GF-GA</th>
+                          <th style="width: 10%;">PTS</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      ${data.map(r => {
+                          const played = r.all?.played ?? 0;
+                          const goalsFor = r.all?.goals?.for ?? r.goalsFor ?? 0;
+                          const goalsAgainst = r.all?.goals?.against ?? r.goalsAgainst ?? 0;
+                          
+                          return `<tr>
+                              <td>${r.rank}</td>
+                              <td class="team-cell">
+                                  <div style="display:flex; align-items:center; gap:10px;">
+                                      <img src="${r.team.logo}" width="24" height="24" style="object-fit:contain;">
+                                      <span>${r.team.name}</span>
+                                  </div>
+                              </td>
+                              <td>${played}</td>
+                              <td>${goalsFor}:${goalsAgainst}</td>
+                              <td class="pts-col">${r.points}</td>
+                          </tr>`;
+                      }).join('')}
+                  </tbody>
+              </table>
+            </div>
         </div>
     </div>`;
     list.innerHTML = html;

@@ -394,45 +394,42 @@ function renderStandings(data) {
 
     let html = `
         <style>
-            /* Header ကို ပိုကျစ်လျစ်စေပြီး Hover လုပ်လျှင် 3D ပိုဆန်စေရန် */
+            /* 3D Header ကို ဆိုဒ်သေးသေးနှင့် သေသပ်အောင် ပြင်ဆင်ခြင်း */
             .league-header-3d {
-                display: flex; align-items: center; justify-content: center; gap: 8px; 
-                padding: 8px; background: #1a1d23; 
-                border: 1.5px solid #facc15; border-radius: 8px; 
-                margin-bottom: 8px;
-                transition: all 0.2s ease-in-out;
+                display: flex; align-items: center; justify-content: center; gap: 6px; 
+                padding: 6px 12px; background: #1a1d23; 
+                border: 1px solid #facc15; border-radius: 6px; 
+                margin: 0 auto 10px auto;
+                width: fit-content; /* စာသားရှိသလောက်ပဲ အကျယ်ယူမည် */
+                transition: all 0.2s ease;
                 cursor: pointer;
                 box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             }
             .league-header-3d:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 8px 15px rgba(250, 204, 21, 0.2), inset 0 0 5px rgba(250,204,21,0.1);
+                box-shadow: 0 6px 12px rgba(250, 204, 21, 0.2);
                 background: #1e2128;
-            }
-            /* Table Row Hover effect */
-            .standings-table tbody tr:hover {
-                background: rgba(255, 255, 255, 0.03);
             }
         </style>
 
-        <div style="max-width: 500px; margin: 10px auto; font-family: sans-serif;">
+        <div style="max-width: 420px; margin: 10px auto; font-family: 'Inter', sans-serif; padding: 0 10px;">
             
             <div class="league-header-3d">
-                ${leagueLogo ? `<img src="${leagueLogo}" width="22" height="22" style="object-fit: contain;">` : ''}
-                <span style="color: #facc15; font-size: 14px; font-weight: 900; letter-spacing: 0.8px;">
+                ${leagueLogo ? `<img src="${leagueLogo}" width="18" height="18" style="object-fit: contain;">` : ''}
+                <span style="color: #facc15; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;">
                     ${leagueName.toUpperCase()} STANDINGS
                 </span>
             </div>
 
-            <div style="border: 1.5px solid #facc15; border-radius: 10px; overflow: hidden; background: #1a1d23; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-                <table class="standings-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+            <div style="border: 1px solid #facc15; border-radius: 8px; overflow: hidden; background: #1a1d23; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+                <table style="width: 100%; border-collapse: collapse; margin: 0; font-size: 12px;">
                     <thead>
-                        <tr style="background: rgba(250, 204, 21, 0.15); border-bottom: 1px solid rgba(250, 204, 21, 0.3);">
-                            <th style="text-align:center; width:50px; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">RANK</th>
-                            <th style="text-align:left; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">TEAM</th>
-                            <th style="text-align:center; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">PL</th>
-                            <th style="text-align:center; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">GF-GA</th>
-                            <th class="pts-col" style="text-align:center; padding: 8px; color: #facc15; font-size: 11px; font-weight: 800;">PTS</th>
+                        <tr style="background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.2);">
+                            <th style="text-align:center; width:45px; padding: 6px; color: #facc15;">RANK</th>
+                            <th style="text-align:left; padding: 6px; color: #facc15;">TEAM</th>
+                            <th style="text-align:center; width:35px; padding: 6px; color: #facc15;">PL</th>
+                            <th style="text-align:center; width:65px; padding: 6px; color: #facc15;">GF:GA</th>
+                            <th style="text-align:center; width:45px; padding: 6px; color: #facc15;">PTS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -441,18 +438,20 @@ function renderStandings(data) {
                             const ga = r.all?.goals?.against ?? 0;
                             return `
                             <tr style="${index !== data.length - 1 ? 'border-bottom: 1px solid rgba(255,255,255,0.05);' : ''}">
-                                <td style="text-align:center; font-weight: 900; padding: 10px; color: #fff; font-size: 13px;">
+                                <td style="text-align:center; font-weight: 900; padding: 8px; color: #fff;">
                                     ${r.rank}
                                 </td>
-                                <td style="padding: 10px;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <img src="${r.team.logo}" width="22" height="22" style="object-fit:contain;">
-                                        <span style="font-weight:700; color:#fff; font-size: 12px;">${r.team.name}</span>
+                                <td style="padding: 8px;">
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <img src="${r.team.logo}" width="18" height="18" style="object-fit:contain;">
+                                        <span style="font-weight:700; color:#fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">
+                                            ${r.team.name}
+                                        </span>
                                     </div>
                                 </td>
-                                <td style="text-align:center; font-weight:600; padding: 10px; color: #e5e7eb; font-size: 12px;">${r.all?.played ?? 0}</td>
-                                <td style="text-align:center; font-weight:600; padding: 10px; color: #e5e7eb; font-size: 12px;">${gf}:${ga}</td>
-                                <td class="pts-col" style="text-align:center; font-weight:900; font-size:14px; padding: 10px; color: #facc15;">
+                                <td style="text-align:center; font-weight:600; padding: 8px; color: #e5e7eb;">${r.all?.played ?? 0}</td>
+                                <td style="text-align:center; font-weight:600; padding: 8px; color: #e5e7eb;">${gf}:${ga}</td>
+                                <td style="text-align:center; font-weight:900; padding: 8px; color: #facc15; font-size: 13px;">
                                     ${r.points ?? 0}
                                 </td>
                             </tr>`;

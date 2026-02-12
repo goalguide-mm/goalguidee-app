@@ -337,7 +337,9 @@ function renderMatches(matches) {
         const league = grouped[leagueName];
         html += `<div class="league-card">
                     <div class="league-header">
-                        <img src="${league.logo}">
+                        <div style="background: rgba(255, 255, 255, 0.9); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.parentElement.style.display='none'">
+                        </div>
                         <span>${leagueName}</span>
                     </div>`;
 

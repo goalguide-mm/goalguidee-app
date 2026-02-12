@@ -71,6 +71,8 @@
     justify-content: space-between;
     gap: 15px;
     padding: 15px 20px 5px 20px;
+    max-width: 600px; /* မင်းအနီဝိုင်းပြထားတဲ့ ပမာဏအတိုင်း ညှိထားတာ */
+    margin: 0 auto;
   }
 
   #teamSearch {
@@ -115,8 +117,15 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
+  /* Matches List Container ညှိခြင်း */
+  #matches-list {
+    max-width: 600px; /* မင်းအနီဝိုင်းပြထားတဲ့ ပမာဏအတိုင်း ညှိထားတာ */
+    margin: 0 auto;
+    padding: 10px;
+  }
+
   .league-card {
-    margin: 15px;
+    margin-bottom: 20px;
     background: #1a1d23;
     border-radius: 12px;
     border: none;
@@ -129,7 +138,7 @@
     font-size: 14px;
     font-weight: 700;
     background: #252a32;
-    color: #ffffff;
+    color: #facc15;
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -137,13 +146,13 @@
     border-bottom: 1px solid #333;
   }
   
-  .league-header img { width: 25px; height: 25px; object-fit: contain; display: block !important; }
+  .league-header img { width: 25px; height: 25px; object-fit: contain; }
 
   .match {
     display: grid;
-    grid-template-columns: 80px 1fr 80px 1fr;
+    grid-template-columns: 1fr 80px 1fr; /* ဘယ်၊ လယ်၊ ညာ အတိအကျ ညီအောင် ညှိထားတာ */
     align-items: center;
-    padding: 12px 10px;
+    padding: 15px 10px;
     border-bottom: 1px solid #2a2f38;
     transition: all 0.3s ease;
     cursor: pointer;
@@ -153,6 +162,14 @@
     background: rgba(250, 204, 21, 0.05);
   }
 
+  .score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
   .time-status {
     font-size: 16px; 
     color: #facc15;
@@ -160,41 +177,31 @@
     font-weight: 800; 
   }
 
-  .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; }
+  .status-live { color: #ff4d4d; animation: blink 1s infinite; font-weight: 800; font-size: 11px; }
   @keyframes blink { 50% { opacity: 0.5; } }
 
   .team-row { 
     display: flex; 
     align-items: center; 
     gap: 10px; 
-    overflow: hidden;
   }
 
-  .match .team-row:nth-child(2) { 
-    justify-content: flex-end;
-    text-align: right;
-  }
-  
-  .match .team-row:nth-child(4) { 
-    justify-content: flex-start;
-    text-align: left;
-    flex-direction: row-reverse;
-  }
+  .match .team-row.home { justify-content: flex-end; text-align: right; }
+  .match .team-row.away { justify-content: flex-start; text-align: left; }
 
-  .team-row img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
-  .team-name { font-size: 14px; font-weight: 600; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .team-row img { width: 28px; height: 28px; object-fit: contain; }
+  .team-name { font-size: 14px; font-weight: 600; color: #e5e7eb; }
 
   .score-box { 
     background: #0b0f14; 
-    padding: 6px 0; 
+    padding: 4px 10px; 
     border-radius: 6px; 
     font-size: 18px; 
     font-weight: 900; 
     color: #facc15; 
     text-align: center;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-    min-width: 60px;
-    margin: 0 5px;
+    min-width: 65px;
   }
 
   .bottom-nav {
@@ -255,14 +262,10 @@
     border-color: #facc15;
   }
 
-  .standings-container { padding: 10px; }
+  .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
   .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
   .standings-table th { background: #252a32; color: #facc15; padding: 12px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
   .standings-table td { padding: 12px 8px; border-bottom: 1px solid #2a2f38; font-size: 13px; color: #e5e7eb; }
-  .standings-table tr:hover { background: rgba(255,255,255,0.02); }
-  .rank { font-weight: 800; width: 30px; text-align: center; }
-  .team-info { display: flex; align-items: center; gap: 8px; }
-  .team-info img { width: 22px; height: 22px; object-fit: contain; }
   .pts-col { font-weight: 800; color: #facc15; }
 
   .content-section { display: none; animation: fadeIn 0.4s ease; }
@@ -271,36 +274,9 @@
 
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  #highlights-list .video-card, #live-list .video-card {
-    background: #151a21;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #1f2937;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.4);
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-  #highlights-list .video-card:hover, #live-list .video-card:hover {
-    transform: translateY(-5px);
-    border: 1px solid #facc15;
-  }
-  .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  .title-box { padding: 10px; font-size: 13px; font-weight: 600; text-align: center; color: #facc15; }
-
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; z-index: 3000; }
   .modal-content { width: 100%; max-width: 500px; background: #0b0f14; position: relative; border-radius: 12px; overflow: hidden; }
   .close-modal { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
-
-  .standings-container { padding-bottom: 20px; }
-  .standings-table th, .standings-table td { 
-    white-space: nowrap; 
-    padding: 10px 5px; 
-  }
-  .standings-table .team-info span {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 </style>
 </head>
 <body>
@@ -316,7 +292,6 @@
 <div id="section-matches" class="content-section active">
   <div class="controls-wrapper">
     <input type="text" id="teamSearch" placeholder="Search team or league..." oninput="filterBySearch(this.value)">
-    
     <div class="date-bar">
       <button onclick="changeDate(-1)">◀</button>
       <input type="date" id="matchDate" onchange="handleDateChange(this.value)">
@@ -350,11 +325,6 @@ let selectedDate = new Date().toLocaleDateString('en-CA');
 let allMatchesData = []; 
 document.getElementById("matchDate").value = selectedDate;
 
-function getLogo(id, type='team') {
-    if(!id) return 'https://via.placeholder.com/30';
-    return `https://www.sofascore.com/api/v1/${type}/${id}/image`;
-}
-
 function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -370,79 +340,73 @@ function switchTab(tab) {
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>ဒေတာများ ဆွဲယူနေပါသည် (Loading...)</p>";
-    
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // ၁၀ စက္ကန့်ထက်ကြာရင် Pending ဖြတ်မယ်
-
-        const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
+        const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
-
-        if (result.error) {
-            list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">ERROR: ${result.error}</p>`;
-            return;
-        }
-
         allMatchesData = result;
         renderMatches(allMatchesData);
     } catch (error) {
-        const errorMsg = error.name === 'AbortError' ? "ချိတ်ဆက်မှု ကြာမြင့်နေပါသည်။ ခဏနေမှ ပြန်ကြိုးစားပါ။" : "Worker နှင့် ချိတ်ဆက်မရပါ။";
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">${errorMsg}</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Connection Error.</p>`;
     }
 }
 
-// Matches Card ပြင်ဆင်ခြင်း (NS, FT, LIVE အကုန်ပါတယ်)
+// Matches ပြသခြင်း (League ခွဲပြီး အကွက်ညှိထားသည်)
 function renderMatches(matches) {
-    let html = "";
-    matches.forEach(m => {
-        const status = m.fixture.status.short;
-        let scoreDisplay = "";
-        
-        if (status === "NS") {
-            const time = new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            scoreDisplay = `<span style="color:#888;">${time}</span>`;
-        } else {
-            scoreDisplay = `<span>${m.goals.home ?? 0} - ${m.goals.away ?? 0}</span>`;
-        }
-
-        html += `
-            <div class="match-card" style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1a; margin-bottom:10px; padding:15px; border-radius:8px;">
-                <div style="width:40%; text-align:right;">
-                    <span style="margin-right:10px;">${m.teams.home.name}</span>
-                    <img src="${m.teams.home.logo}" width="25">
-                </div>
-                
-                <div style="width:20%; text-align:center;">
-                    <div style="font-weight:bold; font-size:1.2rem;">${scoreDisplay}</div>
-                    <div style="font-size:0.7rem; color:${status === '1H' ? '#ff4d4d' : '#888'};">
-                        ${status === 'NS' ? 'Upcoming' : (status === 'FT' ? 'FT' : m.fixture.status.elapsed + "'")}
-                    </div>
-                </div>
-
-                <div style="width:40%; text-align:left;">
-                    <img src="${m.teams.away.logo}" width="25" style="margin-right:10px;">
-                    <span>${m.teams.away.name}</span>
-                </div>
-            </div>
-        `;
-    });
-    document.getElementById("matches-list").innerHTML = html;
-}
- 
-async function loadLive() {
-    const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
-    
-    // API အသစ်မှ Live ပွဲများကို Fixtures ထဲမှ Filter လုပ်သည်
-    const liveMatches = allMatchesData.filter(m => m.status?.type === 'inprogress');
-    
-    if(liveMatches.length === 0) {
-        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
+    const list = document.getElementById("matches-list");
+    if (!matches || matches.length === 0) {
+        list.innerHTML = '<p style="text-align:center;padding:40px;">ပွဲစဉ်များမရှိသေးပါ။</p>';
         return;
     }
-    renderMatchesInGrid(liveMatches, "live-list");
+
+    // League အလိုက် ပွဲများကို Group ဖွဲ့ခြင်း
+    const grouped = matches.reduce((acc, m) => {
+        const leagueName = m.league.name;
+        if (!acc[leagueName]) acc[leagueName] = { logo: m.league.logo, games: [] };
+        acc[leagueName].games.push(m);
+        return acc;
+    }, {});
+
+    let html = "";
+    for (let leagueName in grouped) {
+        const league = grouped[leagueName];
+        html += `<div class="league-card">
+                    <div class="league-header">
+                        <img src="${league.logo}">
+                        <span>${leagueName}</span>
+                    </div>`;
+
+        league.games.forEach(m => {
+            const status = m.fixture.status.short;
+            const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
+            let timeDisplay = "";
+            
+            if (status === "NS") {
+                timeDisplay = new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } else if (isLive) {
+                timeDisplay = `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>`;
+            } else {
+                timeDisplay = status;
+            }
+
+            html += `
+                <div class="match">
+                    <div class="team-row home">
+                        <span class="team-name">${m.teams.home.name}</span>
+                        <img src="${m.teams.home.logo}">
+                    </div>
+                    <div class="score-section">
+                        <div class="score-box">${m.goals.home ?? 0} - ${m.goals.away ?? 0}</div>
+                        <div class="time-status" style="font-size:11px; margin-top:2px;">${timeDisplay}</div>
+                    </div>
+                    <div class="team-row away">
+                        <img src="${m.teams.away.logo}">
+                        <span class="team-name">${m.teams.away.name}</span>
+                    </div>
+                </div>`;
+        });
+        html += `</div>`;
+    }
+    list.innerHTML = html;
 }
 
 async function loadStandings() {
@@ -455,34 +419,36 @@ async function loadStandings() {
     } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Error loading standings.</p>"; }
 }
 
-// Standings Table ပြင်ဆင်ခြင်း
 function renderStandings(data) {
     const list = document.getElementById("standings-list");
     let html = `
-        <table style="width:100%; border-collapse: collapse; text-align: left;">
-            <tr style="background: #222; color: #facc15;">
-                <th style="padding: 10px;">#</th>
-                <th>TEAM</th>
-                <th>PL</th>
-                <th>GD</th>
-                <th>PTS</th>
-            </tr>
-            ${data.map(r => `
-                <tr style="border-bottom: 1px solid #333;">
-                    <td style="padding: 10px;">${r.rank}</td>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="${r.team.logo}" width="20">
-                            <span>${r.team.name}</span>
-                        </div>
-                    </td>
-                    <td>${r.all?.played ?? 0}</td>
-                    <td>${r.goalsDiff ?? 0}</td>
-                    <td style="color:#facc15; font-weight:bold;">${r.points ?? 0}</td>
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th class="rank">#</th>
+                    <th>TEAM</th>
+                    <th>PL</th>
+                    <th>GD</th>
+                    <th class="pts-col">PTS</th>
                 </tr>
-            `).join('')}
-        </table>
-    `;
+            </thead>
+            <tbody>
+                ${data.map(r => `
+                    <tr>
+                        <td class="rank">${r.rank}</td>
+                        <td>
+                            <div class="team-info">
+                                <img src="${r.team.logo}">
+                                <span>${r.team.name}</span>
+                            </div>
+                        </td>
+                        <td>${r.all?.played ?? 0}</td>
+                        <td>${r.goalsDiff ?? 0}</td>
+                        <td class="pts-col">${r.points ?? 0}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>`;
     list.innerHTML = html;
 }
 
@@ -495,18 +461,43 @@ async function loadHighlights() {
         const items = Array.isArray(data) ? data : (data.response || []);
         listContainer.innerHTML = items.map(h => `
             <div class="video-card" onclick="openVideo('${h.url || h.matchviewUrl}')">
-                <img src="${h.thumbnail}" onerror="this.src='https://via.placeholder.com/300x169/111827/facc15?text=GOAL+GUIDE'">
+                <img src="${h.thumbnail}">
                 <div class="title-box">${h.title}</div>
             </div>`).join('');
-    } catch(e) { listContainer.innerHTML = "Error loading highlights."; }
+    } catch(e) { listContainer.innerHTML = "Error."; }
+}
+
+async function loadLive() {
+    const list = document.getElementById("live-list");
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Live ပွဲစဉ်များ ရှာဖွေနေပါသည်...</p>";
+    const liveMatches = allMatchesData.filter(m => ["1H", "2H", "HT", "ET", "P"].includes(m.fixture.status.short));
+    if(liveMatches.length === 0) {
+        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
+        return;
+    }
+    renderMatchesInGrid(liveMatches, "live-list");
+}
+
+function renderMatchesInGrid(matches, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = matches.map(m => `
+        <div class="league-card" style="padding:15px; text-align:center;">
+             <div style="font-size:11px; color:#facc15; margin-bottom:10px;">${m.league.name}</div>
+             <div style="display:flex; justify-content:space-between; align-items:center;">
+                <img src="${m.teams.home.logo}" width="30">
+                <div style="font-size:20px; font-weight:900; color:#facc15;">${m.goals.home} - ${m.goals.away}</div>
+                <img src="${m.teams.away.logo}" width="30">
+             </div>
+             <div class="status-live" style="margin-top:10px;">LIVE ${m.fixture.status.elapsed}'</div>
+        </div>`).join('');
 }
 
 function filterBySearch(val) {
     const query = val.toLowerCase();
     const filtered = allMatchesData.filter(m => 
-        (m.homeTeam?.name?.toLowerCase().includes(query)) || 
-        (m.awayTeam?.name?.toLowerCase().includes(query)) ||
-        (m.tournament?.name?.toLowerCase().includes(query))
+        (m.teams.home.name.toLowerCase().includes(query)) || 
+        (m.teams.away.name.toLowerCase().includes(query)) ||
+        (m.league.name.toLowerCase().includes(query))
     );
     renderMatches(filtered);
 }
@@ -525,33 +516,6 @@ function openVideo(url) {
     document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
-
-function renderMatchesInGrid(matches, containerId) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = matches.map(m => `
-        <div class="video-card" style="padding:15px; height:auto; color: white;">
-            <div style="font-size:12px; font-weight:800; color:#facc15; margin-bottom:12px; display:flex; align-items:center; gap:5px;">
-                <img src="${getLogo(m.tournament?.uniqueTournament?.id, 'unique-tournament')}" width="18"> ${m.tournament?.name}
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
-                <div style="text-align:center; flex:1;">
-                    <img src="${getLogo(m.homeTeam?.id)}" width="35">
-                    <div style="font-weight:800; font-size:13px; margin-top:5px;">${m.homeTeam?.name}</div>
-                </div>
-                <div style="font-weight:900; color:#facc15; font-size:24px; flex:1; text-align:center;">
-                    ${m.homeScore?.current} - ${m.awayScore?.current}
-                </div>
-                <div style="text-align:center; flex:1;">
-                    <img src="${getLogo(m.awayTeam?.id)}" width="35">
-                    <div style="font-weight:800; font-size:13px; margin-top:5px;">${m.awayTeam?.name}</div>
-                </div>
-            </div>
-            <div style="text-align:center; font-size:12px; margin-top:10px; color:#ff4d4d; font-weight:900; letter-spacing:1px;">
-                LIVE ${m.status?.description}'
-            </div>
-        </div>
-    `).join('');
-}
 
 window.onload = loadMatches;
 </script>

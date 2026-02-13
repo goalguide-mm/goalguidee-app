@@ -378,6 +378,21 @@
     .content-section::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
     .grid-layout { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
   }
+
+  /* League Select Styling */
+  .league-select {
+    width: 100%;
+    padding: 10px;
+    background: #1a1d23;
+    color: #facc15;
+    border: 1.5px solid #facc15;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    outline: none;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -433,7 +448,7 @@ function switchTab(tab) {
   document.getElementById('section-' + tab).classList.add('active');
   
   if(tab === 'matches') loadMatches();
-  if(tab === 'standings') loadStandings();
+  if(tab === 'standings') loadStandings("17"); // Default PL
   if(tab === 'highlights') loadHighlights();
   if(tab === 'live') loadLive();
 }
@@ -444,7 +459,6 @@ async function loadMatches() {
     try {
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
-        // Array စစ်ဆေးခြင်းအပိုင်းကို ပိုမိုခိုင်မာအောင်လုပ်ထားပါတယ်
         allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
@@ -541,7 +555,6 @@ async function loadLive() {
     `).join('');
 }
 
-// Lineup Logic
 function openTestLineup(home, away, hLogo, aLogo) {
     const modal = document.getElementById("mainModal");
     modal.style.display = "flex";
@@ -618,26 +631,49 @@ function openTestLineup(home, away, hLogo, aLogo) {
     `;
 }
 
-async function loadStandings() {
+async function loadStandings(leagueId = "17") {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Standings...</p>";
+    list.innerHTML = `
+        <select class="league-select" onchange="loadStandings(this.value)">
+            <option value="17" ${leagueId === "17" ? "selected" : ""}>Premier League</option>
+            <option value="8" ${leagueId === "8" ? "selected" : ""}>La Liga</option>
+            <option value="23" ${leagueId === "23" ? "selected" : ""}>Serie A</option>
+            <option value="35" ${leagueId === "35" ? "selected" : ""}>Bundesliga</option>
+            <option value="34" ${leagueId === "34" ? "selected" : ""}>Ligue 1</option>
+            <option value="7" ${leagueId === "7" ? "selected" : ""}>Champions League</option>
+            <option value="37" ${leagueId === "37" ? "selected" : ""}>Eredivisie</option>
+            <option value="955" ${leagueId === "955" ? "selected" : ""}>Saudi Pro League</option>
+        </select>
+        <p style='text-align:center;padding:40px; color:#facc15;'>Loading Standings...</p>
+    `;
+
     try {
-        const response = await fetch(`${WORKER_URL}/standings`); 
+        const response = await fetch(`${WORKER_URL}/standings?leagueId=${leagueId}`); 
         const data = await response.json();
-        renderStandings(data);
+        renderStandings(data, leagueId);
     } catch (e) { list.innerHTML = "Error."; }
 }
 
-function renderStandings(data) {
+function renderStandings(data, currentLeagueId) {
     if (!Array.isArray(data) || data.length === 0) return;
-    const leagueName = data[0].league?.name || "PREMIER LEAGUE";
-    const leagueLogo = data[0].league?.logo || "https://api.sofascore.app/api/v1/tournament/17/image";
+    const leagueName = data[0].league?.name || "STANDINGS";
+    const leagueLogo = data[0].league?.logo || `https://api.sofascore.app/api/v1/tournament/${currentLeagueId}/image`;
     const list = document.getElementById("standings-list");
     
     let html = `<div style="max-width: 600px; margin: 10px auto;">
+        <select class="league-select" onchange="loadStandings(this.value)">
+            <option value="17" ${currentLeagueId === "17" ? "selected" : ""}>Premier League</option>
+            <option value="8" ${currentLeagueId === "8" ? "selected" : ""}>La Liga</option>
+            <option value="23" ${currentLeagueId === "23" ? "selected" : ""}>Serie A</option>
+            <option value="35" ${currentLeagueId === "35" ? "selected" : ""}>Bundesliga</option>
+            <option value="34" ${currentLeagueId === "34" ? "selected" : ""}>Ligue 1</option>
+            <option value="7" ${currentLeagueId === "7" ? "selected" : ""}>Champions League</option>
+            <option value="37" ${currentLeagueId === "37" ? "selected" : ""}>Eredivisie</option>
+            <option value="955" ${currentLeagueId === "955" ? "selected" : ""}>Saudi Pro League</option>
+        </select>
         <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; background:#1a1d23; border:1.5px solid #facc15; border-radius:30px; margin-bottom:8px;">
             <img src="${leagueLogo}" width="25"> 
-            <span style="color:#facc15; font-size:15px; font-weight:900;">${leagueName.toUpperCase()} STANDINGS</span>
+            <span style="color:#facc15; font-size:15px; font-weight:900;">${leagueName.toUpperCase()}</span>
         </div>
         <div style="border:1.5px solid #facc15; border-radius:10px; overflow:hidden; background:#1a1d23;">
             <div style="overflow-x: auto;">
@@ -647,15 +683,14 @@ function renderStandings(data) {
                           <th style="width: 15%;">RANK</th>
                           <th style="width: 45%; text-align: left;">TEAM</th>
                           <th style="width: 10%;">PL</th>
-                          <th style="width: 20%;">GF-GA</th>
+                          <th style="width: 20%;">GD</th>
                           <th style="width: 10%;">PTS</th>
                       </tr>
                   </thead>
                   <tbody>
                       ${data.map(r => {
                           const played = r.all?.played ?? 0;
-                          const goalsFor = r.all?.goals?.for ?? r.goalsFor ?? 0;
-                          const goalsAgainst = r.all?.goals?.against ?? r.goalsAgainst ?? 0;
+                          const gd = r.goalDiff ?? (r.goalsFor - r.goalsAgainst) ?? 0;
                           
                           return `<tr>
                               <td>${r.rank}</td>
@@ -666,7 +701,7 @@ function renderStandings(data) {
                                   </div>
                               </td>
                               <td>${played}</td>
-                              <td>${goalsFor}:${goalsAgainst}</td>
+                              <td>${gd > 0 ? '+' + gd : gd}</td>
                               <td class="pts-col">${r.points}</td>
                           </tr>`;
                       }).join('')}
@@ -678,7 +713,6 @@ function renderStandings(data) {
     list.innerHTML = html;
 }
 
-// Highlights (GOALS) ပေါ်အောင် ပြင်ဆင်ထားသည့် အပိုင်း
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading...</p>";

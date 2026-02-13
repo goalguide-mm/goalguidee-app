@@ -422,7 +422,7 @@ async function loadMatches() {
         allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Check your Tunnel Connection.</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Check your Network Connection.</p>`;
     }
 }
 
@@ -452,9 +452,10 @@ function renderMatches(matches) {
         league.games.forEach(m => {
             const status = m.fixture.status.short;
             const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
-            let timeDisplay = status === "NS" ? new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : (isLive ? `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>` : status);
+            
+            // Direct Worker မှလာသော အချိန် status ကို ညှိယူခြင်း
+            let timeDisplay = status === "NS" ? m.fixture.status.elapsed : (isLive ? `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>` : status);
 
-            // API သစ်က stream_url ကို သုံးရန်
             html += `
                 <div class="match" onclick="openVideo('${m.stream_url}')">
                     <div class="team-row home">
@@ -581,26 +582,21 @@ function filterBySearch(val) {
     renderMatches(allMatchesData.filter(m => m.teams.home.name.toLowerCase().includes(query) || m.teams.away.name.toLowerCase().includes(query) || m.league.name.toLowerCase().includes(query)));
 }
 
-function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
+function changeDate(n) { 
+  let d = new Date(selectedDate); 
+  d.setDate(d.getDate()+n); 
+  selectedDate = d.toISOString().split('T')[0]; 
+  document.getElementById("matchDate").value = selectedDate; 
+  loadMatches(); 
+}
+
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
 
-// --- Resolver API ကို သုံးပြီး ဗီဒီယိုဖွင့်ရန် ပြင်ဆင်ချက် ---
-async function openVideo(streamApiUrl) { 
-  if(!streamApiUrl || streamApiUrl === 'undefined') { alert('Stream not available.'); return; }
+async function openVideo(url) { 
+  if(!url || url === 'undefined' || url === "") { alert('Stream not available.'); return; }
   
   document.getElementById("mainModal").style.display = "flex"; 
-  document.getElementById("modalBody").innerHTML = "<p style='color:#facc15;text-align:center;padding:20px;'>Getting Stream Link...</p>";
-
-  try {
-      // ၄ ခုမြောက် API (Get Stream) ကို လှမ်းခေါ်ခြင်း
-      const res = await fetch(`${WORKER_URL}/get-stream?url=${encodeURIComponent(streamApiUrl)}`);
-      const data = await res.json();
-      const finalUrl = data.stream_url || streamApiUrl;
-
-      document.getElementById("modalBody").innerHTML = `<iframe src="${finalUrl}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
-  } catch (e) {
-      document.getElementById("modalBody").innerHTML = "Error loading stream.";
-  }
+  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
 
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }

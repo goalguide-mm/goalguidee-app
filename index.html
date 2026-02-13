@@ -13,10 +13,8 @@
   body {
     font-family: 'Inter', sans-serif;
     background-color: #0b0f14;
-    /* --- မင်းပြောတဲ့အတိုင်း Background ကို Stadium Lights ပုံစံ ပြောင်းထားတဲ့အပိုင်း --- */
     background-image: linear-gradient(rgba(11, 15, 20, 0.7), rgba(11, 15, 20, 0.85)), 
                       url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1920&auto=format&fit=crop'); 
-    /* ------------------------------------------- */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -206,7 +204,6 @@
   .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.5); }
   @keyframes blink { 50% { opacity: 0.5; } }
 
-  /* 3D Navigation ပြင်ဆင်ချက် */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -229,21 +226,20 @@
     background: #1f2937;
     color: #fff;
     display: inline-block;
-    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect shadow */
+    box-shadow: 0 4px 0px #9a7d0a; 
     transition: all 0.1s ease;
   }
   
   .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
   .nav-item.active span { 
     background: rgba(250, 204, 21, 0.3); 
-    transform: translateY(3px); /* Pressed effect */
+    transform: translateY(3px); 
     box-shadow: 0 1px 0px #9a7d0a; 
     color: #facc15; 
   }
 
   .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
   
-  /* Table Alignment ပြင်ဆင်ချက် */
   .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; border: 1.5px solid #facc15; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: center; border-bottom: 1.5px solid #facc15; }
   .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; text-align: center; }
@@ -335,44 +331,22 @@
     padding: 1px 0;
   }
 
-  /* --- RESPONSIVE ပေါင်းထည့်ထားသော အပိုင်း --- */
-  
-  /* ဖုန်းအတွက် (Mobile - Screen width 768px ထက်ငယ်ရင်) */
   @media screen and (max-width: 768px) {
-    .controls-wrapper {
-      margin: 10px;
-      flex-direction: column;
-      border-radius: 15px;
-    }
-    #teamSearch {
-      border-right: none;
-      border-bottom: 1px solid #facc15;
-      width: 100%;
-      padding: 10px;
-    }
+    .controls-wrapper { margin: 10px; flex-direction: column; border-radius: 15px; }
+    #teamSearch { border-right: none; border-bottom: 1px solid #facc15; width: 100%; padding: 10px; }
     .date-bar { width: 100%; justify-content: center; padding-top: 5px; }
-    
     .match { grid-template-columns: 1fr 80px 1fr; }
     .team-name { font-size: 11px; }
     .score-box { font-size: 16px; min-width: 60px; }
-    
     .logo-text { font-size: 18px; }
     .refresh-btn { padding: 6px 12px; font-size: 11px; }
-
-    /* Lineup ကို ဖုန်းမှာ Scroll လုပ်လို့ရအောင် */
-    .pitch-container {
-      aspect-ratio: 16 / 9;
-      min-width: 600px; /* ဖုန်းမှာ ကွင်းပုံစံမပျက်အောင် အကျယ်တစ်ခုသတ်မှတ် */
-    }
+    .pitch-container { aspect-ratio: 16 / 9; min-width: 600px; }
     #modalBody { overflow-x: auto; }
-
     .bottom-nav { height: 65px; }
     .nav-item span { padding: 6px 8px; font-size: 10px; }
-    
     .grid-layout { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
   }
 
-  /* Tablet နှင့် Desktop အတွက် (Screen width 769px ထက်ကြီးရင်) */
   @media screen and (min-width: 769px) {
     .content-section::-webkit-scrollbar { width: 6px; }
     .content-section::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
@@ -421,6 +395,7 @@
 </div>
 
 <script>
+// --- မင်းပြောတဲ့ Worker URL ---
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
 let selectedDate = new Date().toISOString().split('T')[0];
 let allMatchesData = []; 
@@ -440,15 +415,14 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
-        // Array စစ်ဆေးခြင်းအပိုင်းကို ပိုမိုခိုင်မာအောင်လုပ်ထားပါတယ်
         allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Loading Data.</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Check your Tunnel Connection.</p>`;
     }
 }
 
@@ -471,9 +445,7 @@ function renderMatches(matches) {
         const league = grouped[leagueName];
         html += `<div class="league-card">
                     <div class="league-header">
-                        <div style="background: rgba(255, 255, 255, 0.9); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.parentElement.style.display='none'">
-                        </div>
+                        <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.style.display='none'">
                         <span>${leagueName}</span>
                     </div>`;
 
@@ -482,8 +454,9 @@ function renderMatches(matches) {
             const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
             let timeDisplay = status === "NS" ? new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : (isLive ? `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>` : status);
 
+            // API သစ်က stream_url ကို သုံးရန်
             html += `
-                <div class="match" onclick="openTestLineup('${m.teams.home.name}', '${m.teams.away.name}', '${m.teams.home.logo}', '${m.teams.away.logo}')">
+                <div class="match" onclick="openVideo('${m.stream_url}')">
                     <div class="team-row home">
                         <span class="team-name">${m.teams.home.name}</span>
                         <img src="${m.teams.home.logo}">
@@ -505,9 +478,8 @@ function renderMatches(matches) {
 
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching Live...</p>";
     
-    // allMatchesData က Array ဟုတ်မဟုတ် အရင်စစ်ရပါမယ်
     if(!Array.isArray(allMatchesData)) {
        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
        return;
@@ -520,188 +492,87 @@ async function loadLive() {
     }
     list.innerHTML = liveMatches.map(m => `
         <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;" onclick="openVideo('${m.stream_url}')">
-            <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px; text-align: center; width: 100%;">
+            <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px;">
                 ${m.league.name.toUpperCase()}
             </div>
-            <div style="display:flex; justify-content: space-around; align-items:center; width: 100%;">
+            <div style="display:flex; justify-content: space-around; align-items:center;">
                 <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
-                    <img src="${m.teams.home.logo}" width="45" height="45" style="object-fit: contain; margin-bottom:5px;">
-                    <span style="font-size:12px; font-weight:800; color:#fff; text-align: center; display: block; width: 100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.teams.home.name}</span>
+                    <img src="${m.teams.home.logo}" width="45" height="45">
+                    <span style="font-size:12px; font-weight:800;">${m.teams.home.name}</span>
                 </div>
-                <div style="width: 80px; display:flex; flex-direction:column; align-items:center; justify-content: center;">
-                    <div style="font-size:24px; font-weight:900; color:#facc15; letter-spacing: 2px; line-height: 1;">${m.goals.home} - ${m.goals.away}</div>
-                    <div class="status-live" style="font-size:11px; font-weight:800; margin-top:8px; white-space: nowrap;">LIVE ${m.fixture.status.elapsed}'</div>
+                <div style="width: 80px; text-align:center;">
+                    <div style="font-size:24px; font-weight:900; color:#facc15;">${m.goals.home} - ${m.goals.away}</div>
+                    <div class="status-live" style="font-size:11px;">LIVE ${m.fixture.status.elapsed}'</div>
                 </div>
                 <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
-                    <img src="${m.teams.away.logo}" width="45" height="45" style="object-fit: contain; margin-bottom:5px;">
-                    <span style="font-size:12px; font-weight:800; color:#fff; text-align: center; display: block; width: 100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.teams.away.name}</span>
+                    <img src="${m.teams.away.logo}" width="45" height="45">
+                    <span style="font-size:12px; font-weight:800;">${m.teams.away.name}</span>
                 </div>
             </div>
-            <div style="margin-top:10px; color:#facc15; font-size:11px;">CLICK TO WATCH LIVE</div>
         </div>
     `).join('');
 }
 
-// Lineup Logic
-function openTestLineup(home, away, hLogo, aLogo) {
-    const modal = document.getElementById("mainModal");
-    modal.style.display = "flex";
-    
-    const homePos = [
-      {t: 50, l: 6},
-      {t: 15, l: 18}, {t: 38, l: 18}, {t: 62, l: 18}, {t: 85, l: 18},
-      {t: 25, l: 32}, {t: 50, l: 32}, {t: 75, l: 32},
-      {t: 20, l: 44}, {t: 80, l: 44}, {t: 50, l: 46}
-    ];
-
-    const awayPos = [
-      {t: 50, l: 94},
-      {t: 15, l: 82}, {t: 38, l: 82}, {t: 62, l: 82}, {t: 85, l: 82},
-      {t: 25, l: 68}, {t: 50, l: 68}, {t: 75, l: 68},
-      {t: 20, l: 56}, {t: 80, l: 56}, {t: 50, l: 54}
-    ];
-
-    const players = ["GK", "Def", "Def", "Def", "Def", "Mid", "Mid", "Mid", "Fwd", "Fwd", "Fwd"];
-    
-    let homePlayersHtml = homePos.map((pos, i) => `
-      <div class="player-icon" style="left:${pos.l}%; top:${pos.t}%;">
-        <div class="player-avatar" style="border-color:#facc15;">
-          <div class="player-rating-badge rating-green">${(Math.random()*(9-7.5)+7.5).toFixed(1)}</div>
-        </div>
-        <div class="player-name-txt">${players[i]} ${i+1}</div>
-      </div>`).join('');
-
-    let awayPlayersHtml = awayPos.map((pos, i) => `
-      <div class="player-icon" style="left:${pos.l}%; top:${pos.t}%;">
-        <div class="player-avatar" style="border-color:#fff;">
-          <div class="player-rating-badge rating-orange">${(Math.random()*(8-6.5)+6.5).toFixed(1)}</div>
-        </div>
-        <div class="player-name-txt">${players[i]} ${i+1}</div>
-      </div>`).join('');
-
-    document.getElementById("modalBody").innerHTML = `
-        <div style="padding:15px; background:#0b0f14;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="display:flex; align-items:center; gap:8px; flex:1;">
-                    <img src="${hLogo}" width="28">
-                    <div>
-                        <div style="color:#facc15; font-size:13px;">${home}</div>
-                        <div style="color:#888; font-size:10px;">4-3-3</div>
-                    </div>
-                </div>
-                <div style="color:#facc15; font-size:13px; font-weight:800; text-align:center; flex:1;">PREDICTED LINEUP</div>
-                <div style="display:flex; align-items:center; gap:8px; flex:1; justify-content:flex-end; text-align:right;">
-                    <div>
-                        <div style="color:#fff; font-size:13px;">${away}</div>
-                        <div style="color:#888; font-size:10px;">4-3-3</div>
-                    </div>
-                    <img src="${aLogo}" width="28">
-                </div>
-            </div>
-            
-            <div style="display:flex; gap:8px; margin-bottom:10px;">
-                <span style="background:#1a1d23; padding:3px 10px; border:1px solid #333; border-radius:15px; font-size:9px; color:#facc15;">Season stats</span>
-                <span style="background:#1a1d23; padding:3px 10px; border:1px solid #333; border-radius:15px; font-size:9px; color:#facc15;">Transfer value</span>
-            </div>
-
-            <div id="lineup-scroll-wrapper" style="overflow-x: auto; width: 100%;">
-                <div class="pitch-container">
-                    <div class="pitch-half-line"></div>
-                    <div class="pitch-center-circle"></div>
-                    <div style="position:absolute; top:20%; bottom:20%; left:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-left:none;"></div>
-                    <div style="position:absolute; top:20%; bottom:20%; right:0; width:12%; border:1px solid rgba(255,255,255,0.08); border-right:none;"></div>
-                    
-                    ${awayPlayersHtml}
-                    ${homePlayersHtml}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
 async function loadStandings() {
     const list = document.getElementById("standings-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Standings...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;'>Loading Table...</p>";
     try {
         const response = await fetch(`${WORKER_URL}/standings`); 
         const data = await response.json();
         renderStandings(data);
-    } catch (e) { list.innerHTML = "Error."; }
+    } catch (e) { list.innerHTML = "Table Error."; }
 }
 
 function renderStandings(data) {
     if (!Array.isArray(data) || data.length === 0) return;
-    const leagueName = data[0].league?.name || "PREMIER LEAGUE";
-    const leagueLogo = data[0].league?.logo || "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg";
     const list = document.getElementById("standings-list");
     
     let html = `<div style="max-width: 600px; margin: 10px auto;">
         <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding:10px; background:#1a1d23; border:1.5px solid #facc15; border-radius:30px; margin-bottom:8px;">
-            <img src="${leagueLogo}" width="25"> 
-            <span style="color:#facc15; font-size:15px; font-weight:900;">${leagueName.toUpperCase()} STANDINGS</span>
+            <span style="color:#facc15; font-size:15px; font-weight:900;">LEAGUE STANDINGS</span>
         </div>
-        <div style="border:1.5px solid #facc15; border-radius:10px; overflow:hidden; background:#1a1d23;">
-            <div style="overflow-x: auto;">
-              <table class="standings-table">
-                  <thead>
-                      <tr>
-                          <th style="width: 15%;">RANK</th>
-                          <th style="width: 45%; text-align: left;">TEAM</th>
-                          <th style="width: 10%;">PL</th>
-                          <th style="width: 20%;">GF-GA</th>
-                          <th style="width: 10%;">PTS</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      ${data.map(r => {
-                          const played = r.all?.played ?? 0;
-                          const goalsFor = r.all?.goals?.for ?? r.goalsFor ?? 0;
-                          const goalsAgainst = r.all?.goals?.against ?? r.goalsAgainst ?? 0;
-                          
-                          return `<tr>
-                              <td>${r.rank}</td>
-                              <td class="team-cell">
-                                  <div style="display:flex; align-items:center; gap:10px;">
-                                      <img src="${r.team.logo}" width="24" height="24" style="object-fit:contain;">
-                                      <span>${r.team.name}</span>
-                                  </div>
-                              </td>
-                              <td>${played}</td>
-                              <td>${goalsFor}:${goalsAgainst}</td>
-                              <td class="pts-col">${r.points}</td>
-                          </tr>`;
-                      }).join('')}
-                  </tbody>
-              </table>
-            </div>
-        </div>
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th>RANK</th>
+                    <th style="text-align: left;">TEAM</th>
+                    <th>PL</th>
+                    <th>PTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.map(r => `
+                    <tr>
+                        <td>${r.rank}</td>
+                        <td class="team-cell">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <img src="${r.team_logo}" width="24">
+                                <span>${r.team_name}</span>
+                            </div>
+                        </td>
+                        <td>${r.played}</td>
+                        <td class="pts-col">${r.points}</td>
+                    </tr>`).join('')}
+            </tbody>
+        </table>
     </div>`;
     list.innerHTML = html;
 }
 
-// Highlights (GOALS) ပေါ်အောင် ပြင်ဆင်ထားသည့် အပိုင်း
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
-    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading...</p>";
+    listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading Goals...</p>";
     try {
         const res = await fetch(`${WORKER_URL}/highlights`);
-        const data = await res.json();
-        const items = Array.isArray(data) ? data : (data.response || []);
+        const items = await res.json();
         
-        if (items.length === 0) {
-            listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No highlights available.</p>";
-            return;
-        }
-
         listContainer.innerHTML = items.map(h => `
-            <div class="league-card" style="padding:10px;" onclick="openVideo('${h.url || h.matchviewUrl}')">
-                <img src="${h.thumbnail}" style="width:100%;border-radius:5px;" onerror="this.src='https://via.placeholder.com/300x169?text=No+Thumbnail'">
+            <div class="league-card" style="padding:10px;" onclick="openVideo('${h.video_url}')">
+                <img src="${h.thumbnail}" style="width:100%;border-radius:5px;">
                 <div style="font-size:12px;margin-top:5px;text-align:center;">${h.title}</div>
             </div>
         `).join('');
-    } catch(e) { 
-        listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:red;'>Error loading highlights.</p>"; 
-    }
+    } catch(e) { listContainer.innerHTML = "Highlights Error."; }
 }
 
 function filterBySearch(val) {
@@ -712,11 +583,26 @@ function filterBySearch(val) {
 
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }
 function handleDateChange(v) { selectedDate = v; loadMatches(); }
-function openVideo(url) { 
-  if(!url || url === 'undefined' || url === 'null') { alert('Live stream not available yet.'); return; }
+
+// --- Resolver API ကို သုံးပြီး ဗီဒီယိုဖွင့်ရန် ပြင်ဆင်ချက် ---
+async function openVideo(streamApiUrl) { 
+  if(!streamApiUrl || streamApiUrl === 'undefined') { alert('Stream not available.'); return; }
+  
   document.getElementById("mainModal").style.display = "flex"; 
-  document.getElementById("modalBody").innerHTML = `<iframe src="${url}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
+  document.getElementById("modalBody").innerHTML = "<p style='color:#facc15;text-align:center;padding:20px;'>Getting Stream Link...</p>";
+
+  try {
+      // ၄ ခုမြောက် API (Get Stream) ကို လှမ်းခေါ်ခြင်း
+      const res = await fetch(`${WORKER_URL}/get-stream?url=${encodeURIComponent(streamApiUrl)}`);
+      const data = await res.json();
+      const finalUrl = data.stream_url || streamApiUrl;
+
+      document.getElementById("modalBody").innerHTML = `<iframe src="${finalUrl}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
+  } catch (e) {
+      document.getElementById("modalBody").innerHTML = "Error loading stream.";
+  }
 }
+
 function closeModal() { document.getElementById("mainModal").style.display = "none"; document.getElementById("modalBody").innerHTML = ""; }
 
 window.onload = loadMatches;

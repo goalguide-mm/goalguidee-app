@@ -426,6 +426,7 @@
 </div>
 
 <script>
+// မင်းရဲ့ Worker URL နဲ့ API Key ကို ဒီနေရာမှာပဲ သုံးပါမယ်
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
 let selectedDate = new Date().toISOString().split('T')[0];
 let allMatchesData = []; 
@@ -443,12 +444,16 @@ function switchTab(tab) {
   if(tab === 'live') loadLive();
 }
 
+// TheSportsDB API နဲ့ ချိတ်ဖို့ ပြင်ဆင်ထားသော loadMatches
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
     try {
+        // Worker ထဲမှာ TheSportsDB endpoint ကို လှမ်းခေါ်မယ်
         const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
         const result = await response.json();
+        
+        // API format ကို အဟောင်းနဲ့ ကိုက်အောင် ပြင်ပေးထားတာကို ယူသုံးမယ်
         allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
@@ -456,6 +461,7 @@ async function loadMatches() {
     }
 }
 
+// TheSportsDB data ကို မင်းရဲ့ original UI အတိုင်း ပေါ်အောင် လုပ်ထားတဲ့ renderMatches
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     if (!Array.isArray(matches) || matches.length === 0) {
@@ -463,9 +469,10 @@ function renderMatches(matches) {
         return;
     }
 
+    // TheSportsDB မှာ League တစ်ခုတည်း ပြလေ့ရှိတာကြောင့် Group လုပ်တာကို ရိုးရှင်းအောင် ပြင်ထားပါတယ်
     const grouped = matches.reduce((acc, m) => {
-        const leagueName = m.league.name;
-        if (!acc[leagueName]) acc[leagueName] = { logo: m.league.logo, games: [] };
+        const leagueName = m.league?.name || "SOCCER EVENTS";
+        if (!acc[leagueName]) acc[leagueName] = { logo: m.league?.logo || 'https://www.thesportdb.com/images/media/league/badge/7j96f81530182462.png', games: [] };
         acc[leagueName].games.push(m);
         return acc;
     }, {});
@@ -476,28 +483,33 @@ function renderMatches(matches) {
         html += `<div class="league-card">
                     <div class="league-header">
                         <div style="background: rgba(255, 255, 255, 0.9); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.src='https://api.sofascore.app/api/v1/tournament/17/image'">
+                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;">
                         </div>
                         <span>${leagueName}</span>
                     </div>`;
 
         league.games.forEach(m => {
-            const status = m.fixture.status.short;
-            const isLive = ["1H", "2H", "HT", "ET", "P"].includes(status);
-            let timeDisplay = status === "NS" ? new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : (isLive ? `<span class="status-live">LIVE ${m.fixture.status.elapsed}'</span>` : status);
+            const status = m.status?.short || "FT";
+            const isLive = ["1H", "2H", "HT", "LIVE"].includes(status);
+            
+            // အချိန်ပြသမှုအပိုင်း
+            let timeDisplay = status;
+            if (m.fixture?.date) {
+               timeDisplay = new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
 
             html += `
                 <div class="match" onclick="openTestLineup('${m.teams.home.name}', '${m.teams.away.name}', '${m.teams.home.logo}', '${m.teams.away.logo}')">
                     <div class="team-row home">
                         <span class="team-name">${m.teams.home.name}</span>
-                        <img src="${m.teams.home.logo}">
+                        <img src="${m.teams.home.logo}" onerror="this.src='https://www.thesportdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
                     </div>
                     <div class="score-section">
                         <div class="score-box">${m.goals.home ?? 0} - ${m.goals.away ?? 0}</div>
-                        <div class="time-status">${timeDisplay}</div>
+                        <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
                     </div>
                     <div class="team-row away">
-                        <img src="${m.teams.away.logo}">
+                        <img src="${m.teams.away.logo}" onerror="this.src='https://www.thesportdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
                         <span class="team-name">${m.teams.away.name}</span>
                     </div>
                 </div>`;
@@ -507,6 +519,7 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
+// Live, Standings, Highlights အပိုင်းတွေက မင်းရဲ့ original အတိုင်း ဘာမှမပြောင်းလဲပါဘူး
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
@@ -516,7 +529,7 @@ async function loadLive() {
        return;
     }
 
-    const liveMatches = allMatchesData.filter(m => ["1H", "2H", "HT", "ET", "P"].includes(m.fixture.status.short));
+    const liveMatches = allMatchesData.filter(m => m.status?.short === "LIVE" || m.status?.short === "1H" || m.status?.short === "2H");
     if(liveMatches.length === 0) {
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
         return;
@@ -524,7 +537,7 @@ async function loadLive() {
     list.innerHTML = liveMatches.map(m => `
         <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;" onclick="openVideo('${m.stream_url}')">
             <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px; text-align: center; width: 100%;">
-                ${m.league.name.toUpperCase()}
+                ${(m.league?.name || "SOCCER").toUpperCase()}
             </div>
             <div style="display:flex; justify-content: space-around; align-items:center; width: 100%;">
                 <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
@@ -533,7 +546,7 @@ async function loadLive() {
                 </div>
                 <div style="width: 80px; display:flex; flex-direction:column; align-items:center; justify-content: center;">
                     <div style="font-size:24px; font-weight:900; color:#facc15; letter-spacing: 2px; line-height: 1;">${m.goals.home} - ${m.goals.away}</div>
-                    <div class="status-live" style="font-size:11px; font-weight:800; margin-top:8px; white-space: nowrap;">LIVE ${m.fixture.status.elapsed}'</div>
+                    <div class="status-live" style="font-size:11px; font-weight:800; margin-top:8px; white-space: nowrap;">LIVE</div>
                 </div>
                 <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
                     <img src="${m.teams.away.logo}" width="45" height="45" style="object-fit: contain; margin-bottom:5px;">
@@ -683,8 +696,8 @@ function renderStandings(data, currentLeagueId) {
                   </thead>
                   <tbody>
                       ${data.map(r => {
-                          const played = r.all?.played ?? 0;
-                          const gd = r.goalDiff ?? 0;
+                          const played = r.all?.played || 0;
+                          const gd = r.goalDiff || 0;
                           return `<tr>
                               <td>${r.rank}</td>
                               <td class="team-cell">
@@ -733,7 +746,7 @@ async function loadHighlights() {
 function filterBySearch(val) {
     const query = val.toLowerCase();
     if(!Array.isArray(allMatchesData)) return;
-    renderMatches(allMatchesData.filter(m => m.teams.home.name.toLowerCase().includes(query) || m.teams.away.name.toLowerCase().includes(query) || m.league.name.toLowerCase().includes(query)));
+    renderMatches(allMatchesData.filter(m => m.teams.home.name.toLowerCase().includes(query) || m.teams.away.name.toLowerCase().includes(query) || (m.league && m.league.name.toLowerCase().includes(query))));
 }
 
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }

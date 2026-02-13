@@ -13,10 +13,8 @@
   body {
     font-family: 'Inter', sans-serif;
     background-color: #0b0f14;
-    /* --- မင်းပြောတဲ့အတိုင်း Background ကို Stadium Lights ပုံစံ ပြောင်းထားတဲ့အပိုင်း --- */
     background-image: linear-gradient(rgba(11, 15, 20, 0.7), rgba(11, 15, 20, 0.85)), 
                       url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1920&auto=format&fit=crop'); 
-    /* ------------------------------------------- */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -206,7 +204,6 @@
   .status-live { color: #ff4d4d; animation: blink 1s infinite; text-shadow: 0 0 5px rgba(255, 77, 77, 0.5); }
   @keyframes blink { 50% { opacity: 0.5; } }
 
-  /* 3D Navigation ပြင်ဆင်ချက် */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -229,21 +226,20 @@
     background: #1f2937;
     color: #fff;
     display: inline-block;
-    box-shadow: 0 4px 0px #9a7d0a; /* 3D effect shadow */
+    box-shadow: 0 4px 0px #9a7d0a; 
     transition: all 0.1s ease;
   }
   
   .nav-item:hover span { transform: translateY(-2px); box-shadow: 0 6px 0px #9a7d0a; }
   .nav-item.active span { 
     background: rgba(250, 204, 21, 0.3); 
-    transform: translateY(3px); /* Pressed effect */
+    transform: translateY(3px); 
     box-shadow: 0 1px 0px #9a7d0a; 
     color: #facc15; 
   }
 
   .standings-container { padding: 10px; max-width: 600px; margin: 0 auto; }
   
-  /* Table Alignment ပြင်ဆင်ချက် */
   .standings-table { width: 100%; border-collapse: collapse; background: #1a1d23; border-radius: 12px; overflow: hidden; border: 1.5px solid #facc15; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   .standings-table th { background: #252a32; color: #facc15; padding: 12px; font-size: 12px; text-align: center; border-bottom: 1.5px solid #facc15; }
   .standings-table td { padding: 12px; border-bottom: 1px solid rgba(250, 204, 21, 0.1); font-size: 13px; color: #e5e7eb; text-align: center; }
@@ -335,9 +331,6 @@
     padding: 1px 0;
   }
 
-  /* --- RESPONSIVE ပေါင်းထည့်ထားသော အပိုင်း --- */
-  
-  /* ဖုန်းအတွက် (Mobile - Screen width 768px ထက်ငယ်ရင်) */
   @media screen and (max-width: 768px) {
     .controls-wrapper {
       margin: 10px;
@@ -359,10 +352,9 @@
     .logo-text { font-size: 18px; }
     .refresh-btn { padding: 6px 12px; font-size: 11px; }
 
-    /* Lineup ကို ဖုန်းမှာ Scroll လုပ်လို့ရအောင် */
     .pitch-container {
       aspect-ratio: 16 / 9;
-      min-width: 600px; /* ဖုန်းမှာ ကွင်းပုံစံမပျက်အောင် အကျယ်တစ်ခုသတ်မှတ် */
+      min-width: 600px;
     }
     #modalBody { overflow-x: auto; }
 
@@ -372,14 +364,12 @@
     .grid-layout { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
   }
 
-  /* Tablet နှင့် Desktop အတွက် (Screen width 769px ထက်ကြီးရင်) */
   @media screen and (min-width: 769px) {
     .content-section::-webkit-scrollbar { width: 6px; }
     .content-section::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
     .grid-layout { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
   }
 
-  /* League Select Styling */
   .league-select {
     width: 100%;
     padding: 10px;
@@ -448,7 +438,7 @@ function switchTab(tab) {
   document.getElementById('section-' + tab).classList.add('active');
   
   if(tab === 'matches') loadMatches();
-  if(tab === 'standings') loadStandings("17"); // Default PL
+  if(tab === 'standings') loadStandings("17"); 
   if(tab === 'highlights') loadHighlights();
   if(tab === 'live') loadLive();
 }
@@ -655,9 +645,13 @@ async function loadStandings(leagueId = "17") {
 }
 
 function renderStandings(data, currentLeagueId) {
-    if (!Array.isArray(data) || data.length === 0) return;
-    const leagueName = data[0].league?.name || "STANDINGS";
-    const leagueLogo = data[0].league?.logo || `https://api.sofascore.app/api/v1/tournament/${currentLeagueId}/image`;
+    if (!Array.isArray(data) || data.length === 0) {
+        document.getElementById("standings-list").innerHTML = "<p style='text-align:center;padding:40px;'>No data available.</p>";
+        return;
+    }
+    const leagueNames = {"17":"Premier League","8":"La Liga","23":"Serie A","35":"Bundesliga","34":"Ligue 1","7":"Champions League","37":"Eredivisie","955":"Saudi Pro League"};
+    const leagueName = leagueNames[currentLeagueId] || "STANDINGS";
+    const leagueLogo = `https://api.sofascore.app/api/v1/unique-tournament/${currentLeagueId}/image`;
     const list = document.getElementById("standings-list");
     
     let html = `<div style="max-width: 600px; margin: 10px auto;">
@@ -690,8 +684,7 @@ function renderStandings(data, currentLeagueId) {
                   <tbody>
                       ${data.map(r => {
                           const played = r.all?.played ?? 0;
-                          const gd = r.goalDiff ?? (r.goalsFor - r.goalsAgainst) ?? 0;
-                          
+                          const gd = r.goalDiff ?? 0;
                           return `<tr>
                               <td>${r.rank}</td>
                               <td class="team-cell">

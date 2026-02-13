@@ -472,7 +472,7 @@ function renderMatches(matches) {
         html += `<div class="league-card">
                     <div class="league-header">
                         <div style="background: rgba(255, 255, 255, 0.9); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.parentElement.style.display='none'">
+                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;" onerror="this.src='https://api.sofascore.app/api/v1/tournament/17/image'">
                         </div>
                         <span>${leagueName}</span>
                     </div>`;
@@ -507,7 +507,6 @@ async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching...</p>";
     
-    // allMatchesData က Array ဟုတ်မဟုတ် အရင်စစ်ရပါမယ်
     if(!Array.isArray(allMatchesData)) {
        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches.</p>";
        return;
@@ -632,7 +631,7 @@ async function loadStandings() {
 function renderStandings(data) {
     if (!Array.isArray(data) || data.length === 0) return;
     const leagueName = data[0].league?.name || "PREMIER LEAGUE";
-    const leagueLogo = data[0].league?.logo || "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg";
+    const leagueLogo = data[0].league?.logo || "https://api.sofascore.app/api/v1/tournament/17/image";
     const list = document.getElementById("standings-list");
     
     let html = `<div style="max-width: 600px; margin: 10px auto;">

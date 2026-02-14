@@ -446,20 +446,20 @@ function switchTab(tab) {
   if(tab === 'live') loadLive();
 }
 
-// MATCHES: TheSportsDB ကို Worker ကတဆင့်ခေါ်ယူခြင်း
 async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
     try {
-        const response = await fetch(`${WORKER_URL}/fixtures?date=${selectedDate}`);
+        // WORKER_URL အစား RENDER_URL ကို ပြောင်းသုံးပါ
+        const response = await fetch(`${RENDER_URL}/api/matches`); 
         const result = await response.json();
         allMatchesData = Array.isArray(result) ? result : [];
         renderMatches(allMatchesData);
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Loading Data.</p>`;
+        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Connecting to Backend.</p>`;
     }
 }
-
+  
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     if (!Array.isArray(matches) || matches.length === 0) {
@@ -467,9 +467,10 @@ function renderMatches(matches) {
         return;
     }
 
+    // Backend က ပေးတဲ့ Data ကို League အလိုက် စုစည်းခြင်း
     const grouped = matches.reduce((acc, m) => {
-        const leagueName = m.league?.name || "SOCCER EVENTS";
-        if (!acc[leagueName]) acc[leagueName] = { logo: m.league?.logo || 'https://www.thesportsdb.com/images/media/league/badge/7j96f81530182462.png', games: [] };
+        const leagueName = m.league || "FOOTBALL EVENTS"; // m.league.name အစား m.league ကို သုံးလိုက်ပါ
+        if (!acc[leagueName]) acc[leagueName] = { logo: 'https://www.thesportsdb.com/images/media/league/badge/7j96f81530182462.png', games: [] };
         acc[leagueName].games.push(m);
         return acc;
     }, {});
@@ -479,33 +480,24 @@ function renderMatches(matches) {
         const league = grouped[leagueName];
         html += `<div class="league-card">
                     <div class="league-header">
-                        <div style="background: rgba(255, 255, 255, 0.9); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                            <img src="${league.logo}" style="width: 18px; height: 18px; object-fit: contain;">
-                        </div>
                         <span>${leagueName}</span>
                     </div>`;
 
         league.games.forEach(m => {
-            const status = m.status?.short || "FT";
-            const isLive = ["1H", "2H", "HT", "LIVE"].includes(status);
-            let timeDisplay = status;
-            if (m.fixture?.date) {
-               timeDisplay = new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            }
-
+            // Backend က ပေးတဲ့ home, away, stream_url တွေကို တိုက်ရိုက် သုံးရပါမယ်
             html += `
-                <div class="match" onclick="openTestLineup('${m.teams.home.name}', '${m.teams.away.name}', '${m.teams.home.logo}', '${m.teams.away.logo}')">
+                <div class="match" onclick="window.open('${m.stream_url}', '_blank')">
                     <div class="team-row home">
-                        <span class="team-name">${m.teams.home.name}</span>
-                        <img src="${m.teams.home.logo}" onerror="this.src='https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
+                        <span class="team-name">${m.home}</span>
+                        <img src="https://via.placeholder.com/28?text=H" onerror="this.src='https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
                     </div>
                     <div class="score-section">
-                        <div class="score-box">${m.goals.home ?? 0} - ${m.goals.away ?? 0}</div>
-                        <div class="time-status">${isLive ? '<span class="status-live">LIVE</span>' : timeDisplay}</div>
+                        <div class="score-box">VS</div>
+                        <div class="time-status" style="color:#facc15;">LIVE</div>
                     </div>
                     <div class="team-row away">
-                        <img src="${m.teams.away.logo}" onerror="this.src='https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
-                        <span class="team-name">${m.teams.away.name}</span>
+                        <img src="https://via.placeholder.com/28?text=A" onerror="this.src='https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
+                        <span class="team-name">${m.away}</span>
                     </div>
                 </div>`;
         });

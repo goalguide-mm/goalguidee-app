@@ -425,10 +425,13 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
 // မင်းရဲ့ API URL များ
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
 const RENDER_URL = "https://goalguide-api-v2.onrender.com"; // Render Backend URL
+const SCRAPER_API_URL = "https://live-stream-api-jic8.onrender.com/get-live"; // မင်းအခုတင်လိုက်တဲ့ Scraper API
 
 let selectedDate = new Date().toISOString().split('T')[0];
 let allMatchesData = []; 
@@ -450,7 +453,6 @@ async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
     try {
-        // WORKER_URL အစား RENDER_URL ကို ပြောင်းသုံးပါ
         const response = await fetch(`${RENDER_URL}/api/matches`); 
         const result = await response.json();
         allMatchesData = Array.isArray(result) ? result : [];
@@ -467,9 +469,8 @@ function renderMatches(matches) {
         return;
     }
 
-    // Backend က ပေးတဲ့ Data ကို League အလိုက် စုစည်းခြင်း
     const grouped = matches.reduce((acc, m) => {
-        const leagueName = m.league || "FOOTBALL EVENTS"; // m.league.name အစား m.league ကို သုံးလိုက်ပါ
+        const leagueName = m.league || "FOOTBALL EVENTS";
         if (!acc[leagueName]) acc[leagueName] = { logo: 'https://www.thesportsdb.com/images/media/league/badge/7j96f81530182462.png', games: [] };
         acc[leagueName].games.push(m);
         return acc;
@@ -484,7 +485,6 @@ function renderMatches(matches) {
                     </div>`;
 
         league.games.forEach(m => {
-            // Backend က ပေးတဲ့ home, away, stream_url တွေကို တိုက်ရိုက် သုံးရပါမယ်
             html += `
                 <div class="match" onclick="window.open('${m.stream_url}', '_blank')">
                     <div class="team-row home">
@@ -506,45 +506,41 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
-// LIVE: Socolive ကို Worker ကတဆင့်ခေါ်ယူခြင်း
+// LIVE Section ကို Auto-Update Scraper နဲ့ ချိတ်ဆက်လိုက်သည်
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Searching Live Streams...</p>";
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Real-Time Live Streams...</p>";
     
     try {
-        const response = await fetch(`${WORKER_URL}/soco-live`);
-        const liveMatches = await response.json();
+        // Render Scraper API ဆီကနေ Link အသစ်လှမ်းတောင်းမယ်
+        const response = await fetch(SCRAPER_API_URL);
+        const data = await response.json();
 
-        if(!liveMatches || liveMatches.length === 0) {
-            list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No live matches from Socolive.</p>";
-            return;
+        if(data.status === "success" && data.url) {
+            list.innerHTML = `
+                <div class="league-card" style="padding:20px; text-align:center; width: 100%; max-width: 500px; margin: 20px auto;">
+                    <div style="font-size:14px; color:#facc15; font-weight:800; margin-bottom:15px;">AUTO-UPDATE LIVE STREAM</div>
+                    <video id="auto-live-player" controls autoplay muted style="width:100%; border-radius:8px; border: 1px solid #facc15;"></video>
+                    <div style="margin-top:15px; font-size:12px; color:#888;">Source: yuyantv.cn (Auto-Detected)</div>
+                </div>
+            `;
+
+            const video = document.getElementById('auto-live-player');
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(data.url);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = data.url;
+            }
+        } else {
+            list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No active live stream found at the moment.</p>";
         }
-
-        list.innerHTML = liveMatches.map(m => `
-            <div class="league-card" style="padding:15px; text-align:center; min-width: 320px; margin: 10px; display: inline-block; vertical-align: top;" onclick="openVideo('${m.stream_url}')">
-                <div style="font-size:12px; color:#facc15; font-weight:800; margin-bottom:15px; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 8px; text-align: center; width: 100%;">
-                    LIVE STREAM
-                </div>
-                <div style="display:flex; justify-content: space-around; align-items:center; width: 100%;">
-                    <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
-                        <span style="font-size:12px; font-weight:800; color:#fff; text-align: center;">${m.teams.home.name}</span>
-                    </div>
-                    <div style="width: 80px; display:flex; flex-direction:column; align-items:center;">
-                        <div class="status-live" style="font-size:14px; font-weight:900;">LIVE</div>
-                    </div>
-                    <div style="width: 100px; display:flex; flex-direction:column; align-items:center;">
-                        <span style="font-size:12px; font-weight:800; color:#fff; text-align: center;">${m.teams.away.name}</span>
-                    </div>
-                </div>
-                <div style="margin-top:10px; color:#facc15; font-size:11px;">CLICK TO WATCH</div>
-            </div>
-        `).join('');
     } catch(e) {
-        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Live stream server offline.</p>";
+        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Live Stream API is waking up... Please refresh in 30 seconds.</p>";
     }
 }
 
-// TABLE: Socolive Standings ကို Render Backend ကတဆင့်ခေါ်ယူခြင်း
 async function loadStandings(leagueSlug = "premier-league") {
     const list = document.getElementById("standings-list");
     list.innerHTML = `
@@ -608,7 +604,6 @@ function renderStandings(data, currentLeague) {
     list.innerHTML = html;
 }
 
-// HIGHLIGHTS: Worker ကတဆင့်ခေါ်ယူခြင်း
 async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading Highlights...</p>";
@@ -627,34 +622,13 @@ async function loadHighlights() {
 function openVideo(url) { 
   if(!url) { alert('Stream not available.'); return; }
   document.getElementById("mainModal").style.display = "flex"; 
-  // Worker Proxy ကိုသုံးပြီး Referer Bypass လုပ်ခြင်း
   const proxyUrl = `${WORKER_URL}/proxy-stream?url=${encodeURIComponent(url)}`;
   document.getElementById("modalBody").innerHTML = `<iframe src="${proxyUrl}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
 
-function openTestLineup(home, away, hLogo, aLogo) {
-    const modal = document.getElementById("mainModal");
-    modal.style.display = "flex";
-    const pos = [{t: 50, l: 6},{t: 15, l: 18}, {t: 38, l: 18}, {t: 62, l: 18}, {t: 85, l: 18},{t: 25, l: 32}, {t: 50, l: 32}, {t: 75, l: 32},{t: 20, l: 44}, {t: 80, l: 44}, {t: 50, l: 46}];
-    const players = ["GK", "Def", "Def", "Def", "Def", "Mid", "Mid", "Mid", "Fwd", "Fwd", "Fwd"];
-    
-    let homePlayers = pos.map((p, i) => `<div class="player-icon" style="left:${p.l}%; top:${p.t}%;"><div class="player-avatar"><div class="player-rating-badge rating-green">${(Math.random()*(9-7)+7).toFixed(1)}</div></div><div class="player-name-txt">${players[i]}</div></div>`).join('');
-    let awayPlayers = pos.map((p, i) => `<div class="player-icon" style="left:${100-p.l}%; top:${p.t}%;"><div class="player-avatar" style="border-color:#fff;"><div class="player-rating-badge rating-orange">${(Math.random()*(8-6)+6).toFixed(1)}</div></div><div class="player-name-txt">${players[i]}</div></div>`).join('');
-
-    document.getElementById("modalBody").innerHTML = `
-        <div style="padding:15px; background:#0b0f14;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="display:flex; align-items:center; gap:8px;"><img src="${hLogo}" width="28"><span>${home}</span></div>
-                <div style="color:#facc15;">LINEUP</div>
-                <div style="display:flex; align-items:center; gap:8px;"><span>${away}</span><img src="${aLogo}" width="28"></div>
-            </div>
-            <div class="pitch-container">${homePlayers}${awayPlayers}<div class="pitch-half-line"></div><div class="pitch-center-circle"></div></div>
-        </div>`;
-}
-
 function filterBySearch(val) {
     const query = val.toLowerCase();
-    renderMatches(allMatchesData.filter(m => m.teams.home.name.toLowerCase().includes(query) || m.teams.away.name.toLowerCase().includes(query)));
+    renderMatches(allMatchesData.filter(m => m.home.toLowerCase().includes(query) || m.away.toLowerCase().includes(query)));
 }
 
 function changeDate(n) { let d = new Date(selectedDate); d.setDate(d.getDate()+n); selectedDate = d.toLocaleDateString('en-CA'); document.getElementById("matchDate").value = selectedDate; loadMatches(); }

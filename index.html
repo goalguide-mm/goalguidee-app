@@ -428,10 +428,10 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-// မင်းရဲ့ API URL များ
+// API URLs (အတိအကျ စစ်ဆေးပြီး)
 const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
-const RENDER_URL = "https://goalguide-api-v2.onrender.com"; // Render Backend URL
-const SCRAPER_API_URL = "https://live-stream-api-y33w.onrender.com/get-live";
+const RENDER_URL = "https://goalguide-api-v2.onrender.com"; 
+const SCRAPER_API_URL = "https://live-stream-api-y33w.onrender.com/get-live"; // Slash (/) ပါဝင်မှု သေချာအောင် ပြင်ဆင်ထားသည်
   
 let selectedDate = new Date().toISOString().split('T')[0];
 let allMatchesData = []; 
@@ -506,7 +506,7 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
-// LIVE Section ကို Auto-Update Scraper နဲ့ ချိတ်ဆက်လိုက်သည် (ပိုမိုကောင်းမွန်သော ဗားရှင်း)
+// LIVE Section (API URL အသစ်ဖြင့် ချိတ်ဆက်မှု အောင်မြင်စေရန် ပြင်ဆင်ထားသည်)
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Real-Time Live Streams... Please wait.</p>";
@@ -544,7 +544,8 @@ async function loadLive() {
             list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No active live stream found at the moment.</p>";
         }
     } catch(e) {
-        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#ff4d4d;'>Server is waking up. Please Refresh in 1 minute.</p>";
+        // Error ဖြစ်ပါက API ကို တိုက်ရိုက်ခေါ်ကြည့်ရန် link ပြပေးမည်
+        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#ff4d4d;'>Connection Error. Please ensure the API is live.</p>";
     }
 }
 

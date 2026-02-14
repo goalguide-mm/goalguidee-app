@@ -428,10 +428,10 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-// API URLs (အတိအကျ စစ်ဆေးပြီး)
-const WORKER_URL = "https://rapid-cell-5054.pmk818299.workers.dev";
+// API URLs (အတိအကျ ပြင်ဆင်ပြီး)
 const RENDER_URL = "https://live-stream-api-y33w.onrender.com"; 
-const SCRAPER_API_URL = "https://live-stream-api-y33w.onrender.com/get-live"; // Slash (/) ပါဝင်မှု သေချာအောင် ပြင်ဆင်ထားသည်
+const SCRAPER_API_URL = "https://live-stream-api-y33w.onrender.com/get-live";
+const MATCHES_API_URL = "https://live-stream-api-y33w.onrender.com/get-matches"; 
   
 let selectedDate = new Date().toISOString().split('T')[0];
 let allMatchesData = []; 
@@ -453,10 +453,15 @@ async function loadMatches() {
     const list = document.getElementById("matches-list");
     list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
     try {
-        const response = await fetch(`${RENDER_URL}/api/matches`); 
+        const response = await fetch(MATCHES_API_URL); 
         const result = await response.json();
-        allMatchesData = Array.isArray(result) ? result : [];
-        renderMatches(allMatchesData);
+        
+        if(result.status === "success") {
+            allMatchesData = result.matches;
+            renderMatches(allMatchesData);
+        } else {
+            list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found.</p>';
+        }
     } catch (error) {
         list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Connecting to Backend.</p>`;
     }
@@ -486,17 +491,17 @@ function renderMatches(matches) {
 
         league.games.forEach(m => {
             html += `
-                <div class="match" onclick="window.open('${m.stream_url}', '_blank')">
+                <div class="match">
                     <div class="team-row home">
                         <span class="team-name">${m.home}</span>
-                        <img src="https://via.placeholder.com/28?text=H" onerror="this.src='https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
+                        <img src="https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png" onerror="this.src='https://via.placeholder.com/28'">
                     </div>
                     <div class="score-section">
                         <div class="score-box">VS</div>
-                        <div class="time-status" style="color:#facc15;">LIVE</div>
+                        <div class="time-status" style="color:#facc15;">${m.time}</div>
                     </div>
                     <div class="team-row away">
-                        <img src="https://via.placeholder.com/28?text=A" onerror="this.src='https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png'">
+                        <img src="https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png" onerror="this.src='https://via.placeholder.com/28'">
                         <span class="team-name">${m.away}</span>
                     </div>
                 </div>`;
@@ -506,7 +511,7 @@ function renderMatches(matches) {
     list.innerHTML = html;
 }
 
-// LIVE Section (API URL အသစ်ဖြင့် ချိတ်ဆက်မှု အောင်မြင်စေရန် ပြင်ဆင်ထားသည်)
+// LIVE Section
 async function loadLive() {
     const list = document.getElementById("live-list");
     list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Searching Real-Time Live Streams... Please wait.</p>";
@@ -544,7 +549,6 @@ async function loadLive() {
             list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No active live stream found at the moment.</p>";
         }
     } catch(e) {
-        // Error ဖြစ်ပါက API ကို တိုက်ရိုက်ခေါ်ကြည့်ရန် link ပြပေးမည်
         list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#ff4d4d;'>Connection Error. Please ensure the API is live.</p>";
     }
 }
@@ -616,7 +620,7 @@ async function loadHighlights() {
     const listContainer = document.getElementById("highlights-list");
     listContainer.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Loading Highlights...</p>";
     try {
-        const res = await fetch(`${WORKER_URL}/highlights`);
+        const res = await fetch(`https://rapid-cell-5054.pmk818299.workers.dev/highlights`);
         const data = await res.json();
         listContainer.innerHTML = data.map(h => `
             <div class="league-card" style="padding:10px;" onclick="openVideo('${h.url}')">
@@ -630,7 +634,7 @@ async function loadHighlights() {
 function openVideo(url) { 
   if(!url) { alert('Stream not available.'); return; }
   document.getElementById("mainModal").style.display = "flex"; 
-  const proxyUrl = `${WORKER_URL}/proxy-stream?url=${encodeURIComponent(url)}`;
+  const proxyUrl = `https://rapid-cell-5054.pmk818299.workers.dev/proxy-stream?url=${encodeURIComponent(url)}`;
   document.getElementById("modalBody").innerHTML = `<iframe src="${proxyUrl}" style="width:100%;aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`; 
 }
 

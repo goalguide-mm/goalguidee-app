@@ -451,23 +451,22 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     try {
-        const response = await fetch(MATCHES_API_URL); 
-        const result = await response.json();
-        
-        // Render API က data ကို Array အနေနဲ့ တိုက်ရိုက်ပေးတာမို့လို့ result.status စစ်စရာမလိုပါ
-        if(Array.isArray(result) && result.length > 0) {
-            allMatchesData = result; // API ကလာတဲ့ array ကို တိုက်ရိုက်ယူမယ်
-            renderMatches(allMatchesData);
+        const response = await fetch(MATCHES_API_URL);
+        const result = await response.json(); // ဒါက Array တိုက်ရိုက်ရလာမယ်
+
+        // result.status ဆိုပြီး စစ်စရာမလိုတော့ပါ၊ array ဟုတ်မဟုတ်ပဲ စစ်ပါ
+        if (Array.isArray(result) && result.length > 0) {
+            renderMatches(result);
         } else {
-            list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found at the moment.</p>';
+            list.innerHTML = '<p>No matches found.</p>';
         }
     } catch (error) {
-        list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Connecting to Backend.</p>`;
+        console.error("Error:", error);
+        list.innerHTML = '<p>Connection Error.</p>';
     }
 }
-
+  
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     let html = "";

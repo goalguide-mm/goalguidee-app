@@ -216,9 +216,9 @@
   
   .nav-item { flex: 1; text-align: center; cursor: pointer; }
   .nav-item span { 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800; 
-    padding: 8px 12px;
+    padding: 8px 10px;
     border: 2px solid #facc15;
     border-radius: 8px;
     background: #1f2937;
@@ -247,7 +247,7 @@
   .content-section { 
     display: none; 
     position: absolute;
-    top: 70px;      
+    top: 70px;       
     bottom: 75px; 
     left: 0; right: 0;
     overflow-y: auto;
@@ -256,6 +256,17 @@
   }
   .content-section.active { display: block; }
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
+
+  /* New Video Player Box for Live Tabs */
+  .live-player-container {
+    max-width: 600px;
+    margin: 15px auto;
+    padding: 10px;
+    background: #1a1a1a;
+    border: 2px solid #facc15;
+    border-radius: 12px;
+  }
+  #video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; }
 
   .modal { 
     display: none; 
@@ -317,13 +328,29 @@
   <div id="matches-list"></div>
 </div>
 
-<div id="section-live" class="content-section"><div id="live-list" class="grid-layout"></div></div>
+<div id="section-live-tv" class="content-section">
+    <div class="live-player-container">
+        <video id="tv-player" controls autoplay playsinline style="width:100%; aspect-ratio:16/9; background:#000; border-radius:8px;"></video>
+        <h3 id="tv-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select Myanmar TV</h3>
+    </div>
+    <div id="tv-list" class="grid-layout" style="grid-template-columns: 1fr 1fr; gap:10px; max-width:600px; margin:0 auto;"></div>
+</div>
+
+<div id="section-live-football" class="content-section">
+    <div class="live-player-container">
+        <video id="football-player" controls autoplay playsinline style="width:100%; aspect-ratio:16/9; background:#000; border-radius:8px;"></video>
+        <h3 id="football-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select Football Channel</h3>
+    </div>
+    <div id="football-list" class="grid-layout" style="grid-template-columns: 1fr 1fr; gap:10px; max-width:600px; margin:0 auto;"></div>
+</div>
+
 <div id="section-standings" class="content-section"><div id="standings-list" class="standings-container"></div></div>
 <div id="section-highlights" class="content-section"><div id="highlights-list" class="grid-layout"></div></div>
 
 <div class="bottom-nav">
   <div class="nav-item active" id="nav-matches" onclick="switchTab('matches')"><span>MATCHES</span></div>
-  <div class="nav-item" id="nav-live" onclick="switchTab('live')"><span>LIVE</span></div>
+  <div class="nav-item" id="nav-live-tv" onclick="switchTab('live-tv')"><span>LIVE TV</span></div>
+  <div class="nav-item" id="nav-live-football" onclick="switchTab('live-football')"><span>FOOTBALL</span></div>
   <div class="nav-item" id="nav-standings" onclick="switchTab('standings')"><span>TABLE</span></div>
   <div class="nav-item" id="nav-highlights" onclick="switchTab('highlights')"><span>GOALS</span></div>
 </div>
@@ -338,7 +365,6 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-// မင်းရဲ့ Render API URL အသစ်
 const SCRAPER_API_URL = "https://live-stream-api-1.onrender.com/get-live";
 const RENDER_BASE_URL = "https://live-stream-api-1.onrender.com";
   
@@ -355,7 +381,8 @@ function switchTab(tab) {
   if(tab === 'matches') loadMatches();
   if(tab === 'standings') loadStandings("premier-league"); 
   if(tab === 'highlights') loadHighlights();
-  if(tab === 'live') loadLive();
+  if(tab === 'live-tv') loadLiveTV();
+  if(tab === 'live-football') loadLiveFootball();
 }
 
 async function loadMatches() {
@@ -364,7 +391,6 @@ async function loadMatches() {
     try {
         const response = await fetch(SCRAPER_API_URL);
         const result = await response.json(); 
-
         if (Array.isArray(result) && result.length > 0) {
             allMatchesData = result;
             renderMatches(result);
@@ -372,7 +398,6 @@ async function loadMatches() {
             list.innerHTML = '<p style="text-align:center;padding:40px;">No active matches found.</p>';
         }
     } catch (error) {
-        console.error("Error:", error);
         list.innerHTML = '<p style="text-align:center;padding:40px;color:red;">Connection Error to API.</p>';
     }
 }
@@ -380,137 +405,83 @@ async function loadMatches() {
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
     let html = "";
-
     matches.forEach(m => {
         if(!m.url) return;
         const sourceName = m.source.includes('//') ? m.source.split('//')[1].split('/')[0] : m.source;
         html += `
             <div class="league-card">
-                <div class="league-header">
-                    <span>${m.title}</span>
-                </div>
+                <div class="league-header"><span>${m.title}</span></div>
                 <div class="match" onclick="window.open('${m.url}', '_blank')">
-                    <div class="team-row home">
-                        <span class="team-name">${sourceName}</span>
-                    </div>
+                    <div class="team-row home"><span class="team-name">${sourceName}</span></div>
                     <div class="score-section">
                         <div class="score-box status-live" style="font-size:14px;">LIVE</div>
                         <div class="time-status">WATCH NOW</div>
                     </div>
-                    <div class="team-row away">
-                        <span class="team-name">GOAL GUIDE TV</span>
-                    </div>
+                    <div class="team-row away"><span class="team-name">GOAL GUIDE TV</span></div>
                 </div>
             </div>`;
     });
     list.innerHTML = html || '<p style="text-align:center;padding:40px;">No streams available.</p>';
 }
-  
-// --- ပြင်ဆင်လိုက်သော LOAD LIVE (CORS Error ကင်းစင်သောဗားရှင်း) ---
-async function loadLive() {
-    const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Syncing Live Channels (No Proxy)...</p>";
-    
-    // GitHub Direct Link များ (CDN သုံးထားသဖြင့် CORS Error မတက်ပါ)
-    const mmM3u = "https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/streams/mm.m3u";
-    const sportsM3u = "https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/categories/sports.m3u";
 
+// --- LIVE TV (Myanmar) ---
+async function loadLiveTV() {
+    const list = document.getElementById("tv-list");
+    list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Myanmar TV...</p>";
     try {
-        // Myanmar နှင့် Sports Link နှစ်ခုလုံးကို တိုက်ရိုက် Fetch လုပ်ခြင်း
-        const [resMM, resSP] = await Promise.all([
-            fetch(mmM3u).then(r => r.text()),
-            fetch(sportsM3u).then(r => r.text())
-        ]);
-
-        const mmChannels = parseM3U(resMM, "Myanmar");
-        // အားကစားလိုင်း အလုပ်လုပ်ဆုံး ၂၀ ကို စစ်ထုတ်ခြင်း
-        const spChannels = parseM3U(resSP, "Sports").slice(0, 20);
-
-        const allChannels = [...mmChannels, ...spChannels];
-
-        list.innerHTML = `
-            <div style="width:100%; max-width:600px; margin:0 auto; padding:10px;">
-                <div class="league-card" style="padding:10px; background:#1a1a1a; border-radius:12px; border: 2px solid #facc15;">
-                    <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000; aspect-ratio: 16/9;"></video>
-                    <h3 id="current-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select a Channel</h3>
-                </div>
-
-                <div style="margin-top:20px;">
-                    <h4 style="color:#facc15; margin: 15px 0 10px 0; font-size:14px; display:flex; align-items:center; gap:8px;">
-                        🇲🇲 MYANMAR TV
-                    </h4>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                        ${mmChannels.map(ch => `
-                            <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
-                                    style="padding:10px; background:#262626; color:white; border:1px solid #aaa; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                📺 ${ch.name}
-                            </button>
-                        `).join('')}
-                    </div>
-
-                    <h4 style="color:#facc15; margin: 15px 0 10px 0; font-size:14px; display:flex; align-items:center; gap:8px;">
-                        ⚽ GLOBAL SPORTS
-                    </h4>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        ${spChannels.map(ch => `
-                            <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
-                                    style="padding:10px; background:#1e293b; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                🏆 ${ch.name}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // စဖွင့်ချိန်တွင် ပထမဆုံးရနိုင်သောလိုင်းကို ပြပေးမည်
-        if(allChannels.length > 0) switchChannel(allChannels[0].url, allChannels[0].name);
-
-    } catch (e) {
-        console.error("Fetch Error:", e);
-        list.innerHTML = "<p style='text-align:center;padding:40px;color:red;'>Failed to load live channels. Please try again.</p>";
-    }
+        const res = await fetch("https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/streams/mm.m3u").then(r => r.text());
+        const channels = parseM3U(res);
+        list.innerHTML = channels.map(ch => `
+            <button onclick="playLive('tv-player', 'tv-channel-name', '${ch.url}', '${ch.name}')" 
+                    style="padding:10px; background:#262626; color:white; border:1px solid #aaa; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                📺 ${ch.name}
+            </button>
+        `).join('');
+        if(channels.length > 0) playLive('tv-player', 'tv-channel-name', channels[0].url, channels[0].name);
+    } catch (e) { list.innerHTML = "Error loading TV."; }
 }
 
-// M3U Parser Helper (Fix: Parsing Logic ကို ပိုမိုခိုင်မာအောင် လုပ်ထားသည်)
-function parseM3U(content, cat) {
-    if(!content) return [];
+// --- LIVE FOOTBALL (Sports 20+) ---
+async function loadLiveFootball() {
+    const list = document.getElementById("football-list");
+    list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Football Channels...</p>";
+    try {
+        const res = await fetch("https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/categories/sports.m3u").then(r => r.text());
+        const channels = parseM3U(res).filter(ch => 
+            ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz'].some(key => ch.name.toLowerCase().includes(key))
+        ).slice(0, 30);
+        
+        list.innerHTML = channels.map(ch => `
+            <button onclick="playLive('football-player', 'football-channel-name', '${ch.url}', '${ch.name}')" 
+                    style="padding:10px; background:#1e293b; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                🏆 ${ch.name}
+            </button>
+        `).join('');
+        if(channels.length > 0) playLive('football-player', 'football-channel-name', channels[0].url, channels[0].name);
+    } catch (e) { list.innerHTML = "Error loading Football."; }
+}
+
+function parseM3U(content) {
     const lines = content.split('\n');
     let results = [];
     for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
-        if (line.startsWith('#EXTINF')) {
-            // Channel Name ကို ရှာဖွေခြင်း
-            const commaIndex = line.lastIndexOf(',');
-            const name = commaIndex !== -1 ? line.substring(commaIndex + 1).trim() : "Unknown Channel";
-            
-            // နောက်တစ်ကြောင်းရှိ URL ကို ယူခြင်း
-            let nextLine = lines[i + 1] ? lines[i + 1].trim() : "";
-            if (nextLine && nextLine.startsWith('http')) {
-                results.push({ name, url: nextLine, category: cat });
-            }
+        if (lines[i].startsWith('#EXTINF')) {
+            const name = lines[i].substring(lines[i].lastIndexOf(',') + 1).trim();
+            const url = lines[i + 1] ? lines[i + 1].trim() : "";
+            if (url.startsWith('http')) results.push({ name, url });
         }
     }
     return results;
 }
 
-function switchChannel(url, name) {
-    const video = document.getElementById('video-player');
-    const nameLabel = document.getElementById('current-channel-name');
-    if(nameLabel) nameLabel.innerText = name;
-
+function playLive(playerId, nameId, url, name) {
+    const video = document.getElementById(playerId);
+    document.getElementById(nameId).innerText = name;
     if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            video.play();
-        });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-    }
+        const hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+    } else { video.src = url; }
 }
-// --- ပြင်ဆင်မှု ပြီးဆုံး ---
 
 async function loadStandings(leagueSlug) {
     const list = document.getElementById("standings-list");

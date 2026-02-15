@@ -424,11 +424,28 @@ function renderMatches(matches) {
     list.innerHTML = html || '<p style="text-align:center;padding:40px;">No streams available.</p>';
 }
 
+// --- Helper: M3U Parser ---
+function parseM3U(data) {
+    const lines = data.split('\n');
+    const result = [];
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('#EXTINF')) {
+            const name = lines[i].split(',')[1] || "Unknown Channel";
+            const url = lines[i+1] ? lines[i+1].trim() : "";
+            if(url.startsWith('http')) {
+                result.push({ name: name.trim(), url: url });
+            }
+        }
+    }
+    return result;
+}
+
 // --- LIVE TV (Myanmar) ---
 async function loadLiveTV() {
     const list = document.getElementById("tv-list");
     list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Myanmar TV...</p>";
     try {
+        // Proxy မလိုဘဲ Direct Fetch လုပ်ရန် jsDelivr သုံးထားသည်
         const res = await fetch("https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/streams/mm.m3u").then(r => r.text());
         const channels = parseM3U(res);
         list.innerHTML = channels.map(ch => `
@@ -441,24 +458,22 @@ async function loadLiveTV() {
     } catch (e) { list.innerHTML = "Error loading TV."; }
 }
 
+// --- LIVE FOOTBALL ---
 async function loadLiveFootball() {
     const list = document.getElementById("football-list");
     list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Football Channels...</p>";
     
-    // CORS Error မတက်အောင် Proxy သုံးပြီး Fetch လုပ်ခြင်း
-    const sportsUrl = "https://raw.githubusercontent.com/iptv-org/iptv/master/categories/sports.m3u";
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(sportsUrl)}`;
-
     try {
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        const content = data.contents; // Proxy ကနေ ရလာတဲ့ m3u text
+        // Proxy မလိုဘဲ Direct Fetch လုပ်ရန် jsDelivr သုံးထားသည်
+        const sportsUrl = "https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/categories/sports.m3u";
+        const response = await fetch(sportsUrl);
+        const content = await response.text();
 
         const channels = parseM3U(content).filter(ch => 
             ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz', 'super', 'arena'].some(key => 
                 ch.name.toLowerCase().includes(key)
             )
-        ).slice(0, 40); // လိုင်းအရေအတွက် ၄၀ အထိ ပြပေးမည်
+        ).slice(0, 40); 
         
         if(channels.length === 0) {
             list.innerHTML = "<p style='text-align:center;width:100%;'>No sports channels found.</p>";

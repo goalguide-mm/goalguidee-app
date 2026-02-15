@@ -408,28 +408,52 @@ function renderMatches(matches) {
   
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Testing Player with Sample Link...</p>";
     
-    // စမ်းသပ်ရန် အမြဲအလုပ်လုပ်သော Link
-    let testUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+    // အလုပ်လုပ်တဲ့ လင့်ခ်များကို စုစည်းထားခြင်း
+    const myanmarChannels = [
+        { name: "Mahar TV", url: "https://tv.mahar.live/mahar/website.stream/playlist.m3u8" },
+        { name: "MRTV HD", url: "https://mrtvott.com/cache/MRTV-HD/master.m3u8" },
+        { name: "MRTV Entertainment", url: "https://mrtvott.com/cache/MRTV-Ent-HD/master.m3u8" },
+        { name: "MRTV NRC", url: "https://mrtvott.com/cache/MRTV-NRC-HD/master.m3u8" }
+    ];
 
+    // UI ပုံစံကို တည်ဆောက်ခြင်း
     list.innerHTML = `
-        <div class="league-card" style="padding:15px; text-align:center; width: 100%; max-width: 600px; margin: 10px auto;">
-            <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000;"></video>
-            <p style="color:#facc15; margin-top:10px;">Player Test Mode</p>
+        <div style="width:100%; max-width:600px; margin:0 auto; padding:10px;">
+            <div class="league-card" style="padding:10px; background:#1a1a1a; border-radius:12px;">
+                <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000; aspect-ratio: 16/9;"></video>
+                <h3 id="current-channel-name" style="color:#facc15; margin-top:10px; text-align:center;">Mahar TV</h3>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+                ${myanmarChannels.map((ch, index) => `
+                    <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
+                            style="padding:12px; background:#262626; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-weight:bold;">
+                        📺 ${ch.name}
+                    </button>
+                `).join('')}
+            </div>
         </div>
     `;
-    
+
+    // ပထမဆုံးလိုင်းကို စဖွင့်ပေးခြင်း
+    switchChannel(myanmarChannels[0].url, myanmarChannels[0].name);
+}
+
+// Channel ပြောင်းပေးမည့် Function
+function switchChannel(url, name) {
     const video = document.getElementById('video-player');
+    document.getElementById('current-channel-name').innerText = name;
+
     if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(testUrl); // API link အစား testUrl ကို သုံးထားတယ်
+        hls.loadSource(url);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, function() {
             video.play();
         });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = testUrl;
+        video.src = url;
     }
 }
 

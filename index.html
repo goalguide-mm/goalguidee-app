@@ -255,9 +255,35 @@
     -webkit-overflow-scrolling: touch;
   }
   .content-section.active { display: block; }
-  .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
 
-  /* New Video Player Box for Live Tabs */
+  /* မင်းတောင်းဆိုထားတဲ့ List Style ပုံစံအသစ် */
+  .channel-list-container { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    max-width: 600px; 
+    margin: 0 auto; 
+    padding: 10px;
+  }
+  
+  .list-item-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 15px;
+    background: #1a1d23;
+    color: white;
+    border: 1.5px solid #facc15;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.2s;
+    font-size: 14px;
+    box-shadow: 0 4px 0px #9a7d0a;
+  }
+  .list-item-btn:hover { background: #252a32; transform: translateX(5px); }
+  .list-item-btn:active { transform: translateY(2px); box-shadow: 0 1px 0px #9a7d0a; }
+
   .live-player-container {
     max-width: 600px;
     margin: 15px auto;
@@ -265,6 +291,9 @@
     background: #1a1a1a;
     border: 2px solid #facc15;
     border-radius: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
   #video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; }
 
@@ -333,7 +362,7 @@
         <video id="tv-player" controls autoplay playsinline style="width:100%; aspect-ratio:16/9; background:#000; border-radius:8px;"></video>
         <h3 id="tv-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select Myanmar TV</h3>
     </div>
-    <div id="tv-list" class="grid-layout" style="grid-template-columns: 1fr 1fr; gap:10px; max-width:600px; margin:0 auto;"></div>
+    <div id="tv-list" class="channel-list-container"></div>
 </div>
 
 <div id="section-live-football" class="content-section">
@@ -341,7 +370,7 @@
         <video id="football-player" controls autoplay playsinline style="width:100%; aspect-ratio:16/9; background:#000; border-radius:8px;"></video>
         <h3 id="football-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select Football Channel</h3>
     </div>
-    <div id="football-list" class="grid-layout" style="grid-template-columns: 1fr 1fr; gap:10px; max-width:600px; margin:0 auto;"></div>
+    <div id="football-list" class="channel-list-container"></div>
 </div>
 
 <div id="section-standings" class="content-section"><div id="standings-list" class="standings-container"></div></div>
@@ -424,7 +453,6 @@ function renderMatches(matches) {
     list.innerHTML = html || '<p style="text-align:center;padding:40px;">No streams available.</p>';
 }
 
-// --- Helper: M3U Parser ---
 function parseM3U(data) {
     const lines = data.split('\n');
     const result = [];
@@ -440,50 +468,39 @@ function parseM3U(data) {
     return result;
 }
 
-// --- LIVE TV (Selected 6 Channels Only) ---
+// --- LIVE TV ---
 async function loadLiveTV() {
     const list = document.getElementById("tv-list");
     list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Myanmar TV...</p>";
-    
-    // မင်းလိုချင်တဲ့ Channel ၆ ခုရဲ့ နာမည်တွေကို သတ်မှတ်ခြင်း
     const myFavs = ["mrtv-4", "mrtv", "mrtv entertainment", "mahar tv", "mrtv nrc", "channel 7"];
-
     try {
         const res = await fetch("https://iptv-org.github.io/iptv/countries/mm.m3u").then(r => r.text());
         const allChannels = parseM3U(res);
-        
-        // Filter လုပ်ပြီး မင်းရွေးထားတာတွေပဲ ထုတ်ပေးမယ်
-        const filtered = allChannels.filter(ch => 
-            myFavs.some(fav => ch.name.toLowerCase().includes(fav))
-        );
-
+        const filtered = allChannels.filter(ch => myFavs.some(fav => ch.name.toLowerCase().includes(fav)));
         list.innerHTML = filtered.map(ch => `
-            <button onclick="playLive('tv-player', 'tv-channel-name', '${ch.url}', '${ch.name}')" 
-                    style="padding:10px; background:#262626; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem;">
+            <button class="list-item-btn" onclick="playLive('tv-player', 'tv-channel-name', '${ch.url}', '${ch.name}')">
                 📺 ${ch.name}
             </button>
         `).join('');
-        
         if(filtered.length > 0) playLive('tv-player', 'tv-channel-name', filtered[0].url, filtered[0].name);
     } catch (e) { list.innerHTML = "Error loading TV."; }
 }
 
-// --- LIVE FOOTBALL ---
+// --- LIVE FOOTBALL (Updated to 50+ channels and List view) ---
 async function loadLiveFootball() {
     const list = document.getElementById("football-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Football Channels...</p>";
-    
+    list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing 50+ Football Channels...</p>";
     try {
-        // ဒီ URL အသစ်ကို သုံးပေးပါ
         const sportsUrl = "https://iptv-org.github.io/iptv/categories/sports.m3u";
         const response = await fetch(sportsUrl);
         const content = await response.text();
-
+        
+        // beIN, Sky, SuperSport, ESPN စတဲ့ real video ပါတဲ့ နာမည်ကြီးတွေကို filter လုပ်ပြီး ၅၀ ယူပါတယ်
         const channels = parseM3U(content).filter(ch => 
-            ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz', 'super', 'arena'].some(key => 
+            ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz', 'super', 'arena', 'astro', 'premier'].some(key => 
                 ch.name.toLowerCase().includes(key)
             )
-        ).slice(0, 40); 
+        ).slice(0, 50); 
         
         if(channels.length === 0) {
             list.innerHTML = "<p style='text-align:center;width:100%;'>No sports channels found.</p>";
@@ -491,16 +508,14 @@ async function loadLiveFootball() {
         }
 
         list.innerHTML = channels.map(ch => `
-            <button onclick="playLive('football-player', 'football-channel-name', '${ch.url}', '${ch.name}')" 
-                    style="padding:10px; background:#1e293b; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                🏆 ${ch.name}
+            <button class="list-item-btn" onclick="playLive('football-player', 'football-channel-name', '${ch.url}', '${ch.name}')">
+                ⚽ ${ch.name}
             </button>
         `).join('');
 
         if(channels.length > 0) playLive('football-player', 'football-channel-name', channels[0].url, channels[0].name);
     } catch (e) { 
-        console.error(e);
-        list.innerHTML = "<p style='text-align:center;width:100%;color:red;'>Error loading Football Channels. Please Refresh.</p>"; 
+        list.innerHTML = "<p style='text-align:center;width:100%;color:red;'>Error loading Football Channels.</p>"; 
     }
 }
 
@@ -510,7 +525,7 @@ function playLive(playerId, nameId, url, name) {
     if (Hls.isSupported()) {
         const hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-    } else { video.src = url; }
+    } else { video.src = url; video.play(); }
 }
 
 async function loadStandings(leagueSlug) {
@@ -520,9 +535,7 @@ async function loadStandings(leagueSlug) {
         const response = await fetch(`${RENDER_BASE_URL}/api/standings/${leagueSlug}`); 
         const data = await response.json();
         renderStandings(data, leagueSlug);
-    } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;padding:40px;'>Table currently unavailable.</p>"; 
-    }
+    } catch (e) { list.innerHTML = "<p style='text-align:center;padding:40px;'>Table currently unavailable.</p>"; }
 }
 
 function renderStandings(data, currentLeague) {

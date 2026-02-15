@@ -440,21 +440,31 @@ function parseM3U(data) {
     return result;
 }
 
-// --- LIVE TV (Myanmar) ---
+// --- LIVE TV (Selected 6 Channels Only) ---
 async function loadLiveTV() {
     const list = document.getElementById("tv-list");
     list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Myanmar TV...</p>";
+    
+    // မင်းလိုချင်တဲ့ Channel ၆ ခုရဲ့ နာမည်တွေကို သတ်မှတ်ခြင်း
+    const myFavs = ["mrtv-4", "mrtv", "mrtv entertainment", "mahar tv", "mrtv nrc", "channel 7"];
+
     try {
-        // Proxy မလိုဘဲ Direct Fetch လုပ်ရန် jsDelivr သုံးထားသည်
-        const res = await fetch("https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/streams/mm.m3u").then(r => r.text());
-        const channels = parseM3U(res);
-        list.innerHTML = channels.map(ch => `
+        const res = await fetch("https://iptv-org.github.io/iptv/countries/mm.m3u").then(r => r.text());
+        const allChannels = parseM3U(res);
+        
+        // Filter လုပ်ပြီး မင်းရွေးထားတာတွေပဲ ထုတ်ပေးမယ်
+        const filtered = allChannels.filter(ch => 
+            myFavs.some(fav => ch.name.toLowerCase().includes(fav))
+        );
+
+        list.innerHTML = filtered.map(ch => `
             <button onclick="playLive('tv-player', 'tv-channel-name', '${ch.url}', '${ch.name}')" 
-                    style="padding:10px; background:#262626; color:white; border:1px solid #aaa; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    style="padding:10px; background:#262626; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem;">
                 📺 ${ch.name}
             </button>
         `).join('');
-        if(channels.length > 0) playLive('tv-player', 'tv-channel-name', channels[0].url, channels[0].name);
+        
+        if(filtered.length > 0) playLive('tv-player', 'tv-channel-name', filtered[0].url, filtered[0].name);
     } catch (e) { list.innerHTML = "Error loading TV."; }
 }
 
@@ -464,8 +474,8 @@ async function loadLiveFootball() {
     list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Football Channels...</p>";
     
     try {
-        // Proxy မလိုဘဲ Direct Fetch လုပ်ရန် jsDelivr သုံးထားသည်
-        const sportsUrl = "https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/categories/sports.m3u";
+        // ဒီ URL အသစ်ကို သုံးပေးပါ
+        const sportsUrl = "https://iptv-org.github.io/iptv/categories/sports.m3u";
         const response = await fetch(sportsUrl);
         const content = await response.text();
 

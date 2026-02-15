@@ -256,46 +256,35 @@
   }
   .content-section.active { display: block; }
 
-  /* မင်းတောင်းဆိုထားတဲ့ List Style ပုံစံအသစ် */
-  .channel-list-container { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    max-width: 600px; 
-    margin: 0 auto; 
+  /* VIDEO GRID STYLE အသစ် */
+  .live-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
     padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
   }
-  
-  .list-item-btn {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 15px;
-    background: #1a1d23;
-    color: white;
-    border: 1.5px solid #facc15;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: left;
-    transition: 0.2s;
-    font-size: 14px;
-    box-shadow: 0 4px 0px #9a7d0a;
-  }
-  .list-item-btn:hover { background: #252a32; transform: translateX(5px); }
-  .list-item-btn:active { transform: translateY(2px); box-shadow: 0 1px 0px #9a7d0a; }
 
-  .live-player-container {
-    max-width: 600px;
-    margin: 15px auto;
-    padding: 10px;
-    background: #1a1a1a;
-    border: 2px solid #facc15;
-    border-radius: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  .video-card {
+    background: #1a1d23;
+    border: 1.5px solid #facc15;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   }
-  #video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; }
+
+  .video-box { width: 100%; aspect-ratio: 16/9; background: #000; }
+  video { width: 100%; height: 100%; }
+
+  .channel-title {
+    padding: 8px;
+    text-align: center;
+    color: #facc15;
+    font-size: 13px;
+    background: #252a32;
+    border-top: 1px solid #facc15;
+  }
 
   .modal { 
     display: none; 
@@ -358,19 +347,11 @@
 </div>
 
 <div id="section-live-tv" class="content-section">
-    <div class="live-player-container">
-        <video id="tv-player" controls autoplay playsinline style="width:100%; aspect-ratio:16/9; background:#000; border-radius:8px;"></video>
-        <h3 id="tv-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select Myanmar TV</h3>
-    </div>
-    <div id="tv-list" class="channel-list-container"></div>
+    <div id="tv-grid" class="live-grid"></div>
 </div>
 
 <div id="section-live-football" class="content-section">
-    <div class="live-player-container">
-        <video id="football-player" controls autoplay playsinline style="width:100%; aspect-ratio:16/9; background:#000; border-radius:8px;"></video>
-        <h3 id="football-channel-name" style="color:#facc15; margin-top:10px; text-align:center; font-size:16px;">Select Football Channel</h3>
-    </div>
-    <div id="football-list" class="channel-list-container"></div>
+    <div id="football-grid" class="live-grid"></div>
 </div>
 
 <div id="section-standings" class="content-section"><div id="standings-list" class="standings-container"></div></div>
@@ -410,8 +391,8 @@ function switchTab(tab) {
   if(tab === 'matches') loadMatches();
   if(tab === 'standings') loadStandings("premier-league"); 
   if(tab === 'highlights') loadHighlights();
-  if(tab === 'live-tv') loadLiveTV();
-  if(tab === 'live-football') loadLiveFootball();
+  if(tab === 'live-tv') loadLiveTVGrid();
+  if(tab === 'live-football') loadFootballGrid();
 }
 
 async function loadMatches() {
@@ -468,64 +449,49 @@ function parseM3U(data) {
     return result;
 }
 
-// --- LIVE TV ---
-async function loadLiveTV() {
-    const list = document.getElementById("tv-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Myanmar TV...</p>";
+// VIDEO GRID RENDERER
+function createVideoCard(ch, index, type) {
+    return `
+        <div class="video-card">
+            <div class="video-box">
+                <video id="vid-${type}-${index}" controls muted playsinline></video>
+            </div>
+            <div class="channel-title">${ch.name}</div>
+        </div>`;
+}
+
+function initGridPlayer(id, url) {
+    const video = document.getElementById(id);
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+    } else { video.src = url; }
+}
+
+async function loadLiveTVGrid() {
+    const grid = document.getElementById("tv-grid");
+    grid.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Loading Myanmar TV Grid...</p>";
     const myFavs = ["mrtv-4", "mrtv", "mrtv entertainment", "mahar tv", "mrtv nrc", "channel 7"];
     try {
         const res = await fetch("https://iptv-org.github.io/iptv/countries/mm.m3u").then(r => r.text());
-        const allChannels = parseM3U(res);
-        const filtered = allChannels.filter(ch => myFavs.some(fav => ch.name.toLowerCase().includes(fav)));
-        list.innerHTML = filtered.map(ch => `
-            <button class="list-item-btn" onclick="playLive('tv-player', 'tv-channel-name', '${ch.url}', '${ch.name}')">
-                📺 ${ch.name}
-            </button>
-        `).join('');
-        if(filtered.length > 0) playLive('tv-player', 'tv-channel-name', filtered[0].url, filtered[0].name);
-    } catch (e) { list.innerHTML = "Error loading TV."; }
+        const filtered = parseM3U(res).filter(ch => myFavs.some(fav => ch.name.toLowerCase().includes(fav)));
+        grid.innerHTML = filtered.map((ch, i) => createVideoCard(ch, i, 'tv')).join('');
+        filtered.forEach((ch, i) => initGridPlayer(`vid-tv-${i}`, ch.url));
+    } catch (e) { grid.innerHTML = "Error loading TV."; }
 }
 
-// --- LIVE FOOTBALL (Updated to 50+ channels and List view) ---
-async function loadLiveFootball() {
-    const list = document.getElementById("football-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing 50+ Football Channels...</p>";
+async function loadFootballGrid() {
+    const grid = document.getElementById("football-grid");
+    grid.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Loading Football Grid...</p>";
     try {
-        const sportsUrl = "https://iptv-org.github.io/iptv/categories/sports.m3u";
-        const response = await fetch(sportsUrl);
-        const content = await response.text();
-        
-        // beIN, Sky, SuperSport, ESPN စတဲ့ real video ပါတဲ့ နာမည်ကြီးတွေကို filter လုပ်ပြီး ၅၀ ယူပါတယ်
-        const channels = parseM3U(content).filter(ch => 
-            ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz', 'super', 'arena', 'astro', 'premier'].some(key => 
-                ch.name.toLowerCase().includes(key)
-            )
+        const res = await fetch("https://iptv-org.github.io/iptv/categories/sports.m3u").then(r => r.text());
+        const channels = parseM3U(res).filter(ch => 
+            ['sport', 'football', 'bein', 'espn', 'sky', 'premier'].some(key => ch.name.toLowerCase().includes(key))
         ).slice(0, 50); 
-        
-        if(channels.length === 0) {
-            list.innerHTML = "<p style='text-align:center;width:100%;'>No sports channels found.</p>";
-            return;
-        }
-
-        list.innerHTML = channels.map(ch => `
-            <button class="list-item-btn" onclick="playLive('football-player', 'football-channel-name', '${ch.url}', '${ch.name}')">
-                ⚽ ${ch.name}
-            </button>
-        `).join('');
-
-        if(channels.length > 0) playLive('football-player', 'football-channel-name', channels[0].url, channels[0].name);
-    } catch (e) { 
-        list.innerHTML = "<p style='text-align:center;width:100%;color:red;'>Error loading Football Channels.</p>"; 
-    }
-}
-
-function playLive(playerId, nameId, url, name) {
-    const video = document.getElementById(playerId);
-    document.getElementById(nameId).innerText = name;
-    if (Hls.isSupported()) {
-        const hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-    } else { video.src = url; video.play(); }
+        grid.innerHTML = channels.map((ch, i) => createVideoCard(ch, i, 'fb')).join('');
+        channels.forEach((ch, i) => initGridPlayer(`vid-fb-${i}`, ch.url));
+    } catch (e) { grid.innerHTML = "Error loading Football Grid."; }
 }
 
 async function loadStandings(leagueSlug) {

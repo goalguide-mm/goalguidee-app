@@ -406,23 +406,27 @@ function renderMatches(matches) {
     list.innerHTML = html || '<p style="text-align:center;padding:40px;">No streams available.</p>';
 }
   
-// --- ပြင်ဆင်လိုက်သော LOAD LIVE (AUTO-FETCH) ပိုင်း ---
+// --- ပြင်ဆင်လိုက်သော LOAD LIVE (CORS Error ကင်းစင်သောဗားရှင်း) ---
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Syncing Myanmar & Sports Links...</p>";
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Syncing Live Channels (No Proxy)...</p>";
     
-    const mmM3u = "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/mm.m3u";
-    const sportsM3u = "https://raw.githubusercontent.com/iptv-org/iptv/master/categories/sports.m3u";
-    const proxy = "https://api.allorigins.win/get?url=";
+    // GitHub Direct Link များ (CDN သုံးထားသဖြင့် CORS Error မတက်ပါ)
+    const mmM3u = "https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/streams/mm.m3u";
+    const sportsM3u = "https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/categories/sports.m3u";
 
     try {
+        // Myanmar နှင့် Sports Link နှစ်ခုလုံးကို တိုက်ရိုက် Fetch လုပ်ခြင်း
         const [resMM, resSP] = await Promise.all([
-            fetch(proxy + encodeURIComponent(mmM3u)).then(r => r.json()),
-            fetch(proxy + encodeURIComponent(sportsM3u)).then(r => r.json())
+            fetch(mmM3u).then(r => r.text()),
+            fetch(sportsM3u).then(r => r.text())
         ]);
 
-        const mmChannels = parseM3U(resMM.contents, "Myanmar");
-        const spChannels = parseM3U(resSP.contents, "Sports").slice(0, 20);
+        const mmChannels = parseM3U(resMM, "Myanmar");
+        // အားကစားလိုင်း အလုပ်လုပ်ဆုံး ၂၀ ကို စစ်ထုတ်ခြင်း
+        const spChannels = parseM3U(resSP, "Sports").slice(0, 20);
+
+        const allChannels = [...mmChannels, ...spChannels];
 
         list.innerHTML = `
             <div style="width:100%; max-width:600px; margin:0 auto; padding:10px;">
@@ -432,21 +436,25 @@ async function loadLive() {
                 </div>
 
                 <div style="margin-top:20px;">
-                    <h4 style="color:#facc15; margin: 15px 0 10px 0; font-size:14px;">🇲🇲 MYANMAR TV</h4>
+                    <h4 style="color:#facc15; margin: 15px 0 10px 0; font-size:14px; display:flex; align-items:center; gap:8px;">
+                        🇲🇲 MYANMAR TV
+                    </h4>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
                         ${mmChannels.map(ch => `
                             <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
-                                    style="padding:10px; background:#262626; color:white; border:1px solid #aaa; border-radius:8px; cursor:pointer; font-size: 0.75rem;">
+                                    style="padding:10px; background:#262626; color:white; border:1px solid #aaa; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                 📺 ${ch.name}
                             </button>
                         `).join('')}
                     </div>
 
-                    <h4 style="color:#facc15; margin: 15px 0 10px 0; font-size:14px;">⚽ GLOBAL SPORTS</h4>
+                    <h4 style="color:#facc15; margin: 15px 0 10px 0; font-size:14px; display:flex; align-items:center; gap:8px;">
+                        ⚽ GLOBAL SPORTS
+                    </h4>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         ${spChannels.map(ch => `
                             <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
-                                    style="padding:10px; background:#262626; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem;">
+                                    style="padding:10px; background:#1e293b; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                 🏆 ${ch.name}
                             </button>
                         `).join('')}
@@ -455,24 +463,32 @@ async function loadLive() {
             </div>
         `;
         
-        if(mmChannels.length > 0) switchChannel(mmChannels[0].url, mmChannels[0].name);
+        // စဖွင့်ချိန်တွင် ပထမဆုံးရနိုင်သောလိုင်းကို ပြပေးမည်
+        if(allChannels.length > 0) switchChannel(allChannels[0].url, allChannels[0].name);
 
     } catch (e) {
-        list.innerHTML = "<p style='text-align:center;padding:40px;color:red;'>Failed to load live channels.</p>";
+        console.error("Fetch Error:", e);
+        list.innerHTML = "<p style='text-align:center;padding:40px;color:red;'>Failed to load live channels. Please try again.</p>";
     }
 }
 
-// M3U Parser Helper
+// M3U Parser Helper (Fix: Parsing Logic ကို ပိုမိုခိုင်မာအောင် လုပ်ထားသည်)
 function parseM3U(content, cat) {
     if(!content) return [];
     const lines = content.split('\n');
     let results = [];
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith('#EXTINF')) {
-            const parts = lines[i].split(',');
-            const name = parts[parts.length - 1].trim();
-            const url = lines[i + 1] ? lines[i + 1].trim() : "";
-            if (url.startsWith('http')) results.push({ name, url, category: cat });
+        let line = lines[i].trim();
+        if (line.startsWith('#EXTINF')) {
+            // Channel Name ကို ရှာဖွေခြင်း
+            const commaIndex = line.lastIndexOf(',');
+            const name = commaIndex !== -1 ? line.substring(commaIndex + 1).trim() : "Unknown Channel";
+            
+            // နောက်တစ်ကြောင်းရှိ URL ကို ယူခြင်း
+            let nextLine = lines[i + 1] ? lines[i + 1].trim() : "";
+            if (nextLine && nextLine.startsWith('http')) {
+                results.push({ name, url: nextLine, category: cat });
+            }
         }
     }
     return results;

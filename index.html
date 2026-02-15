@@ -451,66 +451,51 @@ function switchTab(tab) {
 
 async function loadMatches() {
     const list = document.getElementById("matches-list");
-    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading...</p>";
+    list.innerHTML = "<p style='text-align:center;padding:40px;color:#facc15;'>Loading Matches...</p>";
     try {
         const response = await fetch(MATCHES_API_URL); 
         const result = await response.json();
         
-        if(result.status === "success") {
-            allMatchesData = result.matches;
+        // Render API က data ကို Array အနေနဲ့ တိုက်ရိုက်ပေးတာမို့လို့ result.status စစ်စရာမလိုပါ
+        if(Array.isArray(result) && result.length > 0) {
+            allMatchesData = result; // API ကလာတဲ့ array ကို တိုက်ရိုက်ယူမယ်
             renderMatches(allMatchesData);
         } else {
-            list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found.</p>';
+            list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found at the moment.</p>';
         }
     } catch (error) {
         list.innerHTML = `<p style="color:red; text-align:center; padding:40px;">Error Connecting to Backend.</p>`;
     }
 }
-  
+
 function renderMatches(matches) {
     const list = document.getElementById("matches-list");
-    if (!Array.isArray(matches) || matches.length === 0) {
-        list.innerHTML = '<p style="text-align:center;padding:40px;">No matches found.</p>';
-        return;
-    }
-
-    const grouped = matches.reduce((acc, m) => {
-        const leagueName = m.league || "FOOTBALL EVENTS";
-        if (!acc[leagueName]) acc[leagueName] = { logo: 'https://www.thesportsdb.com/images/media/league/badge/7j96f81530182462.png', games: [] };
-        acc[leagueName].games.push(m);
-        return acc;
-    }, {});
-
     let html = "";
-    for (let leagueName in grouped) {
-        const league = grouped[leagueName];
-        html += `<div class="league-card">
-                    <div class="league-header">
-                        <span>${leagueName}</span>
-                    </div>`;
 
-        league.games.forEach(m => {
-            html += `
-                <div class="match">
+    // Data တွေကို Title (သို့မဟုတ်) Source အလိုက် စုစည်းပြသခြင်း
+    matches.forEach(m => {
+        if(m.url === "") return; // URL မရှိရင် မပြပါနဲ့
+        html += `
+            <div class="league-card">
+                <div class="league-header">
+                    <span>${m.title}</span>
+                </div>
+                <div class="match" onclick="window.open('${m.url}', '_blank')">
                     <div class="team-row home">
-                        <span class="team-name">${m.home}</span>
-                        <img src="https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png" onerror="this.src='https://via.placeholder.com/28'">
+                        <span class="team-name">Source: ${m.source.split('//')[1].split('/')[0]}</span>
                     </div>
                     <div class="score-section">
-                        <div class="score-box">VS</div>
-                        <div class="time-status" style="color:#facc15;">${m.time}</div>
+                        <div class="score-box" style="font-size:12px;">CLICK TO WATCH</div>
                     </div>
                     <div class="team-row away">
-                        <img src="https://www.thesportsdb.com/images/media/team/badge/small/vpyusv1420573751.png" onerror="this.src='https://via.placeholder.com/28'">
-                        <span class="team-name">${m.away}</span>
+                        <span class="team-name">LIVE STREAM</span>
                     </div>
-                </div>`;
-        });
-        html += `</div>`;
-    }
-    list.innerHTML = html;
+                </div>
+            </div>`;
+    });
+    list.innerHTML = html || '<p style="text-align:center;padding:40px;">No active streams.</p>';
 }
-
+  
 // LIVE Section (ပြင်ဆင်ထားသော အပိုင်း)
 async function loadLive() {
     const list = document.getElementById("live-list");

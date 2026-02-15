@@ -408,32 +408,28 @@ function renderMatches(matches) {
   
 async function loadLive() {
     const list = document.getElementById("live-list");
-    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Checking stream player...</p>";
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Testing Player with Sample Link...</p>";
     
-    try {
-        const response = await fetch(SCRAPER_API_URL);
-        const data = await response.json();
-        let liveUrl = Array.isArray(data) && data.length > 0 ? data[0].url : "";
+    // စမ်းသပ်ရန် အမြဲအလုပ်လုပ်သော Link
+    let testUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
-        if(liveUrl) {
-            list.innerHTML = `
-                <div class="league-card" style="padding:15px; text-align:center; width: 100%; max-width: 600px; margin: 10px auto;">
-                    <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000;"></video>
-                </div>
-            `;
-            const video = document.getElementById('video-player');
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(liveUrl);
-                hls.attachMedia(video);
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = liveUrl;
-            }
-        } else {
-            list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>No active stream for player.</p>";
-        }
-    } catch(e) {
-        list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;'>Player Error.</p>";
+    list.innerHTML = `
+        <div class="league-card" style="padding:15px; text-align:center; width: 100%; max-width: 600px; margin: 10px auto;">
+            <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000;"></video>
+            <p style="color:#facc15; margin-top:10px;">Player Test Mode</p>
+        </div>
+    `;
+    
+    const video = document.getElementById('video-player');
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(testUrl); // API link အစား testUrl ကို သုံးထားတယ်
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            video.play();
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = testUrl;
     }
 }
 

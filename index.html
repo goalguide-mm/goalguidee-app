@@ -441,37 +441,42 @@ async function loadLiveTV() {
     } catch (e) { list.innerHTML = "Error loading TV."; }
 }
 
-// --- LIVE FOOTBALL (Sports 20+) ---
 async function loadLiveFootball() {
     const list = document.getElementById("football-list");
     list.innerHTML = "<p style='text-align:center;width:100%;color:#facc15;'>Syncing Football Channels...</p>";
+    
+    // CORS Error မတက်အောင် Proxy သုံးပြီး Fetch လုပ်ခြင်း
+    const sportsUrl = "https://raw.githubusercontent.com/iptv-org/iptv/master/categories/sports.m3u";
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(sportsUrl)}`;
+
     try {
-        const res = await fetch("https://cdn.jsdelivr.net/gh/iptv-org/iptv@master/categories/sports.m3u").then(r => r.text());
-        const channels = parseM3U(res).filter(ch => 
-            ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz'].some(key => ch.name.toLowerCase().includes(key))
-        ).slice(0, 30);
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const content = data.contents; // Proxy ကနေ ရလာတဲ့ m3u text
+
+        const channels = parseM3U(content).filter(ch => 
+            ['sport', 'football', 'bein', 'espn', 'sky', 'fanatiz', 'super', 'arena'].some(key => 
+                ch.name.toLowerCase().includes(key)
+            )
+        ).slice(0, 40); // လိုင်းအရေအတွက် ၄၀ အထိ ပြပေးမည်
         
+        if(channels.length === 0) {
+            list.innerHTML = "<p style='text-align:center;width:100%;'>No sports channels found.</p>";
+            return;
+        }
+
         list.innerHTML = channels.map(ch => `
             <button onclick="playLive('football-player', 'football-channel-name', '${ch.url}', '${ch.name}')" 
                     style="padding:10px; background:#1e293b; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.75rem; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                 🏆 ${ch.name}
             </button>
         `).join('');
-        if(channels.length > 0) playLive('football-player', 'football-channel-name', channels[0].url, channels[0].name);
-    } catch (e) { list.innerHTML = "Error loading Football."; }
-}
 
-function parseM3U(content) {
-    const lines = content.split('\n');
-    let results = [];
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith('#EXTINF')) {
-            const name = lines[i].substring(lines[i].lastIndexOf(',') + 1).trim();
-            const url = lines[i + 1] ? lines[i + 1].trim() : "";
-            if (url.startsWith('http')) results.push({ name, url });
-        }
+        if(channels.length > 0) playLive('football-player', 'football-channel-name', channels[0].url, channels[0].name);
+    } catch (e) { 
+        console.error(e);
+        list.innerHTML = "<p style='text-align:center;width:100%;color:red;'>Error loading Football Channels. Please Refresh.</p>"; 
     }
-    return results;
 }
 
 function playLive(playerId, nameId, url, name) {

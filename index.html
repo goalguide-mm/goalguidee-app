@@ -406,44 +406,85 @@ function renderMatches(matches) {
     list.innerHTML = html || '<p style="text-align:center;padding:40px;">No streams available.</p>';
 }
   
+// --- ပြင်ဆင်လိုက်သော LOAD LIVE (AUTO-FETCH) ပိုင်း ---
 async function loadLive() {
     const list = document.getElementById("live-list");
+    list.innerHTML = "<p style='text-align:center;width:100%;padding:40px;color:#facc15;'>Auto-Fetching Latest Links...</p>";
     
-    // အလုပ်လုပ်တဲ့ လင့်ခ်များကို စုစည်းထားခြင်း
-    const myanmarChannels = [
-        { name: "Mahar TV", url: "https://tv.mahar.live/mahar/website.stream/playlist.m3u8" },
-        { name: "MRTV HD", url: "https://mrtvott.com/cache/MRTV-HD/master.m3u8" },
-        { name: "MRTV Entertainment", url: "https://mrtvott.com/cache/MRTV-Ent-HD/master.m3u8" },
-        { name: "MRTV NRC", url: "https://mrtvott.com/cache/MRTV-NRC-HD/master.m3u8" }
-    ];
+    // GitHub Links (Myanmar & Sports)
+    const mmM3u = "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/mm.m3u";
+    const sportsM3u = "https://raw.githubusercontent.com/iptv-org/iptv/master/categories/sports.m3u";
+    const proxy = "https://api.allorigins.win/get?url=";
 
-    // UI ပုံစံကို တည်ဆောက်ခြင်း
-    list.innerHTML = `
-        <div style="width:100%; max-width:600px; margin:0 auto; padding:10px;">
-            <div class="league-card" style="padding:10px; background:#1a1a1a; border-radius:12px;">
-                <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000; aspect-ratio: 16/9;"></video>
-                <h3 id="current-channel-name" style="color:#facc15; margin-top:10px; text-align:center;">Mahar TV</h3>
+    try {
+        // Fetch Myanmar Channels
+        const resMM = await fetch(proxy + encodeURIComponent(mmM3u));
+        const dataMM = await resMM.json();
+        const mmChannels = parseM3U(dataMM.contents, "Myanmar");
+
+        // Fetch Sports Channels (Top 10 only for speed)
+        const resSP = await fetch(proxy + encodeURIComponent(sportsM3u));
+        const dataSP = await resSP.json();
+        const spChannels = parseM3U(dataSP.contents, "Sports").slice(0, 10);
+
+        const allChannels = [...mmChannels, ...spChannels];
+
+        list.innerHTML = `
+            <div style="width:100%; max-width:600px; margin:0 auto; padding:10px;">
+                <div class="league-card" style="padding:10px; background:#1a1a1a; border-radius:12px; border: 2px solid #facc15;">
+                    <video id="video-player" controls autoplay playsinline style="width:100%; border-radius:8px; background:#000; aspect-ratio: 16/9;"></video>
+                    <h3 id="current-channel-name" style="color:#facc15; margin-top:10px; text-align:center;">Select a Channel</h3>
+                </div>
+
+                <div style="margin-top:20px;">
+                    <h4 style="color:#facc15; margin-bottom:10px;">🇲🇲 Myanmar TV</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                        ${mmChannels.map(ch => `
+                            <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
+                                    style="padding:10px; background:#262626; color:white; border:1px solid #aaa; border-radius:8px; cursor:pointer; font-size: 0.8rem;">
+                                📺 ${ch.name}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <h4 style="color:#facc15; margin-bottom:10px;">⚽ Global Sports</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        ${spChannels.map(ch => `
+                            <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
+                                    style="padding:10px; background:#262626; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-size: 0.8rem;">
+                                🏆 ${ch.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
+        `;
+        
+        if(allChannels.length > 0) switchChannel(allChannels[0].url, allChannels[0].name);
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
-                ${myanmarChannels.map((ch, index) => `
-                    <button onclick="switchChannel('${ch.url}', '${ch.name}')" 
-                            style="padding:12px; background:#262626; color:white; border:1px solid #facc15; border-radius:8px; cursor:pointer; font-weight:bold;">
-                        📺 ${ch.name}
-                    </button>
-                `).join('')}
-            </div>
-        </div>
-    `;
-
-    // ပထမဆုံးလိုင်းကို စဖွင့်ပေးခြင်း
-    switchChannel(myanmarChannels[0].url, myanmarChannels[0].name);
+    } catch (e) {
+        list.innerHTML = "<p style='text-align:center;padding:40px;color:red;'>Failed to load live channels.</p>";
+    }
 }
 
-// Channel ပြောင်းပေးမည့် Function
+// M3U Parser Helper
+function parseM3U(content, cat) {
+    const lines = content.split('\n');
+    let results = [];
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith('#EXTINF')) {
+            const name = lines[i].split(',')[1].trim();
+            const url = lines[i + 1].trim();
+            if (url.startsWith('http')) results.push({ name, url, category: cat });
+        }
+    }
+    return results;
+}
+
 function switchChannel(url, name) {
     const video = document.getElementById('video-player');
-    document.getElementById('current-channel-name').innerText = name;
+    const nameLabel = document.getElementById('current-channel-name');
+    if(nameLabel) nameLabel.innerText = name;
 
     if (Hls.isSupported()) {
         const hls = new Hls();
@@ -456,6 +497,7 @@ function switchChannel(url, name) {
         video.src = url;
     }
 }
+// --- ပြင်ဆင်မှု ပြီးဆုံး ---
 
 async function loadStandings(leagueSlug) {
     const list = document.getElementById("standings-list");
